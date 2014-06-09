@@ -1,0 +1,5 @@
+*.pyc
+import1cdb.py
+my.cnf
+build/
+apache/

@@ -1,0 +1,32 @@
+{% extends "index.html" %}
+    {% block script %}
+    <script type="text/javascript" src="/media/js/jquery-1.10.1.js"></script>
+    <script type="text/javascript" src="/media/js/alert.js"></script>
+    <script type="text/javascript">
+    $(function(){
+        $("select#id_tos").change(function(){
+            $.getJSON("/ajax/plans/",{id:+$(this).val()}, function(j) {
+                var options = '<option value="">--------- </option>';
+                for (var i = 0; i < j.length; i++) {
+                options += '<option value="' + parseInt(j[i].pk) + '">' + j[i].fields['title'] + '</option>';
+                }
+                $("#id_plan").html(options);
+                $("#id_plan option:first").attr('selected', 'selected');
+                $("#id_plan").attr('disabled', false);
+                })
+            $("#id_tos").attr('selected', 'selected');
+        })
+    })
+    </script>
+    {% endblock %}
+{% block main %} 
+
+<div class="jumbotron">
+<form class="form-horizontal" role="form" action={% url "users.views.abonent_search" %} method="post">{% csrf_token %}
+    <div class="form-group">
+        {{ form.as_table }}
+    </div>
+    <p><button type="submit" class="btn btn-primary btn-lg">Найти</button></p>
+</form>
+</div>
+{% endblock %}

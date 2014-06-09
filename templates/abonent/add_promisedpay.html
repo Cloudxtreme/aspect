@@ -1,0 +1,49 @@
+{% extends "abonent/main.html" %}
+    {% block script %}
+        {{ form.media }}
+    {% endblock %}
+
+{% block pages %} 
+
+<h2>Внести обещанный платеж</h2>     
+<hr>
+<form method="post" class="form-horizontal" role="form">{% csrf_token %}
+    <div class="form-group">
+        <label for="id_summ" class="col-sm-3 control-label">Сумма</label>
+        <div class="col-sm-3">
+            {{ form.summ }}    
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="id_datestart" class="col-sm-3 control-label">Дата начала</label>
+        <div class="col-sm-3">
+            {{ form.datestart }}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="id_datefinish" class="col-sm-3 control-label">Дата завершения</label>
+        <div class="col-sm-3">
+            {{ form.datefinish }}
+        </div>
+        <a id="setDate" class="btn btn-primary">+3 Дня</a>
+    </div>
+    <div class="form-group">
+        <label for="id_comment" class="col-sm-3 control-label">Комментарий</label>
+        <div class="col-sm-4">
+            {{ form.comment }}
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <button id="btn_save" class="btn btn-primary" type="submit">Сохранить <span class="glyphicon glyphicon-save"></span></button>
+        </div>
+    </div>
+</form>
+        <script type="text/javascript">
+        $("#setDate").click(function () {
+            var d = new Date();
+            d.setDate( d.getDate() + 3 );
+            $('#id_datefinish_picker').data("DateTimePicker").setDate(d);
+        });
+        </script>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "equip/index.html" %}
+{% block left %} 
+<h2>Список Объектов</h2>
+{% if loc_list %}
+<ul class="style1">
+    {% for loc in loc_list %}
+        <li>
+        <h3>{{ loc.label }}</h3>
+        <p class="date">{{ loc.latlng }}</p>
+        <p><a href="{% url equip.views.bs_edit loc.id %}" class="button-style">Редактировать</a></p>
+        </li>
+    {% endfor %}
+</ul>
+{% else %}
+    <p>No locations are available.</p>
+{% endif %}
+<p class="button-style"><a href="{% url equip.views.bs_add %}">Добавить</a></p>
+<p class="button-style"><a href="{% url equip.views.full_map %}">Полная карта</a></p>
+{% endblock %}

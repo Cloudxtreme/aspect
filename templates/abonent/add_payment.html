@@ -1,0 +1,41 @@
+{% extends "abonent/main.html" %}
+    {% block script %}
+        {{ form.media }}
+    {% endblock %}
+{% block pages %} 
+
+<h2>Данные о платеже</h2>     
+<hr>
+<form method="post" class="form-horizontal" role="form">{% csrf_token %}
+    <div class="form-group">
+        <label for="id_num" class="col-sm-3 control-label">Номер</label>
+        <div class="col-sm-3">
+            {{ form.num }}    
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="id_num" class="col-sm-3 control-label">Сумма</label>
+        <div class="col-sm-3">
+            {{ form.sum }}
+        </div>
+    </div>    
+    <div class="form-group">
+        <label for="id_top" class="col-sm-3 control-label">Платежная система</label>
+        <div class="col-sm-3">
+            {{ form.top }}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="id_date" class="col-sm-3 control-label">Дата</label>
+        <div class="col-sm-3">
+            {{ form.date }}
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <button id="btn_save" class="btn btn-primary" type="submit">Сохранить <span class="glyphicon glyphicon-save"></span></button>
+        </div>
+    </div>
+</form>
+
+{% endblock %}

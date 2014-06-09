@@ -1,0 +1,14 @@
+{% extends "equip/index.html" %}
+{% block left %} 
+<h2>Список Vlan'ов</h2>
+{% if vlan_list %}
+    {% for vlan in vlan_list %}
+        <p><a href="/vlan/{{ vlan.id }}/edit">{{ forloop.counter }}:{{ vlan.number }} - {{ vlan.description }}</a></p>
+    {% endfor %}
+{% else %}
+    <p>No vlans are available.</p>
+{% endif %}
+{% endblock %}
+     {% block right %}
+        <h2>Заголовок</h2>
+     {% endblock %}

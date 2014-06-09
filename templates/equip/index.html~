@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+Design by Free CSS Templates
+http://www.freecsstemplates.org
+Released for free under a Creative Commons Attribution 2.5 License
+
+Name       : Green Pasture 
+Description: A two-column, fixed-width design with dark color scheme.
+Version    : 1.0
+Released   : 20132402
+
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+{% block head %}
+<head>
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>Green Pasture by FCT</title>
+<link href='http://fonts.googleapis.com/css?family=Oswald:400,300' rel='stylesheet' type='text/css' />
+<link href='http://fonts.googleapis.com/css?family=Abel|Satisfy' rel='stylesheet' type='text/css' />
+<link href="/media/css/default.css" rel="stylesheet" type="text/css" media="all" />
+<!--[if IE 6]>
+<link href="default_ie6.css" rel="stylesheet" type="text/css" />
+<![endif]-->
+{% endblock %}
+</head>
+<body>
+<div id="header-wrapper">
+	<div id="header">
+		<div id="logo">
+			<h1><a href="#">Radiobridge</a></h1>
+		</div>
+		<div id="menu">
+			<ul>
+   				<li><a href="{% url equip.views.def_params %}" accesskey="1" title="">Расчет</a></li>				
+                <li><a href="{% url equip.views.bs_list %}" accesskey="1" title="">Базовые станции</a></li>
+				<li><a href="{% url equip.views.full_map %}" accesskey="2" title="">Полная карта</a></li>
+				<li><a href="/admin/" accesskey="3" title="">Администрирование</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+<div id="wrapper">
+	<div id="page-wrapper">
+		<div id="page">
+			<div id="wide-content">
+				<div>
+                {% block left %} 
+                {% endblock %}
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	</div>
+</div>
+<div id="footer" class="container">
+	<p>Copyright (c) 2012 Sitename.com. All rights reserved. Design by <a href="http://www.freecsstemplates.org/" rel="nofollow">FreeCSSTemplates.org</a>. Photos by <a href="http://fotogrph.com/">Fotogrph</a>.</p>
+</div>
+</body>
+</html>

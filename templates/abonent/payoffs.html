@@ -1,0 +1,44 @@
+{% extends "abonent/main.html" %}
+
+{% block pages %} 
+     
+{% if payoffs %}	
+		<table class="table table-striped h6">
+		<thead>
+          <tr>
+            <th>#</th>
+            <th>Платежная система</th>
+            <th>Услуга</th>
+            <th>Оператор</th>
+            <th>Сумма</th>
+            <th>Дата</th>
+          </tr>
+        </thead>
+        <tbody>
+		{% for payoff in payoffs %}
+		<tr>
+            <td>{{ payoff.number }}</td>
+            <td>{{ payoff.wot.title }}
+            {% if payoff.comment %} <p><small>{{ payoff.comment }}</small></p>{% endif %}
+            </td>
+            <td>{% if payoff.service %} {{ payoff.service }} {% endif %}</td>
+            <td>{% if payoff.user %} {{ payoff.user.get_full_name }} {% else %} Автоматическое списание {% endif %}</td>
+            <td>{{ payoff.summ }} руб. </td>
+            <td>{{ payoff.date|date:'Y-M-d' }}</td>
+        </tr>
+		{% endfor %}
+		</tbody>
+		</table>
+
+
+{% else %}
+	<h3 class="sub-header">Списания не найдены</h3>
+{% endif %} 
+<div class='row'>
+    <div class="col-xs-3 pull-right">
+        <a href="{% url 'addpayoff' abonent.id %}" class="btn btn-primary btn-xm pull-right" role="button">
+            Списать средства
+        </a>
+    </div>
+</div>
+{% endblock %}

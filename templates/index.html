@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <!--[if IE]>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="/media/images/favicon.ico">
+    <title>Albeon client control system</title>
+    <!-- Bootstrap core CSS -->
+    <link href="/media/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap theme -->
+    <link href="/media/css/bootstrap-theme.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/media/css/theme.css" rel="stylesheet">
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="/media/js/bootstrap.min.js"></script>
+    <script src="/media/js/docs.min.js"></script>
+    <!--<script src="/media/js/jquery-1.10.1.js" type="text/javascript"></script>-->
+
+    <!-- Just for debugging purposes. Don't actually copy this line! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    {% block script %}
+    {% endblock %}
+  </head>
+  <body role="document">
+<!-- Fixed navbar -->
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Albeon UCS</a>
+        </div>
+    <div class="navbar-collapse collapse">
+    {% block navbar %}
+            <ul class="nav navbar-nav">
+            <li><a href={% url "users.views.abonent_search" %}>Абоненты</a></li>
+            <li class="dropdown">
+                <a href='#' class="dropdown-toggle" data-toggle="dropdown" id="dropdownMenu1">Отчеты <b class="caret"></b></a>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                    <li><a href={% url "journaling.views.report_plans" %}>Распределение абонентов по скоростям</a></li>
+                    <li><a href={% url "journaling.views.report_paysbymonth" %}>Платежи по дням месяца</a></li>
+                    <li><a href={% url "journaling.views.report_paysbyweek" %}>Платежи по дням недели</a></li>
+                    <li><a href={% url "journaling.views.report_sumbymonth" %}>Платежи по месяцам</a></li>
+                </ul>
+            </li>
+            <li><a href={% url "notes.views.notes_all" %}>Заметки</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Ресурсы <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                <li><a href={% url "vlans.views.ips_all" %}>IP Адреса</a></li>
+                <li><a href={% url "vlans.views.vlans_all" %}>VLANs</a></li>
+                <li><a href="#">Оборудование</a></li>
+                <li class="divider"></li>
+                <li class="dropdown-header">Nav header</li>
+                <li><a href="#">Separated link</a></li>
+                <li><a href="#">One more separated link</a></li>
+              </ul>
+            </li>
+          </ul>
+    {% endblock %}
+
+    {% if user.is_authenticated %}
+              <p class="navbar-text ">
+                <span class="glyphicon glyphicon-user"></span> {{ user.get_full_name }}
+                <a href={% url 'users.views.log_out' %} class="btn btn-primary btn-xs" role="button"><span class="glyphicon glyphicon-log-out"></span> Выйти</a>
+              </p>
+    {% endif %}
+        <form class="navbar-form navbar-right" method="post" role="search" action={% url 'aquicksearch' %}>{% csrf_token %}
+            <div class="form-group">
+                <input type="text" class="form-control" id="id_sidebar_search_q" name="q" placeholder="Номер договора">
+            </div>
+            <button type="submit" class="btn btn-success">Найти</button>
+        </form>
+        </div><!--/.nav-collapse -->    
+      </div>
+    </div>
+
+    <div class="container theme-showcase" role="main">
+    {% block main %}
+    {% endblock %}
+    </div>
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="/media/js/bootstrap.min.js"></script>
+    <script src="/media/js/docs.min.js"></script>
+    <script src="/media/js/jquery-1.10.1.js" type="text/javascript"></script>-->
+  </body>
+</html>

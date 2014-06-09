@@ -1,0 +1,51 @@
+{% extends "abonent/main.html" %}
+
+{% block pages %} 
+     
+{% if pays %}	
+		<table class="table table-striped h6">
+		<thead>
+          <tr>
+            <th>#</th>
+            <th>Платежная система</th>
+            <th>Оператор</th>
+            <th>Сумма</th>
+            <th>Дата</th>
+          </tr>
+        </thead>
+        <tbody>
+		{% for pay in pays %}
+		<tr>
+            <td>{{ pay.num }}</td>
+            <td>{{ pay.top.title }}</td>
+            <td>{% if pay.user %} {{ pay.user.get_full_name }} {% else %} Автоматический платеж {% endif %}</td>
+            <td>{{ pay.sum }} руб. </td>
+            <td>{{ pay.date|date:'Y-M-d' }}</td>
+        </tr>
+		{% endfor %}
+		</tbody>
+		</table>
+</br>
+<div class="row">
+        <div class="col-xs-6">
+                <p>Всего платежей: <b>{{ pay_stat.sum__sum|floatformat }}</b> руб.</p>
+                <p>Средний платеж: <b>{{ pay_stat.sum__avg|floatformat }}</b> руб.</p>
+        </div>
+        <div class="col-xs-3 pull-right">
+            <a href="{% url 'addpayment' abonent.id %}" class="btn btn-primary btn-xm pull-right" role="button">
+                Добавить платеж
+            </a>
+        </div>
+</div>
+{% else %}
+	<h3 class="sub-header">Платежи не найдены</h3>
+<div class="row">
+        <div class="col-xs-3 pull-right">
+            <a href="{% url 'addpayment' abonent.id %}" class="btn btn-primary btn-xm pull-right" role="button">
+                Добавить платеж
+            </a>
+        </div>
+</div>    
+{% endif %}        
+    
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "abonent/main.html" %}
+
+    {% block script %}
+    <script type="text/javascript" src="/media/js/jquery-1.10.1.js"></script>
+    <script type="text/javascript" src="/media/js/alert.js"></script>
+    <script type="text/javascript">
+        function unlock() {
+            $("#id_notice_email").attr('disabled', false);
+            $("#id_notice_mobile").attr('disabled', false);
+            $("#id_status").attr('disabled', false);
+            $("#id_is_credit").attr('disabled', false);
+            $("#btn_save").show();
+            $("#btn_edit").hide();
+           }
+    </script>
+    {% endblock %}
+
+{% block pages %} 
+<h2>Настройки</h2>     
+<hr>
+<form method="post" class="form-horizontal" role="form">{% csrf_token %}
+    <div class="form-group">
+        <label for="id_notice_email" class="col-sm-3 control-label">E-Mail для уведомлений</label>
+        <div class="col-sm-4">
+            {{ form.notice_email }}    
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="id_notice_mobile" class="col-sm-3 control-label">Телефон для уведомлений</label>
+        <div class="col-sm-4">
+            {{ form.notice_mobile }}
+        </div>
+    </div>    
+    <div class="form-group">
+        <label for="id_status" class="col-sm-3 control-label">Статус абонента</label>
+        <div class="col-sm-4">
+            {{ form.status }}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="id_is_credit" class="col-sm-3 control-label">Форма оплаты</label>
+        <div class="col-sm-4">
+            {{ form.is_credit }}
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <button id="btn_save" class="btn btn-primary" style="display: none;" type="submit">Сохранить <span class="glyphicon glyphicon-save"></span></button>
+              <a onclick="unlock()" id="btn_edit" class="btn btn-warning" class="btn btn-warning">Изменить <span class="glyphicon glyphicon-edit"></span></a>
+        </div>
+    </div>
+</form>
+{% endblock %}

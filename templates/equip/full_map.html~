@@ -1,0 +1,52 @@
+{% extends "equip/index.html" %}
+<html>
+  {% block head %}  
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link href="/maps/documentation/javascript/examples/default.css" rel="stylesheet">
+    <link href="/media/css/default.css" rel="stylesheet" type="text/css" />
+    <script src="https://www.google.com/jsapi"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false&libraries=geometry"></script>
+  </head>
+ {% endblock %}
+ {% block left %}
+ <script type="text/javascript">
+      function initialize() {
+
+        var myLatlng = new google.maps.LatLng(60.0,30.0);
+        
+        var mapOptions = {
+          zoom: 8,
+          center: myLatlng,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        }
+        var map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
+        {% regroup points by address as address_list %}
+        {% for address in address_list %}
+            {% for point in address.list %}
+        var myLatlng{{ forloop.parentloop.counter }} = new google.maps.LatLng({{  point.lat|safe }},{{  point.lng|safe }});
+        var contentString{{ forloop.parentloop.counter }} = '{{ point.address }}'
+        var infowindow{{ forloop.parentloop.counter }} = new google.maps.InfoWindow({
+            content: contentString{{ forloop.parentloop.counter }}
+        });
+        var marker{{ forloop.parentloop.counter }} = new google.maps.Marker({
+            position: myLatlng{{ forloop.parentloop.counter }},
+            map: map,
+            title: '{{ point.address }}'
+        });
+        google.maps.event.addListener(marker{{ forloop.parentloop.counter }}, 'click', function() {
+            infowindow{{ forloop.parentloop.counter }}.open(map,marker{{ forloop.parentloop.counter }});
+        });
+
+            {% endfor %}
+        {% endfor %}
+        
+      }
+    </script>
+  <body onload="initialize()">
+        <div id="map_canvas" style="position:relative;width:1024px; height:576px; border: 1px solid black;"></div>        
+  </body>
+ {% endblock %}
+</html>

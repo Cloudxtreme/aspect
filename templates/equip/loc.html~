@@ -1,0 +1,11 @@
+{% extends "equip/index.html" %}
+{% block left %} 
+<h2>Список Объектов</h2>
+{% if loc_list %}
+    {% for loc in loc_list %}
+        <p><a href="{% url equip.views.elevation_path loc.id 2%}">{{ loc.label }}</a></p>
+    {% endfor %}
+{% else %}
+    <p>No locations are available.</p>
+{% endif %}
+{% endblock %}

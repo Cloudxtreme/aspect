@@ -1,0 +1,17 @@
+{% extends "abonent.html" %}
+{% block pages %} 
+		<ul class="nav nav-pills">
+			<li><a href={% url 'users.views.abonent_contacts' abonent.id %}>Контакты<span class="badge pull-right">{{ abonent.contact.count }}</span></a></li>
+			<li class="active"><a href={% url 'users.views.abonent_services' abonent.id %}>Услуги&nbsp;<span class="badge pull-right">{{ services.count }}</span></a></li>
+			<li><a href={% url 'users.views.abonent_payments' abonent.id %}>Платежи</a></li>
+		</ul>
+		<p></p>
+
+<div class="col-lg-6">
+            {{ form.as_p }}
+            <button type="button" class="btn btn-success"><span class="glyphicon glyphicon-cog"></span> Добавить</button></a>
+</div>            
+<div class="col-lg-6">
+
+</div>
+{% endblock %}

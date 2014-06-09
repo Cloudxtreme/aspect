@@ -1,0 +1,40 @@
+{% extends "abonent.html" %}
+{% block pages %} 
+		<ul class="nav nav-pills">
+			<li class="active"><a href={% url 'users.views.abonent_contacts' abonent.id %}>Контакты&nbsp;<span class="badge pull-right">{{ contacts.count }}</span></a></li>
+			<li><a href={% url 'users.views.abonent_services' abonent.id %}>Услуги<span class="badge pull-right">{{ count_serv }}</span></a></li>
+			<li><a href={% url 'users.views.abonent_payments' abonent.id %}>Платежи</a></li>
+		</ul>
+		<p></p>
+{% if contacts %}
+    <div class="col-lg-12">
+	<div class="panel panel-default">
+
+        <table class="table">
+		<thead>
+          <tr>
+            <th>Имя</th>
+            <th>Телефоны</th>
+            <th>Должность</th>
+            <th>Email</th>
+            <th>Адрес</th>            
+          </tr>
+        </thead>
+        <tbody>
+		{% for contact in contact %}
+		<tr>
+            <td>{{ contact.full_name }}</td>
+            <td>{{ contact.phone }} {{ contact.mobile }}</td>
+            <td>{{ contact.position }}</td>
+            <td>{{ contact.email }}</td>
+            <td>{{ contact.address }}</td>
+        </tr>
+		{% endfor %}
+		</tbody>
+		</table>
+    {% else %}
+        <h3 class="sub-header">Контакты не найдены</h3>
+    {% endif %}        
+	</div>
+    </div>
+{% endblock %}

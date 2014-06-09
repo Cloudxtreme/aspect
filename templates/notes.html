@@ -1,0 +1,25 @@
+{% extends "index.html" %}
+{% block main %} 
+{% if note_list %}
+<div class="page-header">
+<h2 class="sub-header">Заметки</h2>
+</div>
+<div class="col-lg-6">
+{% for note in note_list %}
+<a href="#">
+  <div class="panel {{ note.marks }}">
+        <div class="panel-heading">
+      <h3 class="panel-title">{{ note.title }}</h3>
+    </div>
+  <div class="panel-body">
+    {{ note.descr }}
+  </div>
+  </div>
+  </a>
+{% endfor %}
+</div>
+{% else %}
+<h2 class="sub-header">Заметки не найдены</h2>
+{% endif %}
+
+{% endblock %}

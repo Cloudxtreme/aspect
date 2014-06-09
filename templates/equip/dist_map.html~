@@ -1,0 +1,80 @@
+{% extends "equip/index.html" %}
+<html>
+  {% block head %}  
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link href="/maps/documentation/javascript/examples/default.css" rel="stylesheet">
+    <link href="/media/css/default.css" rel="stylesheet" type="text/css" />
+    <script src="https://www.google.com/jsapi"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false&libraries=geometry"></script>
+  </head>
+ {% endblock %}
+ {% block left %}
+ <script type="text/javascript">
+      
+      google.load('visualization', '1', {packages:['table']});
+      google.setOnLoadCallback(drawTable);
+      
+      var target = new google.maps.LatLng({{  target.lat|safe }},{{  target.lng|safe }});
+      
+      function drawTable() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Address');        
+        data.addColumn('string', 'Lat');
+        data.addColumn('string', 'Lng');
+        data.addColumn('string', 'Distance');
+        {% for point in points %}
+              var Latlng{{forloop.counter}} = new google.maps.LatLng({{  point.lat|safe }},{{  point.lng|safe }});
+              var distance = google.maps.geometry.spherical.computeDistanceBetween(target, Latlng{{forloop.counter}});
+              data.addRows([
+                  ['{{ point.pk }}', '{{ point.lat|safe }}', '{{ point.lng|safe }}', String(Math.round(distance))+' m'],
+              ]);
+        {% endfor %}
+        var table = new google.visualization.Table(document.getElementById('table_div'));
+        table.draw(data, {showRowNumber: false, allowHtml: true });
+      }   
+
+      function initialize() {
+        var myLatlng = new google.maps.LatLng(60.0,30.0);
+        
+        var mapOptions = {
+          zoom: 8,
+          center: myLatlng,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        }
+        var map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
+       // var target = new google.maps.LatLng({{  target.lat|safe }},{{  target.lng|safe }});
+        {% regroup points by address as address_list %}
+        {% for address in address_list %}
+            {% for point in address.list %}
+            
+            var myLatlng{{ forloop.parentloop.counter }} = new google.maps.LatLng({{  point.lat|safe }},{{  point.lng|safe }});
+            var distance = google.maps.geometry.spherical.computeDistanceBetween(target,myLatlng{{ forloop.parentloop.counter }});
+//            var contentString{{ forloop.parentloop.counter }} = '<p class="button-style"><a href="{% url equip.views.bs_list %}">Назад</a></p>'
+            var contentString{{ forloop.parentloop.counter }} = String(Math.round(distance));
+            var infowindow{{ forloop.parentloop.counter }} = new google.maps.InfoWindow({content: contentString{{ forloop.parentloop.counter }}});
+            var marker{{ forloop.parentloop.counter }} = new google.maps.Marker({
+                position: myLatlng{{ forloop.parentloop.counter }},
+                map: map,
+                title: '{{ forloop.parentloop.counter }} - {{ point.address }}'
+            });
+
+            google.maps.event.addListener(marker{{ forloop.parentloop.counter }}, 'click', function() {
+                infowindow{{ forloop.parentloop.counter }}.open(map,marker{{ forloop.parentloop.counter }});
+            });
+
+            
+
+            {% endfor %}
+        {% endfor %}
+      }
+    </script>
+  <body onload="initialize()">
+        <div id="map_canvas" style="position:relative;width:1024px; height:576px; border: 1px solid black;"></div>
+        </br>
+        <div id="table_div" style="position:relative;width:1024px; height:200px; border: 1px solid black;"></div>        
+  </body>
+ {% endblock %}
+</html>

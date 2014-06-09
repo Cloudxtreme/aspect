@@ -1,0 +1,71 @@
+{% extends "abonent/main.html" %}
+
+    {% block script %}
+    <script type="text/javascript" src="/media/js/jquery-1.10.1.js"></script>
+    <script type="text/javascript" src="/media/js/alert.js"></script>
+    <script type="text/javascript">
+        function unlock() {
+            $("#id_title").attr('disabled', false);
+            $("#id_inn").attr('disabled', false);
+            $("#id_kpp").attr('disabled', false);
+            $("#id_post_address").attr('disabled', false);
+            $("#id_official_address").attr('disabled', false);
+            $("#id_bank").attr('disabled', false);
+            $("#id_account").attr('disabled', false);
+            $("#btn_save").show();
+            $("#btn_edit").hide();
+           }
+    </script>
+    {% endblock %}
+
+{% block pages %} 
+<h2>Реквизиты компании</h2>     
+<hr>
+<form method="post" action="#">{% csrf_token %}
+<div class="row">
+        <div class="col-xs-8">
+            <label for="id_title">Название</label>
+            {{ form.title }}
+        </div>
+</div>
+<br>
+<div class="row">
+        <div class="col-xs-2">
+         <label for="id_inn">ИНН</label>
+        {{ form.inn }}
+        </div>
+        <div class="col-xs-2">
+        <label for="id_kpp">КПП</label>
+        {{ form.kpp }}
+        </div>
+</div>
+<br>
+<div class="row">
+        <div class="col-xs-8">
+        <label for="id_post_address">Почтовый адрес</label>
+        {{ form.post_address }}
+        </div>
+</div>
+<br>        
+<div class="row">        
+        <div class="col-xs-8">
+        <label for="id_official_address">Юридический адрес</label>
+        {{ form.official_address }}
+        </div>
+</div>
+<br>
+<div class="row">
+        <div class="col-xs-3">
+        <label for="id_bank">Банк</label>
+        {{ form.bank }}
+        </div>
+        <div class="col-xs-5">
+         <label for="id_account">Расчетный счет</label>
+        {{ form.account }}
+        </div>
+</div>
+<br>
+<button id="btn_save" class="btn btn-primary" style="display: none;" type="submit">Сохранить <span class="glyphicon glyphicon-save"></span></button>
+</form>
+<button id="btn_edit" class="btn btn-warning" onclick="unlock()">Изменить <span class="glyphicon glyphicon-edit"></span></button>
+{% endblock %}

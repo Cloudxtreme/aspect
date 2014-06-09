@@ -1,0 +1,50 @@
+{% extends "abonent/main.html" %}
+
+{% block script %}
+{{ form.media }}
+{% endblock %}
+
+{% block pages %} 
+     
+{% if promisedpays %}	
+		<table class="table  h6">
+		<thead>
+          <tr>
+            <th>Дата начала</th>
+            <th>Дата завершения</th>
+            <th>Оплачен</th>
+            <th>Сумма</th>
+            <th>Оператор</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+		{% for pay in promisedpays %}
+		<tr {% if not pay.pay_onaccount %}class="active"{% endif%}>
+            <td>{{ pay.datestart }}</td>
+            <td>{{ pay.datefinish }}</td>
+            <td>{% if pay.repaid %}Да{% else %}Нет{% endif %}</td>
+            <td>{{ pay.summ }} руб.</td>
+            <td>{% if pay.user %} {{ pay.user.get_full_name }} {% else %} Пользовательский платеж {% endif %}</td>
+            <td>{% if pay.pay_onaccount %}
+            <a href="{% url 'closepromisedpay' abonent.id pay.pk %}" role="button" class="btn btn-primary">
+            <span class="glyphicon glyphicon-off"></span> Завершить</a>
+            {% else %}Платеж завершен{% endif%}
+            </td>
+        </tr>
+		{% endfor %}
+		</tbody>
+		</table>
+</br>
+{% else %}
+	<h3 class="sub-header">Платежи не найдены</h3>
+{% endif %} 
+<div class="row">
+        <div class="col-xs-3 pull-right">
+            <a href="{% url 'addpromisedpay' abonent.id %}" class="btn btn-primary btn-xm" role="button">
+                Добавить обещаный платеж
+            </a>
+        </div>
+</div>    
+    
+{% endblock %}

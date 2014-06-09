@@ -1,0 +1,40 @@
+{% extends "abonent/main.html" %}
+
+{% block pages %} 
+     
+{% if tts %}	
+		<table class="table">
+		<thead>
+          <tr>
+            <th>Номер</th>
+            <th>Дата создания</th>
+            <th>Категория</th>
+            <th>Комментарии</th>
+          </tr>
+        </thead>
+        <tbody>
+		{% for tt in tts %}
+		<tr>
+            <td>{{ tt.number }}</td>
+            <td>{{ tt.create_date|date:'Y-M-d' }}</td>
+            <td>{{ tt.category }}</td>
+            <td>
+                <small>
+                <p>{{ tt.create_date|date:'Y-M-d H:i' }} {{ tt.performer.get_full_name }}</p>
+                <p>{{ tt.description }}</p>
+                {% for ttc in tt.troubleticketcomment_set.all %}
+                <hr>
+                <p>{{ ttc.create_date|date:'Y-M-d H:i' }} {{ ttc.author.get_full_name }}</p>
+                <p>{{ ttc.comment }}</p>
+                {% endfor %}
+                </small>
+            </td>
+        </tr>
+		{% endfor %}
+		</tbody>
+		</table>
+{% else %}
+	<h3 class="sub-header">Обращений не было</h3>
+{% endif %}        
+
+{% endblock %}
