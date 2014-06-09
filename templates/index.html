@@ -64,24 +64,26 @@
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Ресурсы <b class="caret"></b></a>
                 <ul class="dropdown-menu">
-                <li><a href={% url "vlans.views.ips_all" %}>IP Адреса</a></li>
-                <li><a href={% url "vlans.views.vlans_all" %}>VLANs</a></li>
-                <li><a href="#">Оборудование</a></li>
-                <li class="divider"></li>
-                <li class="dropdown-header">Nav header</li>
-                <li><a href="#">Separated link</a></li>
-                <li><a href="#">One more separated link</a></li>
-              </ul>
+                    <li><a href={% url "vlans.views.ips_all" %}>IP Адреса</a></li>
+                    <li><a href={% url "vlans.views.vlans_all" %}>VLANs</a></li>
+                    <li><a href="#">Оборудование</a></li>
+                    <li class="divider"></li>
+                    <li class="dropdown-header">Nav header</li>
+                    <li><a href="#">Separated link</a></li>
+                    <li><a href="#">One more separated link</a></li>
+                </ul>
             </li>
+    {% if user.is_authenticated %}            
+            <li class="dropdown">
+                <a href='#' class="dropdown-toggle" data-toggle="dropdown" id="dropdownMenu2">
+                <span class="glyphicon glyphicon-user"></span>  {{ user.get_full_name }}  <b class="caret"></b></a>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                    <li><a href={% url "users.views.log_out" %}><span class="glyphicon glyphicon-log-out"></span> Выход</a></li>
+                </ul>
+            </li>
+    {% endif %}            
           </ul>
     {% endblock %}
-
-    {% if user.is_authenticated %}
-              <p class="navbar-text ">
-                <span class="glyphicon glyphicon-user"></span> {{ user.get_full_name }}
-                <a href={% url 'users.views.log_out' %} class="btn btn-primary btn-xs" role="button"><span class="glyphicon glyphicon-log-out"></span> Выйти</a>
-              </p>
-    {% endif %}
         <form class="navbar-form navbar-right" method="post" role="search" action={% url 'aquicksearch' %}>{% csrf_token %}
             <div class="form-group">
                 <input type="text" class="form-control" id="id_sidebar_search_q" name="q" placeholder="Номер договора">
