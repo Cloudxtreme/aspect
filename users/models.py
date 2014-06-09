@@ -4,6 +4,7 @@ from vlans.models import IPAddr, Vlan, Node, Device
 from journaling.models import AbonentStatusChanges, ServiceStatusChanges
 from django.core.validators import RegexValidator
 from users.fields import JSONField
+from django.contrib.auth.models import User
 import datetime
 import calendar
 import pays.models
@@ -355,3 +356,14 @@ class Service(models.Model):
 
     def __unicode__(self):
         return "[%s] : %s - %s" % (self.pk, self.plan.title, self.get_status_display())
+
+class ServiceSuspension(models.Model):
+    service = models.ForeignKey(Service, verbose_name=u'Услуга')
+    user = models.ForeignKey(User, verbose_name=u'Пользователь', blank=True, null= True)
+    datestart = models.DateTimeField(default=datetime.datetime.now, verbose_name=u'Дата начала')
+    datefinish = models.DateTimeField(verbose_name=u'Дата завершения', blank=True, null= True)
+    comment = models.CharField(u'Комментарии', blank=True, null= True, max_length=200)
+
+    class Meta:
+        verbose_name = u'Приостановка услуги'
+        verbose_name_plural = u'Приостановка услуг'

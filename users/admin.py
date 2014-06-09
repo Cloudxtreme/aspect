@@ -1,5 +1,5 @@
 from django.contrib import admin
-from users.models import TypeOfService, Plan, Service, Segment, Abonent, Contact, Agent, Bank, Detail, Passport
+from users.models import TypeOfService, Plan, Service, Segment, Abonent, Contact, Agent, Bank, Detail, Passport, ServiceSuspension
 
 class ServiceInline(admin.TabularInline):
     model = Service
@@ -33,3 +33,4 @@ admin.site.register(Segment)
 admin.site.register(Abonent, AbonentAdmin)
 admin.site.register(Contact)
 admin.site.register(Bank)
+admin.site.register(ServiceSuspension)
