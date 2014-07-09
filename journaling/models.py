@@ -41,8 +41,9 @@ class SomeEntityWithReason(models.Model):
 
 class ServiceStatusChanges(SomeEntityWithReason):
     service = models.ForeignKey('users.Service', verbose_name=u'Услуга')
+    datetimefinish = models.DateTimeField(auto_now=False,
+        auto_now_add=False, blank=True, verbose_name=u'Дата окончания')
     #reason = models.ForeignKey('users.Reason', verbose_name=u'Основание')
-    
     
     class Meta:
         verbose_name = u'Изменение статуса услуги'
