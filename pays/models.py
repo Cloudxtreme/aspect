@@ -5,6 +5,7 @@ from users.models import Abonent, Service
 # import users
 from django.contrib.auth.models import User
 from datetime import datetime
+from notice.models import EmailMessage
 # from django.utils import timezone
 
 PAYS_PREFIX = u''
@@ -102,7 +103,12 @@ class WriteOff(models.Model):
                 self.number = self.pk
                 super(WriteOff, self).save(*args, **kwargs)
             Abonent.objects.filter(pk=self.abonent.pk).update(balance=F('balance') - self.summ)
-            Abonent.objects.get(pk=self.abonent.pk).check_status(reason='Списание средств')
+            abonent = Abonent.objects.get(pk=self.abonent.pk)
+            abonent.check_status(reason='Списание средств')
+            if abonent.notice_email:
+                email = EmailMessage(destination = abonent.notice_email, subject = 'Списание средств', content = u'С вашего счета списано: %s руб. Теперь на вашем счету %s руб.' % (self.summ, abonent.balance) )
+                email.save()      
+            
             
     def delete(self, *args, **kwargs):
         Abonent.objects.filter(pk=self.abonent.pk).update(balance=F('balance') + self.summ)
@@ -142,7 +148,11 @@ class Payment(models.Model):
             # self.abon.balance = F('balance') + self.sum
             PromisedPays.objects.filter(abonent__pk=self.abon.pk, pay_onaccount=True).update(repaid=True)
             Abonent.objects.filter(pk=self.abon.pk).update(balance=F('balance') + self.sum)
-            Abonent.objects.get(pk=self.abon.pk).check_status(reason='Зачисление средств')
+            abonent = Abonent.objects.get(pk=self.abon.pk)
+            abonent.check_status(reason='Зачисление средств')
+            if abonent.notice_email:
+                email = EmailMessage(destination = abonent.notice_email, subject = 'Зачисление средств', content = u' На ваш счет зачислено: %s руб. Теперь на вашем счету %s руб.' % (self.sum, abonent.balance) )
+                email.save()        
             # self.abon.balance += self.sum
             # self.abon.save()
             

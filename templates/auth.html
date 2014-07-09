@@ -27,7 +27,7 @@
   </head>
   <body>
      <div class="container">
-      <form class="form-signin" role="form" action={% url 'users.views.log_in' %} method="POST">
+      <form class="form-signin" role="form" action="" method="POST">
         {% csrf_token %}
         <h3 class="form-signin-heading">Albeon UCS</h3>
         {{ form.username }}

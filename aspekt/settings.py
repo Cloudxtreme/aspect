@@ -44,6 +44,7 @@ INSTALLED_APPS = (
     'tt',
     'south',
     'bootstrap3_datetime',
+    'notice',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -162,4 +163,14 @@ MEDIA_URL = '/media/'
 
 LOGIN_URL = '/login/'
 
+LOGIN_REDIRECT_URL = '/'
+
 SESSION_COOKIE_AGE = 600
+
+EMAIL_SERVER = 'smtp.yandex.ru'
+
+EMAIL_SENDER = "albeon@ptls.ru"
+
+EMAIL_USERNAME = "albeon@ptls.ru"
+
+EMAIL_PASSWORD = "yfpfgbcm"

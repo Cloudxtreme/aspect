@@ -18,6 +18,7 @@ from vlans.models import Network, IPAddr
 from journaling.models import AbonentStatusChanges
 from django.db.models import Avg, Max, Min, Sum, Q
 import datetime
+from django.conf import settings
 
 from pays.models import Payment
 
@@ -268,11 +269,13 @@ def log_in(request):
         if form.is_valid():
             if form.get_user():
                 login(request, form.get_user())
-                return HttpResponseRedirect('/')
+                # print request.GET.get('next')
+                url = settings.LOGIN_REDIRECT_URL if not request.GET.get('next') else request.GET.get('next')
+                return HttpResponseRedirect(url)
     else:
         form = LoginForm()
     return render(request, 'auth.html', {'form': form})
 
 def log_out(request):
     logout(request)
-    return HttpResponseRedirect('/')
+    return HttpResponseRedirect(settings.LOGIN_URL)
