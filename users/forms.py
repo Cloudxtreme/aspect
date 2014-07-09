@@ -83,7 +83,7 @@ class ServiceForm(forms.ModelForm):
 
     class Meta:
         model = Service
-        exclude = {'abon'}
+        exclude = {'abon', 'status'}
 
         widgets = {
             # 'segment': forms.Select(attrs={'class': 'form-control'}),
@@ -94,6 +94,7 @@ class ServiceForm(forms.ModelForm):
             'speed_out': forms.TextInput(attrs={'class': 'form-control', 'placeholder' : 'Kbps', 'disabled' : 'disabled'}),
             'lat': forms.TextInput(attrs={'class': 'form-control', 'placeholder' : '60.00000'}),
             'lon': forms.TextInput(attrs={'class': 'form-control', 'placeholder' : '30.00000'}),
+            # 'status': forms.Select(attrs={'class': 'form-control',}),
         }
 
 class LoginForm(forms.Form):

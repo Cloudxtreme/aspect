@@ -128,12 +128,12 @@ class Agent(models.Model):
 
 class Abonent(models.Model):
     U_TYPE = (
-    ('F', 'Физическое лицо'),
-    ('U', 'Юридическое лицо'),
+        ('F', 'Физическое лицо'),
+        ('U', 'Юридическое лицо'),
     )
     PAYTYPE =(
-    ('R', 'Предоплата'),
-    ('O', 'В кредит')
+        ('R', 'Предоплата'),
+        ('O', 'В кредит')
     )
     title = models.CharField(u'Название', max_length=70)
     contract = models.CharField(u'Номер договора',max_length=15,blank=True, null=True)
@@ -164,12 +164,14 @@ class Abonent(models.Model):
             if self.status in [STATUS_ACTIVE, STATUS_PAUSED, STATUS_OUT_OF_BALANCE]:
                 for item in self.service_set.all():
                     if item.status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE]:
-                        item.status = self.status
-                        item.save()
+                        item.set_status(self.status)
+                        # item.status = self.status
+                        # item.save()
             if self.status == STATUS_ARCHIVED:
                 for item in self.service_set.all():
-                    item.status = self.status
-                    item.save()
+                    item.set_status(self.status)
+                    # item.status = self.status
+                    # item.save()
 
             if old_status != self.status:
                 asc = AbonentStatusChanges(
@@ -177,7 +179,7 @@ class Abonent(models.Model):
                     laststatus=old_status,
                     newstatus=self.status,
                     comment=comment,
-                    datetime=datetime.datetime.now()
+                    date=datetime.datetime.now()
                 )
                 asc.save()
 
@@ -300,6 +302,18 @@ class Service(models.Model):
     datefinish = models.DateField(auto_now=False, auto_now_add=False,blank=True, null= True, verbose_name=u'Дата окончания')
     user_device = models.ForeignKey(Device, related_name='user_device',verbose_name=u'Абонентское устройство', blank=True, null= True)
     bs_device = models.ForeignKey(Device, related_name='bs_device', verbose_name=u'Абонентская БС', blank=True, null= True)
+
+    def set_status(self,new_status):
+        ssc = ServiceStatusChanges(
+                    service=self,
+                    laststatus=self.status,
+                    newstatus=new_status,
+                    comment='Изменение статуса услуги',
+                    date=datetime.datetime.now()
+            )
+        self.status = new_status
+        self.save()
+        ssc.save()
 
     def stop(self):
         self.status = STATUS_ARCHIVED

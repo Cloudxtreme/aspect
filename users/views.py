@@ -11,11 +11,12 @@ from django.core import serializers
 # from django.core.context_processors import csrf
 from django.template import RequestContext
 from users.forms import  ServiceForm, SearchForm, LoginForm, PassportForm, DetailForm, ManageForm
+from journaling.forms import ServiceStatusChangesForm
 # from vlans.forms import LocationForm
 from users.models import Abonent, Service, TypeOfService, Plan, Passport, Detail
 from tt.models import TroubleTicket, TroubleTicketComment
+from journaling.models import ServiceStatusChanges, AbonentStatusChanges
 from vlans.models import Network, IPAddr
-from journaling.models import AbonentStatusChanges
 from django.db.models import Avg, Max, Min, Sum, Q
 import datetime
 from django.conf import settings
@@ -119,11 +120,38 @@ def service_add(request, abonent_id="0", tos_id="0"):
         abonent = Abonent.objects.get(pk=abonent_id)
     except:
         abonent, services = None	
-    return render_to_response('abonent/srv_edit.html', {
+    return render_to_response('service/service_edit.html', {
                                 'abonent' : abonent, 
                                 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), 
                                 'form': form }, 
                                 context_instance = RequestContext(request) )    
+
+@login_required
+def service_status_change(request, abonent_id, service_id):
+    if request.method == 'POST':
+        form = ServiceStatusChangesForm(request.POST)
+        if form.is_valid(): 
+            ssc = form.save(commit=False)
+            ssc.service = Service.objects.get(pk=service_id)
+            ssc.laststatus = Service.objects.get(pk=service_id).status
+            ssc.save()
+        else:
+            print form.errors
+    else:
+        form = ServiceStatusChangesForm() 
+        # form.fields['plan'].queryset=Plan.objects.filter(tos__pk=tos_id)
+    try:
+        abonent = Abonent.objects.get(pk=abonent_id)
+        service = Service.objects.get(pk=service_id)
+    except:
+        abonent, service = None    
+
+    return render_to_response('service/service_status_changes.html', {
+                                'abonent' : abonent, 
+                                'service' : service, 
+                                'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), 
+                                'form': form }, 
+                                context_instance = RequestContext(request) )   
 
 @login_required
 def service_edit(request, abonent_id, service_id=0):
@@ -160,7 +188,7 @@ def service_edit(request, abonent_id, service_id=0):
             form.fields['plan'].queryset=Plan.objects.none()
             form.fields['ip'].queryset=IPAddr.objects.none()
 
-    return render_to_response('abonent/srv_edit.html', {
+    return render_to_response('service/service_edit.html', {
                                 'form': form,
                                 'message': message,
                                 'new': new,
@@ -176,13 +204,24 @@ def abonent_services(request, abonent_id):
     except:
         abonent = None
 
-    return render_to_response('abonent/services.html', { 
+    return render_to_response('service/services.html', { 
                                 'abonent' : abonent, 
                                 'services' : Service.objects.filter(abon__pk=abonent_id), 
                                 's_types' : TypeOfService.objects.all(),
                                 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() 
                                 }, 
                                 context_instance = RequestContext(request))
+
+@login_required    
+def service_history(request, abonent_id, service_id):
+    try:
+        service = Service.objects.get(pk=service_id)
+        abonent = Abonent.objects.get(pk=abonent_id)
+    except:
+        abonent = None
+        service = None
+    sscs = ServiceStatusChanges.objects.filter(service__pk=service_id).order_by('-pk')
+    return render_to_response('service/history.html', { 'abonent' : abonent,  'sscs' : sscs, 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() }, context_instance = RequestContext(request))
 
 @login_required    
 def abonent_history(request, abonent_id):

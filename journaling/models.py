@@ -1,6 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 from django.db import models
 from vlans.models import Device
+from datetime import datetime
 # import datetime
 
 # Create your models here.
@@ -22,14 +23,13 @@ class DeviceStatusEntry(models.Model):
     device = models.ForeignKey(Device, verbose_name=u'Устройство')
     status = models.CharField(u'Новый статус', max_length=1, 
         choices=( ('A', 'Доступен'),('N','Недоступен') ))
-    datetime = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField(auto_now_add=True)
 
 
 class SomeEntityWithReason(models.Model):
-    comment = models.CharField(u'Комментарий', max_length=30)
-    attach = models.FileField(upload_to='user_files', blank=True, null=True)
-    datetime = models.DateTimeField(auto_now=True, 
-        auto_now_add=True, verbose_name=u'Дата')
+    comment = models.CharField(u'Комментарий', max_length=30, blank=True, null=True)
+    attach = models.FileField(u'Приложение', upload_to='user_files', blank=True, null=True)
+    date = models.DateTimeField(default=datetime.now, verbose_name=u'Дата начала')
     laststatus = models.CharField(u'Старый статус', max_length=1, 
         choices=STATUSES, blank=True, null=True)
     newstatus = models.CharField(u'Новый статус', 
@@ -41,8 +41,8 @@ class SomeEntityWithReason(models.Model):
 
 class ServiceStatusChanges(SomeEntityWithReason):
     service = models.ForeignKey('users.Service', verbose_name=u'Услуга')
-    datetimefinish = models.DateTimeField(auto_now=False,
-        auto_now_add=False, blank=True, verbose_name=u'Дата окончания')
+    # datetimefinish = models.DateTimeField(auto_now=False,
+        # auto_now_add=False, blank=True, null=True, verbose_name=u'Дата окончания')
     #reason = models.ForeignKey('users.Reason', verbose_name=u'Основание')
     
     class Meta:
@@ -50,7 +50,7 @@ class ServiceStatusChanges(SomeEntityWithReason):
         verbose_name_plural = u'Изменение статусов услуг'   
         
     def __unicode__(self):
-        return '%s %s %s %s' % (self.service.title, self.laststatus, self.newstatus, self.datetime)
+        return '[%s] %s %s %s' % (self.service.pk, self.laststatus, self.newstatus, self.date)
     
 class AbonentStatusChanges(SomeEntityWithReason):
     abonent = models.ForeignKey('users.Abonent', verbose_name=u'Абонент')
@@ -61,5 +61,5 @@ class AbonentStatusChanges(SomeEntityWithReason):
         verbose_name_plural = u'Изменение статусов абонентов'  
 
     def __unicode__(self):
-        return '[%s] %s : %s -> %s ' % (self.datetime, self.abonent.contract, self.get_laststatus_display(),self.get_newstatus_display())            
+        return '[%s] %s : %s -> %s ' % (self.date, self.abonent.contract, self.get_laststatus_display(),self.get_newstatus_display())            
 #        return '%s %s %s %s' % (self.abonent.title, self.get_laststatus_display(), self.get_newstatus_display(), self.datetime )        

@@ -1,0 +1,55 @@
+{% extends "abonent/main.html" %}
+    {% block script %}
+        {{ form.media }}
+    {% endblock %}
+
+{% block pages %} 
+
+<h2>Изменение статуса услуги [{{ service.pk }}]</h2>     
+<hr>
+<form method="post" class="form-horizontal" role="form">{% csrf_token %}
+    <div class="form-group">
+        <label for="id_newstatus" class="col-sm-3 control-label">Текущий статус</label>
+        <div class="col-sm-3">
+            <h5>{{ service.get_status_display }}</h5>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="id_newstatus" class="col-sm-3 control-label">Новый статус</label>
+        <div class="col-sm-3">
+            {{ form.newstatus }}    
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="id_date" class="col-sm-3 control-label">Дата начала</label>
+        <div class="col-sm-3">
+            {{ form.date }}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="id_attach" class="col-sm-3 control-label">Приложение</label>
+        <div class="col-sm-4">
+            {{ form.attach }}
+            <p class="help-block">Скан заявления на измение статуса услуги</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="id_comment" class="col-sm-3 control-label">Комментарий</label>
+        <div class="col-sm-4">
+            {{ form.comment }}
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <button id="btn_save" class="btn btn-primary" type="submit">Сохранить <span class="glyphicon glyphicon-save"></span></button>
+        </div>
+    </div> 
+</form>
+        <script type="text/javascript">
+        $("#setDate").click(function () {
+            var d = new Date();
+            d.setDate( d.getDate() + 3 );
+            $('#id_datefinish_picker').data("DateTimePicker").setDate(d);
+        });
+        </script>
+{% endblock %}

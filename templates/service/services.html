@@ -61,6 +61,10 @@
             </td>
             <td>
                 {% ifnotequal service.status 'D' %}
+                <a href="{% url 'users.views.service_history' abonent.id service.id %}" role="button" class="btn btn-warning btn-xm pull-right">
+                <span class="glyphicon glyphicon-list"></span></a>
+            </td>
+            <td>
                 <a href="{% url 'users.views.service_edit' abonent.id service.id %}" role="button" class="btn btn-primary btn-xm pull-right">
                 <span class="glyphicon glyphicon-cog"></span></a>
                 {% endifnotequal %}
