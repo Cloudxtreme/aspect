@@ -1,14 +1,16 @@
 from django.shortcuts import render_to_response, HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 from notes.models import Note
 from notes.forms import NoteModelForm
 
-# Create your views here.
+@login_required
 def note_del(request, note_id):
 	Note.objects.get(pk=note_id).delete()
 	return HttpResponseRedirect(reverse('notes_all'))
 
+@login_required
 def note_add(request):
 	if request.method == 'POST':
 		form = NoteModelForm(request.POST)
@@ -19,6 +21,7 @@ def note_add(request):
             print form.errors
 	return HttpResponseRedirect(reverse('notes_all'))
 
+@login_required
 def notes_all(request):
     note_list = Note.objects.all().order_by('-pk')
     form = NoteModelForm()
