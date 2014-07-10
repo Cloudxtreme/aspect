@@ -165,7 +165,7 @@ LOGIN_URL = '/login/'
 
 LOGIN_REDIRECT_URL = '/'
 
-SESSION_COOKIE_AGE = 600
+# SESSION_COOKIE_AGE = 600
 
 EMAIL_SERVER = 'smtp.yandex.ru'
 

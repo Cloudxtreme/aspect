@@ -34,6 +34,8 @@ class SomeEntityWithReason(models.Model):
         choices=STATUSES, blank=True, null=True)
     newstatus = models.CharField(u'Новый статус', 
         max_length=1, choices=STATUSES)
+    done = models.BooleanField(u'Исполнен', default=False)
+    successfully = models.BooleanField(u'Успешно', default=False)
 
     class Meta:
         abstract = True

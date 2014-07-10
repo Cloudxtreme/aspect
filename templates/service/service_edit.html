@@ -39,8 +39,16 @@
     })
     </script>
 
-    {{ form.media }}
-    {% endblock %}
+{{ form.media }}
+{% endblock %}
+
+{% block breadcrumb %}
+        <ol class="breadcrumb">
+            <li><a href="{% url 'abonent_info' abonent.id %}">Абонент</a></li>
+            <li><a href="{% url 'users.views.abonent_services' abonent.id %}">Услуги</a></li>
+            <li class="active">Изменение</li>
+        </ol>
+{% endblock %}
 
 {% block pages %}
 <h2>{% if new %} Добавление новой услуги{% else %}Изменение параметров услуги {% endif %}</h2>
@@ -100,12 +108,6 @@
         <label for="id_datestart" class="col-sm-3 control-label">Начало услуги</label>
         <div class="col-sm-3">
             {{ form.datestart }}
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="id_id_datefinish" class="col-sm-3 control-label">Завершение услуги</label>
-        <div class="col-sm-3">
-            {{ form.datefinish }}
         </div>
     </div>
     <div class="form-group">

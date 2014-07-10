@@ -69,7 +69,8 @@ def feeds_ip_by_seg(request):
     if request.GET['id'] == '0':
         json_subcat = serializers.serialize("json", IPAddr.objects.none())
     else:
-        data = IPAddr.objects.filter(net__segment__pk=request.GET['id'])
+        # data = IPAddr.objects.filter(net__segment__pk=request.GET['id'])
+        data = IPAddr.objects.filter(net__segment__pk=request.GET['id']).filter(Q(service=None))|IPAddr.objects.filter(service__pk=request.GET['id'])
         json_subcat = serializers.serialize("json", data)
     return HttpResponse(json_subcat, mimetype="application/javascript")
 
@@ -128,6 +129,12 @@ def service_add(request, abonent_id="0", tos_id="0"):
 
 @login_required
 def service_status_change(request, abonent_id, service_id):
+    try:
+        abonent = Abonent.objects.get(pk=abonent_id)
+        service = Service.objects.get(pk=service_id)
+    except:
+        abonent, service = None 
+
     if request.method == 'POST':
         form = ServiceStatusChangesForm(request.POST)
         if form.is_valid(): 
@@ -135,16 +142,12 @@ def service_status_change(request, abonent_id, service_id):
             ssc.service = Service.objects.get(pk=service_id)
             ssc.laststatus = Service.objects.get(pk=service_id).status
             ssc.save()
+            return HttpResponseRedirect(reverse('services_history', args=[abonent_id, service_id]))
         else:
             print form.errors
     else:
         form = ServiceStatusChangesForm() 
         # form.fields['plan'].queryset=Plan.objects.filter(tos__pk=tos_id)
-    try:
-        abonent = Abonent.objects.get(pk=abonent_id)
-        service = Service.objects.get(pk=service_id)
-    except:
-        abonent, service = None    
 
     return render_to_response('service/service_status_changes.html', {
                                 'abonent' : abonent, 
@@ -212,6 +215,11 @@ def abonent_services(request, abonent_id):
                                 }, 
                                 context_instance = RequestContext(request))
 
+@login_required   
+def ssc_delete(request, abonent_id, service_id, ssc_id):
+    ServiceStatusChanges.objects.get(pk=ssc_id).delete()
+    return HttpResponseRedirect(reverse('services_history', args=[abonent_id, service_id]))
+
 @login_required    
 def service_history(request, abonent_id, service_id):
     try:
@@ -221,7 +229,7 @@ def service_history(request, abonent_id, service_id):
         abonent = None
         service = None
     sscs = ServiceStatusChanges.objects.filter(service__pk=service_id).order_by('-pk')
-    return render_to_response('service/history.html', { 'abonent' : abonent,  'sscs' : sscs, 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() }, context_instance = RequestContext(request))
+    return render_to_response('service/history.html', { 'abonent' : abonent, 'service' : service,  'sscs' : sscs, 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() }, context_instance = RequestContext(request))
 
 @login_required    
 def abonent_history(request, abonent_id):

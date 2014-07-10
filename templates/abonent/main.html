@@ -31,8 +31,10 @@
             {% include "includes/menu_item.html" with item_url='pays.views.promisedpays' item_title='Обещанный платеж' abonent=abonent request=request only %}            
 		</ul>
 		<br>
-   {% block pages %}
-	 {% endblock%}
+        {% block breadcrumb %}
+        {% endblock%}
+        {% block pages %}
+    	{% endblock%}
     </div>
 	</div>
 </div>

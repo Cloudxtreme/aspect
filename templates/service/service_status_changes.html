@@ -3,6 +3,15 @@
         {{ form.media }}
     {% endblock %}
 
+{% block breadcrumb %}
+        <ol class="breadcrumb">
+            <li><a href="{% url 'abonent_info' abonent.id %}">Абонент</a></li>
+            <li><a href="{% url 'users.views.abonent_services' abonent.id %}">Услуги</a></li>
+            <li><a href="{% url 'services_history' abonent.id service.id %}">История</a></li>
+            <li class="active">Изменение статуса</li>
+        </ol>
+{% endblock %}
+
 {% block pages %} 
 
 <h2>Изменение статуса услуги [{{ service.pk }}]</h2>     

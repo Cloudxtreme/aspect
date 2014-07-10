@@ -303,17 +303,29 @@ class Service(models.Model):
     user_device = models.ForeignKey(Device, related_name='user_device',verbose_name=u'Абонентское устройство', blank=True, null= True)
     bs_device = models.ForeignKey(Device, related_name='bs_device', verbose_name=u'Абонентская БС', blank=True, null= True)
 
-    def set_status(self,new_status):
-        ssc = ServiceStatusChanges(
-                    service=self,
-                    laststatus=self.status,
-                    newstatus=new_status,
-                    comment='Изменение статуса услуги',
-                    date=datetime.datetime.now()
-            )
-        self.status = new_status
-        self.save()
-        ssc.save()
+    def set_status(self, new_status, date=datetime.datetime.now(), create_entry=True):
+        if create_entry:
+            ssc = ServiceStatusChanges(
+                        service=self,
+                        laststatus=self.status,
+                        newstatus=new_status,
+                        comment='Изменение статуса услуги',
+                        date=date,
+                        done=True,
+                        successfully=True,
+                )
+            ssc.save()
+        else:
+            if not self.abon.status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE]:
+                return False
+
+        if self.status == new_status:
+            return False
+        else:
+            self.status = new_status if not new_status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE] else self.abon.status
+            self.save()
+            return True
+
 
     def stop(self):
         self.status = STATUS_ARCHIVED
