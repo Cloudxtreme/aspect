@@ -16,7 +16,7 @@ thismoment = datetime.now()
 for item in ServiceStatusChanges.objects.filter(date__lte=thismoment, done=False):
 	item.laststatus = item.service.status
 	item.done = True
-	item.successfully = item.service.set_status(item.newstatus, create_entry=False)
+	item.successfully = item.service.set_status(item.newstatus)
 	item.save()
 
 #Ищем запланирование смены статусов абонентов

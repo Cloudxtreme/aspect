@@ -160,20 +160,30 @@ class Abonent(models.Model):
     #         except Service.DoesNotExist:
     #             return None
     
+    # Перенос статуса абонента на услуги
     def set_changes(self,comment,old_status):
-            if self.status in [STATUS_ACTIVE, STATUS_PAUSED, STATUS_OUT_OF_BALANCE]:
-                for item in self.service_set.all():
-                    if item.status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE]:
-                        item.set_status(self.status)
-                        # item.status = self.status
-                        # item.save()
-            if self.status == STATUS_ARCHIVED:
-                for item in self.service_set.all():
-                    item.set_status(self.status)
-                    # item.status = self.status
-                    # item.save()
+            # if self.status in [STATUS_ACTIVE, STATUS_PAUSED, STATUS_OUT_OF_BALANCE]:
+            #     for item in self.service_set.all():
+            #         if item.status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE]:
+            #             # item.set_changestatus_in_plan(self.status)
+            #             # item.status = self.status
+            #             # item.save()
+            # if self.status == STATUS_ARCHIVED:
+            #     for item in self.service_set.all():
+            #         # item.set_changestatus_in_plan(self.status)
+            #         # item.status = self.status
+            #         # item.save()
 
             if old_status != self.status:
+                if self.status in [STATUS_ACTIVE, STATUS_PAUSED, STATUS_OUT_OF_BALANCE]:
+                    for item in self.service_set.all():
+                        if item.status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE]:
+                            item.set_changestatus_in_plan(self.status)
+                if self.status == STATUS_ARCHIVED:
+                    for item in self.service_set.all():
+                        item.set_changestatus_in_plan(self.status)
+                        
+                # Создаем запись об изменении статуса абонента        
                 asc = AbonentStatusChanges(
                     abonent=self,
                     laststatus=old_status,
@@ -183,6 +193,7 @@ class Abonent(models.Model):
                 )
                 asc.save()
 
+    # Проверка на положительность баланса
     def check_status(self, reason):
         old_status = self.status
         if self.status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE]:
@@ -303,10 +314,25 @@ class Service(models.Model):
     user_device = models.ForeignKey(Device, related_name='user_device',verbose_name=u'Абонентское устройство', blank=True, null= True)
     bs_device = models.ForeignKey(Device, related_name='bs_device', verbose_name=u'Абонентская БС', blank=True, null= True)
 
-    def set_status(self, new_status, date=datetime.datetime.now(), create_entry=True):
-        
+    def set_changestatus_in_plan(self, new_status, date=datetime.datetime.now()):
+        ssc = ServiceStatusChanges(
+                        service=self,
+                        laststatus=self.status,
+                        newstatus=new_status,
+                        comment='Изменение статуса услуги',
+                        date=date,
+                        # done=True,
+                        # successfully=True,
+                )
+        ssc.save()
+
+    def set_status(self, new_status, date=datetime.datetime.now()):
         if self.status == new_status:
             return False
+
+        if self.abon.status in [STATUS_ARCHIVED, STATUS_PAUSED, STATUS_NEW] and not new_status in [STATUS_ARCHIVED, STATUS_PAUSED, STATUS_NEW]:
+            return False
+
         else:
             if self.status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE] and new_status in [STATUS_ARCHIVED, STATUS_PAUSED, STATUS_NEW]:
                 self.stop(newstatus=new_status)
@@ -314,26 +340,7 @@ class Service(models.Model):
                 self.start(newstatus=new_status)
             self.status = new_status if not new_status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE] else self.abon.status
             self.save()
-            
-        if create_entry:
-            ssc = ServiceStatusChanges(
-                        service=self,
-                        laststatus=self.status,
-                        newstatus=new_status,
-                        comment='Изменение статуса услуги',
-                        date=date,
-                        done=True,
-                        successfully=True,
-                )
-            ssc.save()
-        else:
-            if not self.abon.status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE]:
-                return False
-
-        return True
-
-
-
+            return True
 
     def stop(self, newstatus=STATUS_ARCHIVED):
         self.status = newstatus
