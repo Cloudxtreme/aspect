@@ -32,7 +32,7 @@ def add_promisedpay(request, abonent_id):
 			promisedpay.save()
 			return HttpResponseRedirect(reverse('promisedpays', args=[abonent_id]))
 	else:
-		form = PromisedPayForm(initial={'summ': abs(0 - abonent.balance) })
+		form = PromisedPayForm(initial={'summ': round(abs(0 - abonent.balance),2) })
 	return render(request, 'abonent/add_promisedpay.html', {'form': form, 'abonent' : abonent})
 
 @login_required

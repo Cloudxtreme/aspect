@@ -182,7 +182,7 @@ class Abonent(models.Model):
                 if self.status == STATUS_ARCHIVED:
                     for item in self.service_set.all():
                         item.set_changestatus_in_plan(self.status)
-                        
+
                 # Создаем запись об изменении статуса абонента        
                 asc = AbonentStatusChanges(
                     abonent=self,
@@ -317,7 +317,7 @@ class Service(models.Model):
     def set_changestatus_in_plan(self, new_status, date=datetime.datetime.now()):
         ssc = ServiceStatusChanges(
                         service=self,
-                        laststatus=self.status,
+                        # laststatus=self.status,
                         newstatus=new_status,
                         comment='Изменение статуса услуги',
                         date=date,
