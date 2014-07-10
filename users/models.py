@@ -304,6 +304,17 @@ class Service(models.Model):
     bs_device = models.ForeignKey(Device, related_name='bs_device', verbose_name=u'Абонентская БС', blank=True, null= True)
 
     def set_status(self, new_status, date=datetime.datetime.now(), create_entry=True):
+        
+        if self.status == new_status:
+            return False
+        else:
+            if self.status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE] and new_status in [STATUS_ARCHIVED, STATUS_PAUSED, STATUS_NEW]:
+                self.stop(newstatus=new_status)
+            elif self.status in [STATUS_ARCHIVED, STATUS_PAUSED, STATUS_NEW] and new_status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE]:
+                self.start(newstatus=new_status)
+            self.status = new_status if not new_status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE] else self.abon.status
+            self.save()
+            
         if create_entry:
             ssc = ServiceStatusChanges(
                         service=self,
@@ -319,16 +330,13 @@ class Service(models.Model):
             if not self.abon.status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE]:
                 return False
 
-        if self.status == new_status:
-            return False
-        else:
-            self.status = new_status if not new_status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE] else self.abon.status
-            self.save()
-            return True
+        return True
 
 
-    def stop(self):
-        self.status = STATUS_ARCHIVED
+
+
+    def stop(self, newstatus=STATUS_ARCHIVED):
+        self.status = newstatus
         today = datetime.datetime.today()
         qty_days = calendar.mdays[today.month]
         summ = round(self.plan.price * (qty_days - today.day)/qty_days,2)
@@ -338,8 +346,8 @@ class Service(models.Model):
             payment.save()
         self.save()
 
-    def start(self):
-        self.status = STATUS_ACTIVE
+    def start(self, newstatus=STATUS_ACTIVE):
+        self.status = newstatus
         today = datetime.datetime.today()
         qty_days = calendar.mdays[today.month]
         summ = round(self.plan.price * (qty_days - today.day + 1)/qty_days,2)
@@ -350,11 +358,7 @@ class Service(models.Model):
         write_off.save()
 
     def save(self, force_insert=False, force_update=False):
-        # Списываем плату за установку
-        if not self.pk:
-            wot = pays.models.WriteOffType.objects.get(title=u'Инсталляция')
-            write_off = pays.models.WriteOff(abonent=self.abon, service=self, wot=wot,summ=self.plan.install_price, date=datetime.datetime.now(), comment=u'Подключение услуги [%s]' % (self.plan.title))
-            write_off.save()
+        is_new = True if not self.pk else False
         if self.mac:
              self.mac.translate(':,.,-').upper().strip()
         # Проверяем не поменялся ли тарифный план
@@ -375,6 +379,11 @@ class Service(models.Model):
                 super(Service, self).save(update_fields=['datefinish','status'])
         else:
             super(Service, self).save(force_insert=False, force_update=False)
+            # Списываем плату за установку
+            if is_new:
+                wot = pays.models.WriteOffType.objects.get(title=u'Инсталляция')
+                write_off = pays.models.WriteOff(abonent=self.abon, service=self, wot=wot,summ=self.plan.install_price, date=datetime.datetime.now(), comment=u'Подключение услуги [%s]' % (self.plan.title))
+                write_off.save()
 
     class Meta:
         verbose_name = u'Услуга'
