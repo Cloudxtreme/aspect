@@ -3,3 +3,7 @@ import1cdb.py
 my.cnf
 build/
 apache/
+promised_pays.py 
+send_email.py 
+statuses_changes.py 
+monthly_fee.py
