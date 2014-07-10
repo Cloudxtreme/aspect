@@ -32,7 +32,7 @@
             <td>{{ abonent.title }}
             <small>{{ abonent.get_utype_display }}</small></td>
             <td></td>
-            <td>{{ abonent.balance }} руб.</td>
+            <td>{{ abonent.balance|floatformat:2 }} руб.</td>
             <td class={{ abonent.status|get_color }}>{{ abonent.get_status_display }}</td>
         </tr>
         {% endfor %}
