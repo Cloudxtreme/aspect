@@ -18,8 +18,8 @@ for item in PromisedPays.objects.filter(datefinish__lte=thismoment):
 	if item.pay_onaccount:
 		item.close()
 
-for item in Service.objects.filter(datestart__lte=thismoment, status=STATUS_NEW):
-	item.start()
+# for item in Service.objects.filter(datestart__lte=thismoment, status=STATUS_NEW):
+# 	item.start()
 
-for item in Service.objects.filter(datefinish__lte=thismoment).exclude(status=STATUS_ARCHIVE):
-	item.stop()
+# for item in Service.objects.filter(datefinish__lte=thismoment).exclude(status=STATUS_ARCHIVE):
+# 	item.stop()

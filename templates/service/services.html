@@ -34,6 +34,7 @@
             <th>Параметры</th>
             <th>Статус</th>
             <th></th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -68,11 +69,11 @@
             </td>
             <td>
 
-                <a href="{% url 'users.views.service_history' abonent.id service.id %}" role="button" class="btn btn-warning btn-xm pull-right">
+                <a href="{% url 'users.views.service_history' abonent.id service.id %}" role="button" class="btn btn-warning btn-xm pull-right">История
                 <span class="glyphicon glyphicon-list"></span></a>
             </td>
             <td>
-                <a href="{% url 'users.views.service_edit' abonent.id service.id %}" role="button" class="btn btn-primary btn-xm pull-right">
+                <a href="{% url 'users.views.service_edit' abonent.id service.id %}" role="button" class="btn btn-primary btn-xm pull-right">Изменить
                 <span class="glyphicon glyphicon-cog"></span></a>
 
             </td>
