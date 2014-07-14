@@ -10,7 +10,7 @@ from django.core import serializers
 # from django.views.decorators.csrf import csrf_exempt, csrf_protect
 # from django.core.context_processors import csrf
 from django.template import RequestContext
-from users.forms import  ServiceForm, SearchForm, LoginForm, PassportForm, DetailForm, ManageForm
+from users.forms import  ServiceForm, SearchForm, LoginForm, PassportForm, DetailForm, ManageForm, AbonentForm
 from journaling.forms import ServiceStatusChangesForm
 # from vlans.forms import LocationForm
 from users.models import Abonent, Service, TypeOfService, Plan, Passport, Detail
@@ -84,6 +84,48 @@ def feeds_ip_by_seg(request):
 #     else:
 #         form = SearchForm() # An unbound form
 #         return render_to_response('asearch.html', {'form': form} )
+
+@login_required
+def abonent_add(request,abonent_id=0):
+    if abonent_id != '0' :
+        message = u'Изменение параметров абонента [%s]' % (abonent_id)
+        new = False
+        try:
+            abonent = Abonent.objects.get(pk = abonent_id)
+        except:
+            abonent = Abonent()
+    else:
+        message = u'Добавление нового абонента'
+        new = True
+        abonent = Abonent()
+
+    if request.method == 'POST':
+        form = AbonentForm(request.POST, instance=abonent)
+        if form.is_valid():
+            newabonent = form.save()
+            # form.save(commit=False)
+            # service.abon=abonent
+            # service.save()
+            return HttpResponseRedirect(reverse('abonent_info', args=[newabonent.pk]))
+        else:
+            print form.errors
+    else:
+        form = AbonentForm(instance=abonent)
+        # form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk,service=None)
+        # if not new:
+        #     form.fields['plan'].queryset=Plan.objects.filter(tos__pk=service.plan.tos.pk)
+        #     form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk).filter(Q(service=None))|IPAddr.objects.filter(service__pk=service.pk)
+        # else:
+        #     form.fields['plan'].queryset=Plan.objects.none()
+        #     form.fields['ip'].queryset=IPAddr.objects.none()
+
+    return render_to_response('abonent/add.html', {
+                                'form': form,
+                                'message': message,
+                                'new': new,
+                                'abonent' : abonent},
+                                context_instance = RequestContext(request)
+                                )  
 
 @login_required
 def abonent_search(request):
@@ -258,7 +300,7 @@ def abonent_manage(request, abonent_id):
                                 'abonent' : abonent, 
                                 'form': form, 
                                 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() },
-                              context_instance = RequestContext(request))
+                                 context_instance = RequestContext(request))
 
 @login_required    
 def abonent_info(request, abonent_id):
@@ -268,6 +310,7 @@ def abonent_info(request, abonent_id):
         abonent = None
         info = None
         template = 'deadend.html'
+        form = PassportForm()
     else:
         if abonent.utype == 'F':
             info, created = Passport.objects.get_or_create(abonent__pk=abonent.pk, defaults={'abonent':abonent, 'series':'', 'number' : '', 'issued_by' : '', 'date' : datetime.datetime.now(), 'address' : '' })

@@ -10,6 +10,17 @@ class ContactForm(forms.ModelForm):
         model = Contact
 #        exclude = ('contact')JSONWidget
 
+class AbonentForm(forms.ModelForm):
+    class Meta:
+        model = Abonent
+        fields = ['title', 'contract', 'is_credit', 'utype']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ФИО или название'}),
+            'contract': forms.TextInput(attrs={'class': 'form-control',  'placeholder': 'Номер договора' }),
+            'is_credit': forms.Select(attrs={'class': 'form-control', }),
+            'utype': forms.Select(attrs={'class': 'form-control', }),
+        }
+
 class ManageForm(forms.ModelForm):
     class Meta:
         model = Abonent

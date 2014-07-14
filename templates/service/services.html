@@ -87,6 +87,7 @@
     </div>
 {% else %}
     <h3 class="sub-header">Услуги не найдены</h3>
+    <a href="{% url 'users.views.service_edit' abonent.id 0 %}" class="btn btn-success">Добавить услугу</a>
 {% endif %}
 
 {% endblock %}
