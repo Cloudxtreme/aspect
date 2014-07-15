@@ -19,7 +19,10 @@
 	      <div class="panel-body">
 			<ul class="list-group">
 				{% for ip in net.ipaddr_set.all %}
-			  	<li class="list-group-item">{{ ip.ip }}</li>
+			  	<li class="list-group-item">
+			  		{% url 'abonent_services' ip.service.abon.pk  as service_url %}
+			  		{{ ip.ip }} <a class='pull-right' href="{{ service_url }}">{{ ip.service.abon }}</a>
+			  	</li>
 			  	{% endfor %}
 			</ul>	      	
 	      </div>
