@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*- 
 from django.db import models
+from users.models import Abonent
 # from django.utils.translation import ugettext_lazy as _
 
 class Contact(models.Model):
+    abonent = models.ForeignKey(Abonent, verbose_name=u'Абонент',blank=True, null=True)
     surname = models.CharField(u'Фамилия', max_length=50,blank=True, null=True)
     first_name = models.CharField(u'Имя', max_length=50,blank=True, null=True)
     second_name = models.CharField(u'Отчество', max_length=50,blank=True, null=True)

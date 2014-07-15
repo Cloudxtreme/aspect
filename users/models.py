@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from vlans.models import IPAddr, Vlan, Node, Device
-from contacts.models import Contact
+# from contacts.models import Contact
 from journaling.models import AbonentStatusChanges, ServiceStatusChanges
 from django.core.validators import RegexValidator
 from users.fields import JSONField
@@ -138,7 +138,7 @@ class Abonent(models.Model):
     )
     title = models.CharField(u'Название', max_length=70)
     contract = models.CharField(u'Номер договора',max_length=15,blank=True, null=True)
-    contact = models.ManyToManyField(Contact,blank=True)
+    # contact = models.ManyToManyField('contacts.Contact', blank=True)
     status = models.CharField(u'Статус',max_length=1, choices=STATUSES, default=STATUS_NEW)
     utype = models.CharField(u'Тип абонента', max_length=1, choices=U_TYPE)
     is_credit = models.CharField(u'Тип оплаты', max_length=1, choices=PAYTYPE)

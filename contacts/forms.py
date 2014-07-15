@@ -7,7 +7,7 @@ class ContactModelForm( forms.ModelForm ):
         model = Contact
     
     def __init__(self, *args, **kwargs):
-        super(NoteModelForm, self).__init__(*args, **kwargs)
+        super(ContactModelForm, self).__init__(*args, **kwargs)
         # adding css classes to widgets without define the fields:
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'

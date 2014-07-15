@@ -28,12 +28,10 @@
             <th>#</th>
             <th>Сегмент</th>
             <th>Начало</th>
-            <th>Окончание</th>
             <th>Тариф</th>
             <th>Скорость</th>
             <th>Параметры</th>
             <th>Статус</th>
-            <th></th>
             <th></th>
           </tr>
         </thead>
@@ -43,7 +41,6 @@
             <td>[{{ service.pk }}]</td>
             <td>{{ service.segment.title }}</td>
             <td>{{ service.datestart }}</td>
-            <td>{% if service.datefinish %}{{ service.datefinish }}{% endif %}</td>
             <td>
                 {{ service.plan.title }} - {{ service.plan.price }} руб/мес
                 <p><small>{{ service.tos }}</small></p>
@@ -68,14 +65,12 @@
                 {% endifequal %}
             </td>
             <td>
-
-                <a href="{% url 'users.views.service_history' abonent.id service.id %}" role="button" class="btn btn-warning btn-xm pull-right">История
-                <span class="glyphicon glyphicon-list"></span></a>
-            </td>
-            <td>
-                <a href="{% url 'users.views.service_edit' abonent.id service.id %}" role="button" class="btn btn-primary btn-xm pull-right">Изменить
-                <span class="glyphicon glyphicon-cog"></span></a>
-
+                <div class="btn-group">
+                    <a href="{% url 'users.views.service_history' abonent.id service.id %}" role="button" class="btn btn-warning btn-xm ">
+                    <span class="glyphicon glyphicon-list"></span></a>
+                    <a href="{% url 'users.views.service_edit' abonent.id service.id %}" role="button" class="btn btn-primary btn-xm ">
+                    <span class="glyphicon glyphicon-cog"></span></a>
+                </div>
             </td>
         </tr>
         {% endfor %}

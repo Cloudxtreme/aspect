@@ -1,14 +1,14 @@
 ﻿from django import forms
 from django.contrib.auth import authenticate
-from users.models import Contact, Abonent, Service, Plan, TypeOfService, Segment, Agent, Passport, Detail
+from users.models import Abonent, Service, Plan, TypeOfService, Segment, Agent, Passport, Detail
 from users.fields import JSONWidget
 from bootstrap3_datetime.widgets import DateTimePicker
 from django.forms.extras.widgets import SelectDateWidget
 
-class ContactForm(forms.ModelForm):
-    class Meta:
-        model = Contact
-#        exclude = ('contact')JSONWidget
+# class ContactForm(forms.ModelForm):
+#     class Meta:
+#         model = Contact
+# #        exclude = ('contact')JSONWidget
 
 class AbonentForm(forms.ModelForm):
     class Meta:
