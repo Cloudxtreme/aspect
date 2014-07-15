@@ -29,7 +29,7 @@
             {% include "includes/menu_item.html" with item_url='users.views.abonent_tts' item_title='Обращения' abonent=abonent request=request only %}
             {% include "includes/menu_item.html" with item_url='users.views.abonent_history' item_title='История' abonent=abonent request=request only %}
             {% include "includes/menu_item.html" with item_url='pays.views.promisedpays' item_title='Обещанный платеж' abonent=abonent request=request only %}
-            {% include "includes/menu_item.html" with item_url='contacts_all' item_title='Контакты' abonent=abonent request=request only %}             
+            {% include "includes/menu_item.html" with item_url='contact.views.contacts_all' item_title='Контакты' abonent=abonent request=request only %}
 		</ul>
 		<br>
         {% block breadcrumb %}
