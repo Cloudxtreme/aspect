@@ -48,9 +48,9 @@
             <td><small>{{ contact.address }}</small></td>
             <td>
                 <div class="btn-group">
-                    <a href="{% url 'contact_edit' abonent.id contact.id %}" role="button" class="btn btn-primary btn-xm ">
+                    <a href="{% url 'contact_edit' abonent.id contact.id %}" role="button" class="btn btn-primary btn-xm" data-toggle="tooltip" data-placement="left" title="Редактировать">
                     <span class="glyphicon glyphicon-cog"></span></a>
-                    <a href="{% url 'contact_del' abonent.id contact.id %}" role="button" class="btn btn-danger btn-xm ">
+                    <a href="{% url 'contact_del' abonent.id contact.id %}" role="button" class="btn btn-danger btn-xm" data-toggle="tooltip" data-placement="left" title="Удалить">
                     <span class="glyphicon glyphicon-remove"></span></a>
                 </div>
             </td>

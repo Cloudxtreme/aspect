@@ -311,7 +311,7 @@ class Service(models.Model):
     address = models.CharField(u'Адрес', blank=True, null= True, max_length=100)
     # location = models.ForeignKey(Node, verbose_name=u'Местонахождение')
     datestart = models.DateField(auto_now=False, auto_now_add=False, default=datetime.datetime.now(), verbose_name=u'Дата начала')
-    datefinish = models.DateField(auto_now=False, auto_now_add=False,blank=True, null= True, verbose_name=u'Дата окончания')
+    datefinish = models.DateField(auto_now=False, auto_now_add=False, blank=True, null= True, verbose_name=u'Дата окончания')
     user_device = models.ForeignKey(Device, related_name='user_device',verbose_name=u'Абонентское устройство', blank=True, null= True)
     bs_device = models.ForeignKey(Device, related_name='bs_device', verbose_name=u'Абонентская БС', blank=True, null= True)
 
