@@ -9,7 +9,7 @@ from notice.models import EmailMessage
 # from django.utils import timezone
 
 PAYS_PREFIX = u''
-WRITEOFF_PREFIX = u'TEST-'
+WRITEOFF_PREFIX = u''
 
 class PaymentSystem(models.Model):
     title = models.CharField(max_length=200)
