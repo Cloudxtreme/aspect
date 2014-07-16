@@ -14,7 +14,7 @@
 <div class="page-header">
     <h2 class="sub-header">Найдено абонентов: {{ abonents.count }}</h2>
 </div>
-<div class="col-lg-10">
+<div class="col-lg-12">
         <table class="table table-striped table-hover">
         <thead>
           <tr>
@@ -30,7 +30,7 @@
         <tr class='clickableRow' href="{% url 'abonent_info' abonent.id %}">
             <td>{{ abonent.contract }}</td>
             <td>{{ abonent.title }}
-            <small>{{ abonent.get_utype_display }}</small></td>
+            <p><small>{{ abonent.get_utype_display }}</small><p></td>
             <td></td>
             <td>{{ abonent.balance|floatformat:2 }} руб.</td>
             <td class={{ abonent.status|get_color }}>{{ abonent.get_status_display }}</td>

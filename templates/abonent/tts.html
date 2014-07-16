@@ -36,5 +36,11 @@
 {% else %}
 	<h3 class="sub-header">Обращений не было</h3>
 {% endif %}        
-
+<div class="row">
+        <div class="col-xs-3 pull-right">
+            <a href="{% url 'addpromisedpay' abonent.id %}" class="btn btn-primary btn-xm" role="button">
+                Создать обращение
+            </a>
+        </div>
+</div>   
 {% endblock %}
