@@ -26,7 +26,7 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>Сегмент</th>
+            <th>Адрес</th>
             <th>Начало</th>
             <th>Тариф</th>
             <th>Скорость</th>
@@ -39,7 +39,10 @@
         {% for service in services %}
         <tr id="tr-{{ service.pk }}" {% ifequal service.status 'D' %} class="active" style=" display:none" {% endifequal %}>
             <td>[{{ service.pk }}]</td>
-            <td>{{ service.segment.title }}</td>
+            <td>
+                <p>{{ service.address }}</p>
+                <small>{{ service.segment.title }}</small>
+            </td>
             <td>{{ service.datestart }}</td>
             <td>
                 {{ service.plan.title }} - {{ service.plan.price }} руб/мес
