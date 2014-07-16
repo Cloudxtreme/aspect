@@ -58,8 +58,13 @@
                 {% endif %}
             {% endif %}
             </td>
-            <td><p>{{ service.ip.ip }}</p> 
-                <p>{{ service.mac }}</p></td>
+            <td>
+                <p>{{ service.ip.ip }}</p> 
+                <p>{{ service.mac }}</p>
+                {% if service.vlan %}
+                    <p>vlan{{ service.vlan.number }}</p>
+                {% endif %} 
+            </td>
             <td>
                 {% ifequal service.adm_status '0' %}
                     {{ service.get_status_display }}

@@ -65,7 +65,7 @@ class Plan(models.Model):
         verbose_name_plural = u'Тарифные планы'
 
     def __unicode__(self):
-        return u"%s - %s руб/мес" % (self.title, self.price)
+        return u"%s %s - %s руб/мес" % (self.tos, self.title, self.price)
 
 # class Contact(models.Model):
 #     surname = models.CharField(u'Фамилия', max_length=50,blank=True, null=True)
@@ -301,6 +301,7 @@ class Service(models.Model):
     segment = models.ForeignKey(Segment,verbose_name=u'Сегмент')
     plan = models.ForeignKey(Plan,verbose_name=u'Тарифный план')
     ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', blank=True, null= True)
+    vlan = models.OneToOneField(Vlan, verbose_name=u'Vlan', blank=True, null= True)
     adm_status = models.CharField(u'Административный статус', max_length=1, choices=ADM_STATUSES, default=STATUS_NEW)
     speed_in = models.PositiveIntegerField(default=0, blank=True, null=True)
     speed_out = models.PositiveIntegerField(default=0, blank=True, null=True)
