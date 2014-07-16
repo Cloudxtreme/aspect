@@ -40,8 +40,8 @@
         <tr id="tr-{{ service.pk }}" {% ifequal service.status 'D' %} class="active" style=" display:none" {% endifequal %}>
             <td>[{{ service.pk }}]</td>
             <td>
-                <p>{{ service.address }}</p>
-                <small>{{ service.segment.title }}</small>
+                {{ service.address }}
+                <p><small>{{ service.segment.title }}</small></p>
             </td>
             <td>{{ service.datestart }}</td>
             <td>

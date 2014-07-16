@@ -28,7 +28,6 @@
             $("#id_ip").attr('selected', 'selected');
         });
         $("#saveSpeed").click(function () {
-
         });
         $("#editSpeed").click(function () {
             $("#id_speed_in").attr('disabled', false);
@@ -101,7 +100,6 @@
             {{ form.speed_out }}
         </div>
         <a id="editSpeed" class="btn btn-warning">Изменить <span class="glyphicon glyphicon-edit"></span></a>
-        <a id="saveSpeed" class="btn btn-primary" style="display: none;">Сохранить <span class="glyphicon glyphicon-"></span></a>
     </div>
 
     <div class="form-group">
@@ -128,7 +126,7 @@
     </div>
     <div class="form-group">
         <label for="id_status" class="col-sm-3 control-label">Адрес</label>
-        <div class="col-sm-4">
+        <div class="col-sm-6">
             {{ form.address }}
         </div>
     </div>
