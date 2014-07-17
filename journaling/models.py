@@ -1,6 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 from django.db import models
-from vlans.models import Device
+from devices.models import Device
 from datetime import datetime
 # import datetime
 

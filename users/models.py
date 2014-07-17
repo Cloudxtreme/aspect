@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.db import models
-from vlans.models import IPAddr, Vlan, Node, Device
+from vlans.models import IPAddr, Vlan, Node 
+from devices.models import Device
 # from contacts.models import Contact
 from journaling.models import AbonentStatusChanges, ServiceStatusChanges
 from django.core.validators import RegexValidator

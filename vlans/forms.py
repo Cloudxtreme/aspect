@@ -1,5 +1,5 @@
 from django import forms
-from vlans.models import Node, Device
+from vlans.models import Node
 from vlans.widgets import LocationWidget
 
 class LocationForm(forms.ModelForm):

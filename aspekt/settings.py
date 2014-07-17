@@ -46,6 +46,7 @@ INSTALLED_APPS = (
     'bootstrap3_datetime',
     'notice',
     'contacts',
+    'devices',
 )
 
 MIDDLEWARE_CLASSES = (
