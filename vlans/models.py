@@ -5,13 +5,6 @@ from django.core.exceptions import ValidationError
 
 # Create your models here.
 
-TYPE_OF_SUPPLY = (
-    ('5V', '5V'),
-    ('12V', '12V'),
-    ('24V', '24V'),
-    ('220V', '220V'),
- )
-
 TYPE_OF_OBJECTS = (
     ('C', 'Клиент'),
     ('B', 'Базовая Станция'),
@@ -41,7 +34,7 @@ class Vlan(models.Model):
         verbose_name_plural = _('Vlans')
 
     def __unicode__(self):
-        return "%s - %s" % (self.number, self.title)
+        return "%s - %s" % (self.number, self.description)
 
 class Node(models.Model):
     title  = models.CharField(max_length=100)
@@ -72,18 +65,18 @@ class Node(models.Model):
 #     def __unicode__(self):
 #         return "%s - %s" % (self.vendor, self.model)
 
-# def dec2ip(ip):
-#      return '.'.join([str((ip >> 8 * i) & 255) for i in range(3, -1, -1)])
+def dec2ip(ip):
+     return '.'.join([str((ip >> 8 * i) & 255) for i in range(3, -1, -1)])
 
-# def ip2dec(ip):
-#     return sum([int(q) << i * 8 for i, q in enumerate(reversed(ip.split(".")))])
+def ip2dec(ip):
+    return sum([int(q) << i * 8 for i, q in enumerate(reversed(ip.split(".")))])
 
-# def calcnet(net, mask):
-#     mask1 = mask + 1
-#     net1 = dec2ip(ip2dec(net)+pow(2,31-mask))
-#     if mask >= 29:
-#         return (net,mask1),(net1,mask1)
-#     return ((net,mask1),(net1,mask1), calcnet(net,mask1),calcnet(net1,mask1))
+def calcnet(net, mask):
+    mask1 = mask + 1
+    net1 = dec2ip(ip2dec(net)+pow(2,31-mask))
+    if mask >= 29:
+        return (net,mask1),(net1,mask1)
+    return ((net,mask1),(net1,mask1), calcnet(net,mask1),calcnet(net1,mask1))
 
 class Network(models.Model):
     # TYPE_OF_NETS= (

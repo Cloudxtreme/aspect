@@ -1,38 +1,64 @@
 {% extends "index.html" %}
+{% block script %}
+    <script type="text/javascript">
+    $(function(){
+        $('.panel-collapse').on('show.bs.collapse', function (){
+        	var spin = '#spinner' + $(this).attr('val');
+        	var lstgroup = '#list-group' + $(this).attr('val');
+        	$(spin).show();
+            $.getJSON("/ajax/get_ip/",{id:+$(this).attr('val')}, function(j) {
+                var options = '';
+                for (var i = 0; i < j.length; i++) {
+                options += '<li class="list-group-item">' + j[i].fields['ip'] + '</li>';
+                }
+	                $(lstgroup).html(options);
+	                $(spin).hide();
+                });
+        });
+    })
+    </script>
+
+{% endblock %}
+
 {% block main %} 
-{% if ip_list %}
 <div class="page-header">
 	<h2 class="sub-header">Управление адресами</h2>
 </div>
-<div class="col-md-8">
+<div class="col-md-3">
+<ul class="nav nav-pills nav-stacked">
+	{% for item in parent_nets %}
+		{% url 'ips' item.id as target_url %}
+		<li {% if request.META.PATH_INFO ==  target_url%} class="active"{% endif %}><a href="{{ target_url }}">{{ item }}</a></li>
+	{% endfor %}
+</ul>
+</div>
+<div class="col-md-9">
+
+
 	<div class="panel-group" id="accordion">
 	{% for net in net_list %}
 	  <div class="panel panel-default">
 	    <div class="panel-heading">
 	      <h4 class="panel-title">
 	        <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{net.pk}}">
-	          {{ net.ip }}/{{ net.mask }} - {{ net.vlan.title }} <span class="badge pull-right">vlan {{ net.vlan.number }}</span>
-	        </a>
+	          {{ net.ip }}/{{ net.mask }} - {{ net.vlan.description }} <span class="badge pull-right">vlan {{ net.vlan.number }}</span>
+	        </a>&nbsp;
+			<img id="spinner{{net.pk}}" style="display:none;" src="/media/images/spinner2.gif" alt="Loading"/>
 	      </h4>
 	    </div>
-	    <div id="collapse{{net.pk}}" class="panel-collapse collapse">
+	    <div id="collapse{{net.pk}}" class="panel-collapse collapse" val="{{net.pk}}">
 	      <div class="panel-body">
-			<ul class="list-group">
-				{% for ip in net.ipaddr_set.all %}
-			  	<li class="list-group-item">
-			  		{% url 'abonent_services' ip.service.abon.pk  as service_url %}
-			  		{{ ip.ip }} <a class='pull-right' href="{{ service_url }}">{{ ip.service.abon }}</a>
-			  	</li>
-			  	{% endfor %}
+			<ul id="list-group{{net.pk}}" class="list-group">
+			<!-- Сюда подгружается список IP адресов через ajax-->
 			</ul>	      	
 	      </div>
 	    </div>
 	  </div>
 	{% endfor %}
 	</div>
+
+
 </div>
-{% else %}
-<h2 class="sub-header">IP-адреса не найдены</h2>
-{% endif %}
+
 
 {% endblock %}
