@@ -22,7 +22,6 @@
             <td>{{ tt.solve_date|date:'Y-M-d' }}</td>
             <td>{{ tt.category }}</td>
             <td>
-                <small>
                 <p>{{ tt.create_date|date:'Y-M-d H:i' }} {{ tt.performer.get_full_name }}</p>
                 <p>{{ tt.description }}</p>
                 {% for ttc in tt.troubleticketcomment_set.all %}
@@ -30,7 +29,6 @@
                 <p>{{ ttc.create_date|date:'Y-M-d H:i' }} {{ ttc.author.get_full_name }}</p>
                 <p>{{ ttc.comment }}</p>
                 {% endfor %}
-                </small>
             </td>
             <td>
                 <div class="btn-group">
