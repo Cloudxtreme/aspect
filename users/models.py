@@ -289,7 +289,6 @@ class Detail(models.Model):
     def __unicode__(self):
         return "%s - %s" % (self.title, self.inn)
 
- 
 class Service(models.Model):
     ADM_STATUSES = (
         ('0', 'По состоянию'),

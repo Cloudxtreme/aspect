@@ -8,8 +8,10 @@
           <tr>
             <th>Номер</th>
             <th>Дата создания</th>
+            <th>Дата решения</th>
             <th>Категория</th>
             <th>Комментарии</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -17,6 +19,7 @@
 		<tr>
             <td>{{ tt.number }}</td>
             <td>{{ tt.create_date|date:'Y-M-d' }}</td>
+            <td>{{ tt.solve_date|date:'Y-M-d' }}</td>
             <td>{{ tt.category }}</td>
             <td>
                 <small>
@@ -29,6 +32,12 @@
                 {% endfor %}
                 </small>
             </td>
+            <td>
+                <div class="btn-group">
+                    <a href="{% url 'tt_add' abonent.id tt.id %}" role="button" class="btn btn-primary btn-xm ">
+                    <span class="glyphicon glyphicon-cog"></span></a>
+                </div>
+            </td>
         </tr>
 		{% endfor %}
 		</tbody>
@@ -37,10 +46,8 @@
 	<h3 class="sub-header">Обращений не было</h3>
 {% endif %}        
 <div class="row">
-        <div class="col-xs-3 pull-right">
-            <a href="{% url 'addpromisedpay' abonent.id %}" class="btn btn-primary btn-xm" role="button">
-                Создать обращение
-            </a>
-        </div>
+    <a href="{% url 'tt_add' abonent.id 0 %}" class="btn btn-primary btn-xm" role="button">
+        Создать обращение
+    </a>
 </div>   
 {% endblock %}

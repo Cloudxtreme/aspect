@@ -20,8 +20,8 @@ def get_ip(request):
     if request.GET['id'] == '0':
         json_subcat = serializers.serialize("json", IPAddr.objects.none())
     else:
-        data = IPAddr.objects.filter(net__pk=request.GET['id'])
-        json_subcat = serializers.serialize("json", data)
+        # data = IPAddr.objects.filter(net__pk=request.GET['id'])
+        json_subcat = serializers.serialize("json", IPAddr.objects.filter(net__pk=request.GET['id']), indent=3, relations=('service',))
     return HttpResponse(json_subcat, mimetype="application/javascript")
 
 def vlans_all(request):

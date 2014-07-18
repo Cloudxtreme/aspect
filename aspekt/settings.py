@@ -154,6 +154,10 @@ TEMPLATE_DIRS = (
 
 # STATIC = ''
 
+SERIALIZATION_MODULES = {
+    'json': 'wadofstuff.django.serializers.json'
+}
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 STATIC_URL = '/static/'

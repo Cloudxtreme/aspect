@@ -4,7 +4,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from users.models import Abonent
 
-TT_PREFIX = u'АСП-'
+TT_PREFIX = u''
 
 class TroubleTicketCategory(models.Model):
     title = models.CharField(u'Название', max_length=30)
@@ -23,7 +23,7 @@ class TroubleTicket(models.Model):
         if no == None:
             return '1'
         else:
-            return TT_PREFIX + u'%s' % (no + 1)
+            return TT_PREFIX + u'%06d' % (no + 1)
 
     abonent = models.ForeignKey(Abonent, verbose_name=u'Абонент')
     number = models.CharField(u'Номер', max_length=30, default=getnumber, unique=True)
