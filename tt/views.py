@@ -44,6 +44,9 @@ def tt_add(request, abonent_id, tt_id):
                                 )  
 
 @login_required
-def tt_all(request):
-    tt_list = TroubleTicket.objects.filter(solve_date=None)
+def tt_all(request, performer_id):
+    if performer_id == '0':
+        tt_list = TroubleTicket.objects.filter(solve_date=None)
+    else:
+        tt_list = TroubleTicket.objects.filter(solve_date=None,performer__pk=performer_id)
     return render_to_response('tt/tt_list.html', { 'tt_list': tt_list, }, context_instance = RequestContext(request))

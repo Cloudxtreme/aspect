@@ -67,7 +67,7 @@
                 </ul>
             </li>
             <li><a href={% url "notes.views.notes_all" %}>Заметки</a></li>
-            <li><a href={% url 'tt_all' %}>TT <span class="badge">{{ open_tt|default:"0" }}</span></a></li>
+            <li><a href={% url 'tt_all' 0 %}>TT <span class="badge">{{ open_tt|default:"0" }}</span></a></li>
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Ресурсы <b class="caret"></b></a>
                 <ul class="dropdown-menu">
@@ -81,6 +81,7 @@
                 <a href='#' class="dropdown-toggle" data-toggle="dropdown" id="dropdownMenu2">
                 <span class="glyphicon glyphicon-user"></span>  {{ user.get_full_name }}  <b class="caret"></b></a>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                    <li><a href={% url 'tt_all' user.pk %}>Мои TT <span class="badge">{{ my_tt|default:"0" }}</span></a></li>
                     <li><a href={% url "users.views.log_out" %}><span class="glyphicon glyphicon-log-out"></span> Выход</a></li>
                 </ul>
             </li>
