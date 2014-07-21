@@ -28,8 +28,8 @@
         {% for tt in tt_list %}
             <div class="panel panel-default">
                 <div class="panel-heading"><span class="badge">{{ tt.number }}</span> от {{ tt.create_date}} 
-                    <a href="{% url 'tt_add' tt.abonent.pk tt.pk %}" type="button" class="btn btn-primary btn-xs pull-right">
-                        <span class="glyphicon glyphicon-edit"></span> 
+                    <a href="{% url 'tt_add' tt.abonent.pk tt.pk %}" class="pull-right">
+                        <span class="glyphicon glyphicon-cog"></span> 
                     </a>
                 </div>
                 <ul class="list-group">
@@ -63,9 +63,8 @@
                 </table>
                 {% endif %}
                 <div class="panel-body">
-    <a href="{% url 'tt_add' tt.abonent.pk tt.pk %}" class="btn btn-primary btn-xm pull-right" role="button">Добавить комментарий</a>
-  </div>
-                
+                    <a href="{% url 'tt_comment_add' tt.abonent.pk tt.pk %}" class="btn btn-success btn-xm pull-right" role="button">Добавить комментарий <span class="glyphicon glyphicon-comment"></a></a>
+                </div>                
             </div>
         {% endfor %}
     {% else %}

@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*- 
 from django import forms
 from django.contrib.auth.models import User
-from tt.models import TroubleTicket
+from tt.models import TroubleTicket, TroubleTicketComment 
 
 class TTForm( forms.ModelForm ):
     def __init__(self, *args, **kwargs):
@@ -16,4 +17,19 @@ class TTForm( forms.ModelForm ):
             'performer': forms.Select(attrs={'class': 'form-control', }),
             'category': forms.Select(attrs={'class': 'form-control', }),
             'description': forms.Textarea(attrs={'class': 'form-control','rows': 10, 'cols': 20}),
+        }
+
+class TTCommentForm( forms.ModelForm ):
+    finished = forms.BooleanField(
+        label='Завершено', 
+        required=False,
+        initial=False
+     )
+
+    class Meta:
+        model = TroubleTicketComment
+        fields = ['comment']
+        widgets = {
+            'comment': forms.Textarea(attrs={'class': 'form-control',}),
+            'finished': forms.CheckboxInput(attrs={'class': 'form-control',}),
         }

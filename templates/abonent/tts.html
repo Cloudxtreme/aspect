@@ -1,22 +1,33 @@
 {% extends "abonent/main.html" %}
 
+{% block script %}
+    <script type="text/javascript">
+    $(function(){
+        var showed = false;
+        $("#btn_toggle").click(function () {
+            $('tr.active').toggle("slow");
+        });
+    });
+    </script>
+{% endblock %}
+
 {% block pages %} 
      
 {% if tts %}	
-		<table class="table table-striped h6">
+		<table class="table h6 table-condensed">
 		<thead>
           <tr>
-            <th>Номер</th>
+            <th class="col-md-1">Номер</th>
             <th>Дата создания</th>
             <th>Дата решения</th>
-            <th>Категория</th>
-            <th>Комментарии</th>
-            <th></th>
+            <th class="col-md-2">Категория</th>
+            <th class="col-md-4">Комментарии</th>
+            <th ></th>
           </tr>
         </thead>
         <tbody>
 		{% for tt in tts %}
-		<tr>
+		<tr {% if tt.solve_date %} class="active" style=" display:none" {% endif %}>
             <td>{{ tt.number }}</td>
             <td>{{ tt.create_date|date:'Y-M-d' }}</td>
             <td>{{ tt.solve_date|date:'Y-M-d' }}</td>
@@ -34,6 +45,8 @@
                 <div class="btn-group">
                     <a href="{% url 'tt_add' abonent.id tt.id %}" role="button" class="btn btn-primary btn-xm ">
                     <span class="glyphicon glyphicon-cog"></span></a>
+                    <a href="{% url 'tt_comment_add' abonent.id tt.id %}" role="button" class="btn btn-success btn-xm ">
+                    <span class="glyphicon glyphicon-comment"></span></a>
                 </div>
             </td>
         </tr>
@@ -43,9 +56,10 @@
 {% else %}
 	<h3 class="sub-header">Обращений не было</h3>
 {% endif %}        
-<div class="row">
+<div class="btn-group">
     <a href="{% url 'tt_add' abonent.id 0 %}" class="btn btn-primary btn-xm" role="button">
         Создать обращение
     </a>
+    <a id='btn_toggle' class="btn btn-warning" onclick="this.innerHTML = this.innerHTML == 'Скрыть завершенные' ? 'Показать завершенные' : 'Скрыть завершенные'; return false;">Показать завершенные</a>
 </div>   
 {% endblock %}

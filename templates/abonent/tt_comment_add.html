@@ -1,0 +1,74 @@
+{% extends "abonent/main.html" %}
+    {% block script %}
+        {{ form.media }}
+    {% endblock %}
+
+{% block breadcrumb %}
+        <ol class="breadcrumb">
+            <li><a href="{% url 'abonent_info' abonent.id %}">Абонент</a></li>
+            <li><a href="{% url 'users.views.abonent_tts' abonent.id %}">Обращения</a></li>
+            <li class="active">Добавление комментария</li>
+        </ol>
+{% endblock %}
+{% block pages %} 
+
+<h2>Добавить комментарий</h2>     
+<hr>
+<div class="panel panel-default">
+    <div class="panel-heading"><span class="badge">{{ tt.number }}</span> от {{ tt.create_date}} 
+        <a href="{% url 'tt_add' tt.abonent.pk tt.pk %}" class="pull-right">
+            <span class="glyphicon glyphicon-cog"></span> 
+        </a>
+    </div>
+    <ul class="list-group">
+        <li class="list-group-item">Категория: <label id="category">{{ tt.category }}</label></li>
+        <li class="list-group-item">Испонитель: <label id="performer">{{ tt.performer.get_full_name }}</label></li>
+    </ul>
+    <div class="panel-body">
+        <p>{{ tt.description }}</p>
+    </div>
+    {% if tt.troubleticketcomment_set.all.count %}
+    <table class="table table-condensed table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Дата</th>                            
+                <th>Автор</th>
+                <th>Комментарии</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for ttc in tt.troubleticketcomment_set.all %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ ttc.create_date }}</td>
+            <td>{{ ttc.author.get_full_name }}</td>
+            <td>{{ ttc.comment }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+
+<form method="post" class="form-horizontal" role="form">{% csrf_token %}
+    <div class="form-group">
+        <label for="id_comment" class="col-sm-3 control-label">Комментарий{{ form.comment.errors }}</label>
+        <div class="col-sm-9">
+            {{ form.comment }}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="id_finished" class="col-sm-3 control-label">Завершено{{ form.finished.errors }}</label>
+        <div class="col-sm-9">
+            {{ form.finished }}
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <button id="btn_save" class="btn btn-primary" type="submit">Добавить <span class="glyphicon glyphicon-save"></span></button>
+        </div>
+    </div>
+</form>
+
+{% endblock %}

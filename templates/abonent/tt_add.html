@@ -7,7 +7,7 @@
         <ol class="breadcrumb">
             <li><a href="{% url 'abonent_info' abonent.id %}">Абонент</a></li>
             <li><a href="{% url 'users.views.abonent_tts' abonent.id %}">Обращения</a></li>
-            <li class="active">Регистрация обращения</li>
+            <li class="active">{% if new %}Регистрация обращения{% else %} Редактирование обращения {% endif %}</li>
         </ol>
 {% endblock %}
 {% block pages %} 
@@ -44,8 +44,9 @@
         {{ form.description.errors }}
     </div>
     <div class="form-group">
-        <div class="col-sm-offset-3 col-sm-9">
+         <div class="btn-group col-sm-offset-3 col-sm-9">
             <button id="btn_save" class="btn btn-primary" type="submit">Сохранить <span class="glyphicon glyphicon-save"></span></button>
+            {% if not new %} <a href="{% url 'tt_comment_add' tt.abonent.pk tt.pk %}" class="btn btn-success btn-xm" role="button">Добавить комментарий <span class="glyphicon glyphicon-comment"></a>{% endif %}
         </div>
     </div>
 </form>
