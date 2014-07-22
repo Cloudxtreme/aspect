@@ -1,0 +1,33 @@
+{% extends "index.html" %}
+
+{% block script %}
+{{ form.media }}
+{% endblock %}
+
+{% block main %} 
+
+<div class="page-header">
+	<h2 class="sub-header">Рассылка уведомлений</h2>
+</div>
+
+
+<form action="/contact/" method="post" class="form-horizontal">
+    {% for field in form %}
+        <div class="form-group">
+            <label class="col-sm-3 control-label">
+                {{ field.errors }}
+                {{ field.label_tag }}
+            </label>
+            <div class="col-sm-3">
+                {{ field }}
+            </div>
+        </div>
+    {% endfor %}
+
+    <div class="form-group">
+        <div class="col-sm-offset-4 col-sm-3">
+            <input type="submit" value="Send message" />
+        </div>
+    </div>
+</form>
+{% endblock %}

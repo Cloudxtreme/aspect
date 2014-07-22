@@ -16,6 +16,7 @@ from journaling.forms import ServiceStatusChangesForm
 from users.models import Abonent, Service, TypeOfService, Plan, Passport, Detail
 from tt.models import TroubleTicket, TroubleTicketComment
 from journaling.models import ServiceStatusChanges, AbonentStatusChanges
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from vlans.models import Network, IPAddr
 from django.db.models import Avg, Max, Min, Sum, Q
 import datetime
@@ -38,18 +39,44 @@ from pays.models import Payment
 #         'form': form,
 #     }, context_instance = RequestContext(request))
 
-@login_required	
+# @login_required	
+# def aquicksearch(request):
+#     if request.method == 'POST': # If the form has been submitted...
+#         data = request.POST
+#         abonents = Abonent.objects.filter(contract__icontains=data['q'])|Abonent.objects.filter(title__icontains=data['q'])
+#         if abonents.count() == 1:
+#             return redirect('abonent_info', abonent_id = abonents[0].pk) 
+#         elif abonents.count() == 0:
+#             return render_to_response('deadend.html', { 'message' : u'Абоненты не найдены', 'previous_page' : request.META['HTTP_REFERER'] }  , context_instance = RequestContext(request))
+#         else:
+#             return render_to_response('aqsearch_result.html', { 'abonents' : abonents } , context_instance = RequestContext(request))
+#     #return redirect(request.META['HTTP_REFERER'])        
+
+@login_required 
 def aquicksearch(request):
-    if request.method == 'POST': # If the form has been submitted...
-        data = request.POST
-        abonents = Abonent.objects.filter(contract__icontains=data['q'])
-        if abonents.count() == 1:
-            return redirect('abonent_info', abonent_id = abonents[0].pk) 
-        elif abonents.count() == 0:
-            return render_to_response('deadend.html', { 'message' : u'Абоненты не найдены', 'previous_page' : request.META['HTTP_REFERER'] }  , context_instance = RequestContext(request))
-        else:
-            return render_to_response('aqsearch_result.html', { 'abonents' : abonents } , context_instance = RequestContext(request))
-    #return redirect(request.META['HTTP_REFERER'])        
+    data = request.GET
+    abonent_list = Abonent.objects.filter(contract__icontains=data['q'])|Abonent.objects.filter(title__icontains=data['q'])
+    paginator = Paginator(abonent_list, 10)
+
+    page = request.GET.get('page')
+    try:
+        abonents = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        abonents = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        abonents = paginator.page(paginator.num_pages)
+
+    if abonent_list.count() == 1:
+        return redirect('abonent_info', abonent_id = abonent_list[0].pk) 
+    elif abonent_list.count() == 0:
+        return render_to_response('deadend.html', { 'message' : u'Абоненты не найдены', 'previous_page' : request.META['HTTP_REFERER'] }  , context_instance = RequestContext(request))
+    else:
+        return render_to_response('aqsearch_result.html', { 'abonents' : abonents, 'abonent_list_count' : abonent_list.count(), 'previous_request' : data['q'] } , context_instance = RequestContext(request))            
+        #     return render_to_response('aqsearch_result.html', { 'abonents' : abonents } , context_instance = RequestContext(request))
+        
+    #return redirect(request.META['HTTP_REFERER'])  
 
 @login_required
 def feeds_plans_by_tos(request):

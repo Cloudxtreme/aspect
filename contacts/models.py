@@ -14,6 +14,7 @@ class Contact(models.Model):
     fax = models.CharField(u'Факс',max_length=12,blank=True, null=True)
     email = models.CharField(max_length=50,blank=True, null=True)
     address = models.CharField(u'Адрес',max_length=200,blank=True, null=True)
+    primary_contact = models.BooleanField(u'Основной контакт', default=False)
 
     class Meta:
         verbose_name = u'Контакт'

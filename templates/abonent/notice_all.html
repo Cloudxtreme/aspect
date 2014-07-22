@@ -1,0 +1,56 @@
+{% extends "abonent/main.html" %}
+
+{% block script %}
+    <script type="text/javascript">
+    $(function(){
+        var showed = false;
+        $("#btn_toggle").click(function () {
+            $('tr.active').toggle("slow");
+        });
+    });
+    </script>
+{% endblock %}
+
+{% block pages %}
+
+{% if notice_list %}
+{% load dict_extras %}
+    <div class="table-responsive">
+        <table class="table table-striped h6">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Дата</th>
+            <th>Тема</th>
+            <th>Отправлен</th>
+            <th>Содержание</th>
+            <th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for notice in notice_list %}
+        <tr>
+            <td>{{ notice.pk }}</td>
+            <td>{{ notice.date }}</td>
+            <td>
+                {{ notice.sent|yesno:"Отправлен,Неотправлен" }}
+            </td>
+            <td>{{ notice.subject }}</td>
+            <td>{{ notice.content }}</td>
+            <td>
+                <div class="btn-group">
+                    <a href="{% url 'notice_email_del' abonent.id notice.id %}" role="button" class="btn btn-danger btn-xm" data-toggle="tooltip" data-placement="left" title="Удалить">
+                    <span class="glyphicon glyphicon-remove"></span></a>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    </div>
+
+{% else %}
+    <h3 class="sub-header">Уведомления не найдены</h3>
+ {% endif %}
+    
+{% endblock %}

@@ -105,8 +105,8 @@ class WriteOff(models.Model):
             Abonent.objects.filter(pk=self.abonent.pk).update(balance=F('balance') - self.summ)
             abonent = Abonent.objects.get(pk=self.abonent.pk)
             abonent.check_status(reason='Списание средств')
-            if abonent.notice_email:
-                email = EmailMessage(destination = abonent.notice_email, subject = 'Списание средств', content = u'С вашего счета списано: %s руб. Теперь на вашем счету %s руб.' % (self.summ, abonent.balance) )
+            if abonent.notice_email and self.summ > 0:
+                email = EmailMessage(abonent=abonent, destination = abonent.notice_email, subject = 'Списание средств', content = u'С вашего счета списано: %s руб. Теперь на вашем счету %s руб.' % (self.summ, abonent.balance) )
                 email.save()      
             
             
