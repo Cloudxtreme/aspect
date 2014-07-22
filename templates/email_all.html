@@ -1,18 +1,9 @@
-{% extends "abonent/main.html" %}
+{% extends "index.html" %}
 
-{% block script %}
-    <script type="text/javascript">
-    $(function(){
-        var showed = false;
-        $("#btn_toggle").click(function () {
-            $('tr.active').toggle("slow");
-        });
-    });
-    </script>
-{% endblock %}
-
-{% block pages %}
-
+{% block main %}
+<div class="page-header">
+    <h2 class="sub-header">Список Email уведомлений</h2>
+</div>
 {% if notice_list %}
 {% load dict_extras %}
     <div class="table-responsive">
@@ -21,8 +12,9 @@
           <tr>
             <th>#</th>
             <th>Дата</th>
-            <th>Тема</th>
             <th>Отправлен</th>
+            <th>Получатель</th>
+            <th>Тема</th>
             <th>Содержание</th>
             <th>
           </tr>
@@ -35,13 +27,16 @@
             <td>
                 {{ notice.sent|yesno:"Отправлен,Неотправлен" }}
             </td>
+            <td>{{ notice.destination }}</td>
             <td>{{ notice.subject }}</td>
             <td>{{ notice.content }}</td>
             <td>
+                {% if not notice.sent %}
                 <div class="btn-group">
-                    <a href="{% url 'notice_email_del' abonent.id notice.id %}" role="button" class="btn btn-danger btn-xm" data-toggle="tooltip" data-placement="left" title="Удалить">
+                    <a href="{% url 'notice_email_del' 0 notice.id %}" role="button" class="btn btn-danger btn-xm" data-toggle="tooltip" data-placement="left" title="Удалить">
                     <span class="glyphicon glyphicon-remove"></span></a>
                 </div>
+                {% endif %}
             </td>
         </tr>
         {% endfor %}

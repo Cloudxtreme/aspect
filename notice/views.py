@@ -11,7 +11,10 @@ from datetime import datetime
 @login_required
 def notice_email_del(request,  abonent_id, notice_id):
     EmailMessage.objects.get(pk=notice_id).delete()
-    return HttpResponseRedirect(reverse('for_abonent', args=[abonent_id]))
+    if abonent_id == '0':
+        return HttpResponseRedirect(reverse('email_all'))
+    else:
+        return HttpResponseRedirect(reverse('for_abonent', args=[abonent_id]))
 
 @login_required
 def mass_notice_add(request):
@@ -33,6 +36,12 @@ def mass_notice_add(request):
                                 'form': form,},
                                 context_instance = RequestContext(request)
                                 )          
+@login_required
+def email_all(request):
+    notice_list = EmailMessage.objects.all().order_by('-pk')
+    return render_to_response('email_all.html', { 
+                                'notice_list': notice_list, 
+                                }, context_instance = RequestContext(request))
 
 @login_required
 def for_abonent(request, abonent_id):
@@ -42,7 +51,7 @@ def for_abonent(request, abonent_id):
         abonent = None
 
     notice_list = EmailMessage.objects.filter(abonent__pk=abonent_id).order_by('-pk')
-    return render_to_response('abonent/notice_all.html', { 
+    return render_to_response('abonent/for_abonent.html', { 
                                 'notice_list': notice_list, 
                                 'abonent' : abonent,
                                 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), 
