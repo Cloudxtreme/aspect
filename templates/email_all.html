@@ -3,6 +3,10 @@
 {% block main %}
 <div class="page-header">
     <h2 class="sub-header">Список Email уведомлений</h2>
+    <div class="btn-group">
+        <a href="{% url 'mass_notice_add' %}" role="button" class="btn btn-primary btn-xm">
+        Создать рассылку <span class="glyphicon glyphicon-envelope"></span></a>
+    </div>
 </div>
 {% if notice_list %}
 {% load dict_extras %}
@@ -27,7 +31,12 @@
             <td>
                 {{ notice.sent|yesno:"Отправлен,Неотправлен" }}
             </td>
-            <td>{{ notice.destination }}</td>
+            <td>{% if notice.abonent %}
+                    <a href="{% url 'abonent_info' notice.abonent.id %}">{{ notice.abonent }}</a>
+                {% else %}
+                    {{ notice.destination }}
+                {% endif%}
+            </td>
             <td>{{ notice.subject }}</td>
             <td>{{ notice.content }}</td>
             <td>

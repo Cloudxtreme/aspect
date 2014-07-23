@@ -2,22 +2,10 @@
 from django.db import models
 from devices.models import Device
 from datetime import datetime
+from django.conf import settings
 # import datetime
 
 # Create your models here.
-STATUS_ACTIVE = 'A'
-STATUS_OUT_OF_BALANCE = 'N'
-STATUS_NEW = 'W'
-PAY_CREDIT = 'O'
-PAY_POST = 'R'
-
-STATUSES = (
-    (STATUS_NEW, 'Новый'),
-    (STATUS_ACTIVE, 'Активный'),
-    ('S', 'Приостановлен'),
-    (STATUS_OUT_OF_BALANCE, 'Отключен за неуплату'),
-    ('D', 'Архив'),
-)
 
 class DeviceStatusEntry(models.Model):
     device = models.ForeignKey(Device, verbose_name=u'Устройство')
@@ -31,9 +19,9 @@ class SomeEntityWithReason(models.Model):
     attach = models.FileField(u'Приложение', upload_to='user_files', blank=True, null=True)
     date = models.DateTimeField(default=datetime.now, verbose_name=u'Дата начала')
     laststatus = models.CharField(u'Старый статус', max_length=1, 
-        choices=STATUSES, blank=True, null=True)
+        choices=settings.STATUSES, blank=True, null=True)
     newstatus = models.CharField(u'Новый статус', 
-        max_length=1, choices=STATUSES)
+        max_length=1, choices=settings.STATUSES)
     done = models.BooleanField(u'Исполнен', default=False)
     successfully = models.BooleanField(u'Успешно', default=False)
 

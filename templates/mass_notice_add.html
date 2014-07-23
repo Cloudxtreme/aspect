@@ -1,33 +1,74 @@
 {% extends "index.html" %}
 
 {% block script %}
+<link href="/media/js/select2.css" rel="stylesheet"/>
+<link rel="stylesheet" href="/media/js/select2-bootstrap.css">
+    <script src="/media/js/select2.js"></script>
+    <script>
+        $(document).ready(function() { $("select").select2(); });
+    </script>
 {{ form.media }}
 {% endblock %}
 
 {% block main %} 
-
+{% load dict_extras %}
 <div class="page-header">
 	<h2 class="sub-header">Рассылка уведомлений</h2>
 </div>
 
 
-<form action="/contact/" method="post" class="form-horizontal">
+<form method="post" class="form-horizontal" role="form">{% csrf_token %}
     {% for field in form %}
         <div class="form-group">
-            <label class="col-sm-3 control-label">
-                {{ field.errors }}
+            <label class="col-sm-2 control-label">
+                <small>{{ field.errors }}</small>
                 {{ field.label_tag }}
             </label>
-            <div class="col-sm-3">
+            <div class="col-sm-4">
                 {{ field }}
             </div>
         </div>
     {% endfor %}
-
     <div class="form-group">
-        <div class="col-sm-offset-4 col-sm-3">
-            <input type="submit" value="Send message" />
+        <div class="col-sm-offset-2">
+            <button class="btn btn-primary" type="submit">Отфильтровать <span class="glyphicon glyphicon-filter"></span>
+            </button>
         </div>
     </div>
 </form>
+{% if abonent_list %}
+<form action={% url 'write_groupemail' %} method="post" class="form-horizontal" role="form">{% csrf_token %}
+    <div class="form-group">
+        <label class="col-sm-2 control-label">
+                Найдено абонентов: {{ abonent_list.count }}
+            </label>
+        <div class="col-sm-10">
+            <select multiple="multiple" class="form-control select2-multiple" id="abonent_list" name="abonent_list">
+            {% for abonent in abonent_list %}
+                <option value={{ abonent.pk }} selected="selected">{{ abonent.title }}</option>
+            {% endfor %}
+            </select>
+        </div>
+    </div>
+    {% for field in messageform %}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                <small>{{ field.errors }}</small>
+                {{ field.label_tag }}
+            </label>
+            <div class="col-sm-4">
+                {{ field }}
+            </div>
+        </div>
+    {% endfor %}
+    <div class="form-group">
+        <div class="col-sm-offset-2">
+            <button id="btn_save" class="btn btn-primary" type="submit">Отправить <span class="glyphicon glyphicon-envelope"></span>
+            </button>
+        </div>
+    </div>
+
+</form>
+{% endif %}
+
 {% endblock %}

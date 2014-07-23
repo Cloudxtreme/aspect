@@ -1,0 +1,33 @@
+{% extends "index.html" %}
+
+{% block script %}
+{{ form.media }}
+{% endblock %}
+
+{% block main %} 
+{% load dict_extras %}
+<div class="page-header">
+	<h2 class="sub-header">Сообщение</h2>
+</div>
+
+<form method="post" class="form-horizontal" role="form">{% csrf_token %}
+    {% for field in form %}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                <small>{{ field.errors }}</small>
+                {{ field.label_tag }}
+            </label>
+            <div class="col-sm-4">
+                {{ field }}
+            </div>
+        </div>
+    {% endfor %}
+    <div class="form-group">
+        <div class="col-sm-offset-2">
+            <button id="btn_save" class="btn btn-primary" type="submit">Отправить <span class="glyphicon glyphicon-envelope"></span>
+            </button>
+        </div>
+    </div>
+</form>
+
+{% endblock %}

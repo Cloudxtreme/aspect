@@ -10,25 +10,7 @@ from django.contrib.auth.models import User
 import datetime
 import calendar
 import pays.models
-# from pays.models import WriteOffType, WriteOff
-
-# Create your models here.
-
-STATUS_ACTIVE = 'A'
-STATUS_OUT_OF_BALANCE = 'N'
-STATUS_PAUSED = 'S'
-STATUS_ARCHIVED = 'D'
-STATUS_NEW = 'W'
-PAY_CREDIT = 'O'
-PAY_BEFORE = 'R'
-
-STATUSES = (
-    (STATUS_NEW, 'Новый'),
-    (STATUS_ACTIVE, 'Активный'),
-    (STATUS_PAUSED, 'Приостановлен'),
-    (STATUS_OUT_OF_BALANCE, 'Отключен за неуплату'),
-    (STATUS_ARCHIVED, 'Архив'),
-)
+from django.conf import settings
 
 class Segment(models.Model):
     title = models.CharField(max_length=200)
@@ -68,48 +50,6 @@ class Plan(models.Model):
     def __unicode__(self):
         return u"%s %s - %s руб/мес" % (self.tos, self.title, self.price)
 
-# class Contact(models.Model):
-#     surname = models.CharField(u'Фамилия', max_length=50,blank=True, null=True)
-#     first_name = models.CharField(u'Имя', max_length=50,blank=True, null=True)
-#     second_name = models.CharField(u'Отчество', max_length=50,blank=True, null=True)
-#     position = models.CharField(u'Должность', max_length=30,blank=True, null=True)
-#     phone = models.CharField(u'Телефон', max_length=12,blank=True, null=True)
-#     mobile = models.CharField(u'Мобильный',max_length=12,blank=True, null=True)
-#     fax = models.CharField(u'Факс',max_length=12,blank=True, null=True)
-#     email = models.CharField(max_length=50,blank=True, null=True)
-#     address = models.CharField(u'Адрес',max_length=200,blank=True, null=True)
-
-#     class Meta:
-#         verbose_name = u'Контакт'
-#         verbose_name_plural = u'Контакты'
-
-#     def _get_full_name(self):
-#         "Returns the person's full name."
-#         return '%s %s %s' % (self.first_name, self.second_name, self.surname)
-#     full_name = property(_get_full_name) 
-
-#     def __unicode__(self):
-#         return self.full_name
-
-# class Reason(models.Model):       
-#     comment = models.CharField(u'Комментарий', max_length=30)
-#     file = models.FileField(upload_to='user_files',blank=True, null=True)
-
-# # pk = 1 'Изменение баланса'
-# # pk = 2 'Изменение статуса'
-# # pk = 3 'Создание нового'
-
-#     class Meta:
-#         verbose_name = u'Основание'
-#         verbose_name_plural = u'Основания' 
-    
-# #    def save(self, force_insert=False, force_update=False):
-# #        if self.pk > 3:
-# #            super(Reason, self).save(force_insert, force_update)
-    
-#     def __unicode__(self):
-#         return self.comment
-
 def has_changed(instance, field):
     if not instance.pk:
         return False
@@ -129,59 +69,26 @@ class Agent(models.Model):
 
 
 class Abonent(models.Model):
-    U_TYPE = (
-        ('F', 'Физическое лицо'),
-        ('U', 'Юридическое лицо'),
-    )
-    PAYTYPE =(
-        ('R', 'Предоплата'),
-        ('O', 'В кредит')
-    )
     title = models.CharField(u'Название', max_length=70)
     contract = models.CharField(u'Номер договора',max_length=15,blank=True, null=True)
-    # contact = models.ManyToManyField('contacts.Contact', blank=True)
-    status = models.CharField(u'Статус',max_length=1, choices=STATUSES, default=STATUS_NEW)
-    utype = models.CharField(u'Тип абонента', max_length=1, choices=U_TYPE)
-    is_credit = models.CharField(u'Тип оплаты', max_length=1, choices=PAYTYPE)
-    agent = models.ForeignKey(Agent,verbose_name=u'Агент',blank=True, null=True, )
+    status = models.CharField(u'Статус',max_length=1, choices=settings.STATUSES, default=settings.STATUS_NEW)
+    utype = models.CharField(u'Тип абонента', max_length=1, choices=settings.U_TYPE)
+    is_credit = models.CharField(u'Тип оплаты', max_length=1, choices=settings.PAYTYPE)
+    agent = models.ForeignKey(Agent,verbose_name=u'Агент', blank=True, null=True)
     balance = models.FloatField(u'Баланс', default = 0)
     reserve = models.FloatField(u'Резерв', default = 0)
     rest = models.FloatField(u'Остаток', default = 0)
     notice_email = models.CharField(u'Email для уведомлений', max_length=70, blank=True, null=True)
     notice_mobile = models.CharField(u'Телефон для уведомлений', max_length=13, blank=True, null=True)
-    # passport = models.ForeignKey(Passport, verbose_name=u'Паспортные данные', blank=True, null=True)
-    # detail = models.ForeignKey(Detail, verbose_name=u'Реквизиты', blank=True, null=True)
 
-
-    # def switch_services(self):
-    #     if not self.is_credit:
-    #         try:
-    #             for item in Service.objects.get(abon=self.pk):
-    #                 if item.status == STATUS_ACTIVE or item.status == STATUS_OUT_OF_BALANCE:
-    #                     item.status = self.status
-    #         except Service.DoesNotExist:
-    #             return None
-    
-    # Перенос статуса абонента на услуги
     def set_changes(self,comment,old_status):
-            # if self.status in [STATUS_ACTIVE, STATUS_PAUSED, STATUS_OUT_OF_BALANCE]:
-            #     for item in self.service_set.all():
-            #         if item.status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE]:
-            #             # item.set_changestatus_in_plan(self.status)
-            #             # item.status = self.status
-            #             # item.save()
-            # if self.status == STATUS_ARCHIVED:
-            #     for item in self.service_set.all():
-            #         # item.set_changestatus_in_plan(self.status)
-            #         # item.status = self.status
-            #         # item.save()
 
             if old_status != self.status:
-                if self.status in [STATUS_ACTIVE, STATUS_PAUSED, STATUS_OUT_OF_BALANCE]:
+                if self.status in [settings.STATUS_ACTIVE, settings.STATUS_PAUSED, settings.STATUS_OUT_OF_BALANCE]:
                     for item in self.service_set.all():
-                        if item.status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE]:
+                        if item.status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE]:
                             item.set_changestatus_in_plan(self.status)
-                if self.status == STATUS_ARCHIVED:
+                if self.status == settings.STATUS_ARCHIVED:
                     for item in self.service_set.all():
                         item.set_changestatus_in_plan(self.status)
 
@@ -198,11 +105,11 @@ class Abonent(models.Model):
     # Проверка на положительность баланса
     def check_status(self, reason):
         old_status = self.status
-        if self.status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE]:
-            if self.is_credit == PAY_BEFORE:
-                self.status = (STATUS_ACTIVE if self.balance >= 0 else STATUS_OUT_OF_BALANCE)
+        if self.status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE]:
+            if self.is_credit == settings.PAY_BEFORE:
+                self.status = (settings.STATUS_ACTIVE if self.balance >= 0 else settings.STATUS_OUT_OF_BALANCE)
             else:
-                self.status = STATUS_ACTIVE
+                self.status = settings.STATUS_ACTIVE
             super(Abonent, self).save()
             self.set_changes(reason, old_status)
 
@@ -216,26 +123,6 @@ class Abonent(models.Model):
         else:
             super(Abonent, self).save(*args, **kwargs)
             self.set_changes('Создание нового', '')
-
-    # def save(self, *args, **kwargs):
-    #     old_status = Abonent.objects.get(pk=self.pk).status
-    #     super(Abonent, self).save(*args, **kwargs)
-    #     comment = 'Изменение статуса'
-    #     if self.status in ['A','N']:
-    #         d = {True : 'A', False : 'N'}
-    #         self.status = d[self.balance >= 0]
-    #         comment = 'Изменение баланса'
-            
-    #     if self.pk:
-    #         if self.status != old_status: #Abonent.objects.get(pk=self.pk).status:
-    #             asc = AbonentStatusChanges(abonent=self, laststatus = Abonent.objects.get(pk=self.pk).status, newstatus=self.status, comment = comment, datetime = datetime.datetime.now())
-    #             asc.save()                
-    #     else:
-    #         super(Abonent, self).save(*args, **kwargs)
-    #         asc = AbonentStatusChanges(abonent=self, newstatus=self.status, comment = 'Создание нового', datetime = datetime.datetime.now())
-    #         asc.save()
-            
-    #     #super(Abonent, self).save(*args, **kwargs)    
    
     class Meta:
         verbose_name = u'Абонент'
@@ -290,11 +177,7 @@ class Detail(models.Model):
         return "%s - %s" % (self.title, self.inn)
 
 class Service(models.Model):
-    ADM_STATUSES = (
-        ('0', 'По состоянию'),
-        ('1', 'Включен вручную'),
-        ('2', 'Выключен вручную'),
-    )
+
     macvalidator = RegexValidator('[0-9a-f]{2}([-:])[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$', u'Неправильный формат MAC адреса')    
     abon = models.ForeignKey(Abonent,verbose_name=u'Абонент')
     tos = models.ForeignKey(TypeOfService,verbose_name=u'Тип услуги')
@@ -302,11 +185,11 @@ class Service(models.Model):
     plan = models.ForeignKey(Plan,verbose_name=u'Тарифный план')
     ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', blank=True, null= True)
     vlan = models.OneToOneField(Vlan, verbose_name=u'Vlan', blank=True, null= True)
-    adm_status = models.CharField(u'Административный статус', max_length=1, choices=ADM_STATUSES, default=STATUS_NEW)
+    adm_status = models.CharField(u'Административный статус', max_length=1, choices=settings.ADM_STATUSES, default=settings.STATUS_NEW)
     speed_in = models.PositiveIntegerField(default=0, blank=True, null=True)
     speed_out = models.PositiveIntegerField(default=0, blank=True, null=True)
     mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=17,validators=[macvalidator])
-    status = models.CharField(u'Статус', max_length=1, choices=STATUSES, default=STATUS_NEW)
+    status = models.CharField(u'Статус', max_length=1, choices=settings.STATUSES, default=settings.STATUS_NEW)
     lat = models.FloatField(u'Latitude', blank=True, null=True)
     lon = models.FloatField(u'Longitude', blank=True, null=True)
     address = models.CharField(u'Адрес', blank=True, null= True, max_length=100)
@@ -332,19 +215,19 @@ class Service(models.Model):
         if self.status == new_status:
             return False
 
-        if self.abon.status in [STATUS_ARCHIVED, STATUS_PAUSED, STATUS_NEW] and not new_status in [STATUS_ARCHIVED, STATUS_PAUSED, STATUS_NEW]:
+        if self.abon.status in [settings.STATUS_ARCHIVED, settings.STATUS_PAUSED, settings.STATUS_NEW] and not new_status in [settings.STATUS_ARCHIVED, settings.STATUS_PAUSED, settings.STATUS_NEW]:
             return False
 
         else:
-            if self.status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE] and new_status in [STATUS_ARCHIVED, STATUS_PAUSED, STATUS_NEW]:
+            if self.status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE] and new_status in [settings.STATUS_ARCHIVED, settings.STATUS_PAUSED, settings.STATUS_NEW]:
                 self.stop(newstatus=new_status)
-            elif self.status in [STATUS_ARCHIVED, STATUS_PAUSED, STATUS_NEW] and new_status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE]:
+            elif self.status in [settings.STATUS_ARCHIVED, settings.STATUS_PAUSED, settings.STATUS_NEW] and new_status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE]:
                 self.start(newstatus=new_status)
-            self.status = new_status if not new_status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE] else self.abon.status
+            self.status = new_status if not new_status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE] else self.abon.status
             self.save()
             return True
 
-    def stop(self, newstatus=STATUS_ARCHIVED):
+    def stop(self, newstatus=settings.STATUS_ARCHIVED):
         self.status = newstatus
         today = datetime.datetime.today()
         qty_days = calendar.mdays[today.month]
@@ -355,7 +238,7 @@ class Service(models.Model):
             payment.save()
         self.save()
 
-    def start(self, newstatus=STATUS_ACTIVE):
+    def start(self, newstatus=settings.STATUS_ACTIVE):
         self.status = newstatus
         today = datetime.datetime.today()
         qty_days = calendar.mdays[today.month]

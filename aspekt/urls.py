@@ -8,6 +8,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'aspekt.views.home', name='home'),
+    url(r'^select2/', include('django_select2.urls')),
     url(r'^pays/', include('pays.urls')),
     url(r'^abonent/', include('users.urls')),
     url(r'^notes/', include('notes.urls')),

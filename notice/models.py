@@ -30,9 +30,9 @@ class EmailMessage(models.Model):
     content = models.CharField(u'Сообщение', max_length=200)
     date = models.DateTimeField(default=datetime.now, verbose_name=u'Дата')
     sent = models.BooleanField(u'Отправлено', default=False)
+    group_id = models.IntegerField(u'Номер групповой рассылки', default=0, blank=True, null=True)
 
     def sendit(self):
-        # print settings.EMAIL_SERVER
         text_subtype = 'plain' # typical values for text_subtype are plain, html, xml
         try:
             msg = MIMEText(self.content, text_subtype, 'utf-8')

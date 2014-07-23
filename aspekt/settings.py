@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*- 
 """
 Django settings for aspekt project.
 
@@ -181,3 +182,34 @@ EMAIL_SENDER = "albeon@ptls.ru"
 EMAIL_USERNAME = "albeon@ptls.ru"
 
 EMAIL_PASSWORD = "yfpfgbcm"
+
+STATUS_ACTIVE = 'A'
+STATUS_OUT_OF_BALANCE = 'N'
+STATUS_PAUSED = 'S'
+STATUS_ARCHIVED = 'D'
+STATUS_NEW = 'W'
+PAY_CREDIT = 'O'
+PAY_BEFORE = 'R'
+PAY_POST = 'R'
+
+STATUSES = (
+    (STATUS_NEW, 'Новый'),
+    (STATUS_ACTIVE, 'Активный'),
+    (STATUS_PAUSED, 'Приостановлен'),
+    (STATUS_OUT_OF_BALANCE, 'Отключен за неуплату'),
+    (STATUS_ARCHIVED, 'Архив'),
+)
+
+U_TYPE = (
+    ('F', 'Физическое лицо'),
+    ('U', 'Юридическое лицо'),
+)
+PAYTYPE =(
+    ('R', 'Предоплата'),
+    ('O', 'В кредит')
+)
+ADM_STATUSES = (
+    ('0', 'По состоянию'),
+    ('1', 'Включен вручную'),
+    ('2', 'Выключен вручную'),
+)
