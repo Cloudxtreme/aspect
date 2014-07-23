@@ -15,7 +15,7 @@ from django.db.models import Max
 def notice_email_del(request,  abonent_id, notice_id):
     EmailMessage.objects.get(pk=notice_id).delete()
     if abonent_id == '0':
-        return HttpResponseRedirect(reverse('email_all'))
+        return HttpResponseRedirect(reverse('email_all'),args=['0'])
     else:
         return HttpResponseRedirect(reverse('for_abonent', args=[abonent_id]))
 
@@ -24,21 +24,30 @@ def write_groupemail(request):
     if request.method == 'POST':
         abonent_list = request.POST.getlist('abonent_list')
         form = GroupEmailForm(request.POST)
+        lst = [(item.pk, item.title) for item in Abonent.objects.filter(pk__in=abonent_list)]
+        form.fields['abonent_list'].choices=lst
         if form.is_valid():
             subject = form.cleaned_data['subject']
             content = form.cleaned_data['content']
             date = form.cleaned_data['date']
             eList = []
             for item in abonent_list:
-                if  Abonent.objects.get(pk=item).notice_email:
-                    eList += [EmailMessage(abonent = Abonent.objects.get(pk=item),
-                                          destination = Abonent.objects.get(pk=item).notice_email,
+                abonent = Abonent.objects.get(pk=item)
+                # здесь подставновка значения поля вместо его имени!
+                filtered_content = content
+                for field in abonent.__dict__.keys():
+                    filtered_content=filtered_content.replace('[%s]' % field, '%s' % abonent.__dict__[field] )
+
+                if  abonent.notice_email:
+                    content += ''
+                    eList += [EmailMessage(abonent = abonent,
+                                          destination = abonent.notice_email,
                                           subject=subject,
-                                          content=content,
+                                          content=filtered_content,
                                           date=date,
-                                          group_id=EmailMessage.objects.all().aggregate(Max('group_id'))['group_id__max']+1)]
+                                          group_id=1 + (EmailMessage.objects.all().aggregate(Max('group_id'))['group_id__max'] or 0) )]
             EmailMessage.objects.bulk_create(eList)
-            return HttpResponseRedirect(reverse('email_all',args=[1]))
+            return HttpResponseRedirect(reverse('email_group',))
     else:
         form = GroupEmailForm()
     
@@ -80,10 +89,19 @@ def mass_notice_add(request):
                                 }, context_instance = RequestContext(request))  
 
 @login_required
-def email_all(request, group=0):
-    notice_list = EmailMessage.objects.order_by('-pk')
-    if group:
-       notice_list = notice_list.exclude(group_id=0) 
+def email_all(request,group_id):
+    if group_id == '0': 
+        notice_list = EmailMessage.objects.order_by('-pk')
+    else: 
+        notice_list = EmailMessage.objects.filter(group_id=group_id).order_by('-pk')
+    return render_to_response('email_all.html', { 
+                                'notice_list': notice_list, 
+                                }, context_instance = RequestContext(request))
+
+@login_required
+def email_group(request):
+    notice_list = EmailMessage.objects.exclude(group_id=0).order_by('-pk')
+
     return render_to_response('email_all.html', { 
                                 'notice_list': notice_list, 
                                 }, context_instance = RequestContext(request))

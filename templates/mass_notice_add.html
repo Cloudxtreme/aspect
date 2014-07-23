@@ -3,11 +3,11 @@
 {% block script %}
 <link href="/media/js/select2.css" rel="stylesheet"/>
 <link rel="stylesheet" href="/media/js/select2-bootstrap.css">
-    <script src="/media/js/select2.js"></script>
-    <script>
-        $(document).ready(function() { $("select").select2(); });
-    </script>
-{{ form.media }}
+<script src="/media/js/select2.js"></script>
+<script>
+    $(document).ready(function() { $("select").select2(); });
+</script>
+{{ messageform.media }}
 {% endblock %}
 
 {% block main %} 
@@ -37,13 +37,14 @@
     </div>
 </form>
 {% if abonent_list %}
+
+<h3 class="sub-header">Найдено абонентов: {{ abonent_list.count }}</h3>
 <form action={% url 'write_groupemail' %} method="post" class="form-horizontal" role="form">{% csrf_token %}
     <div class="form-group">
         <label class="col-sm-2 control-label">
-                Найдено абонентов: {{ abonent_list.count }}
-            </label>
+        </label>
         <div class="col-sm-10">
-            <select multiple="multiple" class="form-control select2-multiple" id="abonent_list" name="abonent_list">
+            <select class="form-control select2-multiple" id="id_abonent_list" multiple="multiple" name="abonent_list">
             {% for abonent in abonent_list %}
                 <option value={{ abonent.pk }} selected="selected">{{ abonent.title }}</option>
             {% endfor %}
@@ -51,6 +52,7 @@
         </div>
     </div>
     {% for field in messageform %}
+        {% ifnotequal field.label 'Список адресатов' %}
         <div class="form-group">
             <label class="col-sm-2 control-label">
                 <small>{{ field.errors }}</small>
@@ -60,6 +62,7 @@
                 {{ field }}
             </div>
         </div>
+        {% endifnotequal %}
     {% endfor %}
     <div class="form-group">
         <div class="col-sm-offset-2">

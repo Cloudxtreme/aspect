@@ -6,7 +6,7 @@ from smtplib import SMTP_SSL as SMTP       # this invokes the secure SMTP protoc
 # from smtplib import SMTP                  # use this for standard SMTP protocol   (port 25, no encryption)
 from email.MIMEText import MIMEText
 from django.conf import settings
-from users.models import Abonent
+# from users.models import Abonent
 import sys
 import os
 import re
@@ -24,7 +24,7 @@ import re
 # subject="Sent from Python"
 
 class EmailMessage(models.Model):
-    abonent = models.ForeignKey(Abonent, verbose_name=u'Абонент', blank=True, null=True)
+    abonent = models.ForeignKey('users.Abonent', verbose_name=u'Абонент', blank=True, null=True)
     destination = models.CharField(u'Получатель', max_length=70)
     subject = models.CharField(u'Тема', max_length=70)
     content = models.CharField(u'Сообщение', max_length=200)

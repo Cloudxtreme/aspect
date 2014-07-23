@@ -1,6 +1,12 @@
 {% extends "index.html" %}
 
 {% block script %}
+<link href="/media/js/select2.css" rel="stylesheet"/>
+<link rel="stylesheet" href="/media/js/select2-bootstrap.css">
+<script src="/media/js/select2.js"></script>
+<script>
+    $(document).ready(function() { $("select").select2(); });
+</script>
 {{ form.media }}
 {% endblock %}
 
@@ -17,7 +23,7 @@
                 <small>{{ field.errors }}</small>
                 {{ field.label_tag }}
             </label>
-            <div class="col-sm-4">
+            <div class="col-sm-8">
                 {{ field }}
             </div>
         </div>

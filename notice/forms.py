@@ -47,6 +47,11 @@ class AbonentFilterForm(forms.Form):
      )
 
 class GroupEmailForm(forms.Form):
+    abonent_list = forms.MultipleChoiceField(
+        label=u'Список адресатов', 
+        required=False,
+        widget=forms.SelectMultiple(attrs={'class' : 'form-control select2-multiple','multiple' : 'multiple'})
+     )    
     subject = forms.CharField(
         label=u'Тема', 
         required=True,
@@ -60,9 +65,8 @@ class GroupEmailForm(forms.Form):
         widget=forms.Textarea(attrs={'class' : 'form-control',})
      ) 
     date = forms.DateTimeField(
-        label=u'Дата', 
+        label=u'Дата отправки', 
         # required=False,
         initial=datetime.now(),
         widget=DateTimePicker(attrs={'class' : 'form-control',})
         )
-

@@ -55,8 +55,8 @@
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
                     <li><a href={% url "users.views.abonent_search" %}>Поиск абонентов</a></li>
                     <li><a href={% url "users.views.abonent_add" 0 %}>Добавить абонента</a></li>
-                    <li><a href={% url "email_all" %}>Уведомления</a></li>
-                    <li><a href={% url "email_all" 1 %}>Групповые уведомления</a></li>
+                    <li><a href={% url "email_all" 0 %}>Уведомления</a></li>
+                    <li><a href={% url "email_group" %}>Групповые уведомления</a></li>
                 </ul>
             </li>
             <li class="dropdown">
