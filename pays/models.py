@@ -79,7 +79,8 @@ class PromisedPays(models.Model):
 
 class WriteOff(models.Model):
     def getnumber():
-        no = WriteOff.objects.filter(valid=True).count()
+        # no = WriteOff.objects.filter(valid=True).count()
+        no = WriteOff.objects.all().order_by("-id")[0].id
         if no == None:
             return '1'
         else:
@@ -124,7 +125,8 @@ class WriteOff(models.Model):
         
 class Payment(models.Model):
     def getnumber():
-        no = Payment.objects.filter(valid=True).count()
+        # no = Payment.objects.filter(valid=True).count()
+        no = Payment.objects.all().order_by("-id")[0].id
         if no == None:
             return '1'
         else:

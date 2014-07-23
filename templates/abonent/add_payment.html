@@ -8,25 +8,29 @@
 <hr>
 <form method="post" class="form-horizontal" role="form">{% csrf_token %}
     <div class="form-group">
-        <label for="id_num" class="col-sm-3 control-label">Номер</label>
+        <label for="id_num" class="col-sm-3 control-label">Номер
+        <small>{{ form.num.errors }}</small></label>
         <div class="col-sm-3">
             {{ form.num }}    
         </div>
     </div>
     <div class="form-group">
-        <label for="id_num" class="col-sm-3 control-label">Сумма</label>
+        <label for="id_num" class="col-sm-3 control-label">Сумма
+        <small>{{ form.sum.errors }}</small></label>
         <div class="col-sm-3">
             {{ form.sum }}
         </div>
     </div>    
     <div class="form-group">
         <label for="id_top" class="col-sm-3 control-label">Платежная система</label>
+        <small>{{ form.top.errors }}</small></label>
         <div class="col-sm-3">
             {{ form.top }}
         </div>
     </div>
     <div class="form-group">
-        <label for="id_date" class="col-sm-3 control-label">Дата</label>
+        <label for="id_date" class="col-sm-3 control-label">Дата
+        <small>{{ form.date.errors }}</small></label>
         <div class="col-sm-3">
             {{ form.date }}
         </div>
