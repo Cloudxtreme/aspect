@@ -73,7 +73,7 @@ def aquicksearch(request):
     elif abonent_list.count() == 0:
         return render_to_response('deadend.html', { 'message' : u'Абоненты не найдены', 'previous_page' : request.META['HTTP_REFERER'] }  , context_instance = RequestContext(request))
     else:
-        return render_to_response('aqsearch_result.html', { 'abonents' : abonents, 'abonent_list_count' : abonent_list.count(), 'previous_request' : data['q'] } , context_instance = RequestContext(request))            
+        return render_to_response('aqsearch_result.html', { 'abonents' : abonents, 'abonent_list_count' : len(abonent_list), 'previous_request' : data['q'] } , context_instance = RequestContext(request))            
         #     return render_to_response('aqsearch_result.html', { 'abonents' : abonents } , context_instance = RequestContext(request))
         
     #return redirect(request.META['HTTP_REFERER'])  
@@ -192,7 +192,7 @@ def abonent_search(request):
         # If page is out of range (e.g. 9999), deliver last page of results.
         abonents = paginator.page(paginator.num_pages)
 
-    return render_to_response('asearch.html', {'form': form, 'abonents' : abonents, }, context_instance = RequestContext(request) )
+    return render_to_response('asearch.html', {'form': form, 'abonents' : abonents, 'abonent_list_count' : len(abonent_list) }, context_instance = RequestContext(request) )
 
 @login_required
 def service_add(request, abonent_id="0", tos_id="0"):
