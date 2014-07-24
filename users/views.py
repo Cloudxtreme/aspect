@@ -12,7 +12,7 @@ from django.core import serializers
 from django.template import RequestContext
 from users.forms import  ServiceForm, SearchForm, LoginForm, PassportForm, DetailForm, ManageForm, AbonentForm
 from journaling.forms import ServiceStatusChangesForm
-# from vlans.forms import LocationForm
+from notice.forms import AbonentFilterForm
 from users.models import Abonent, Service, TypeOfService, Plan, Passport, Detail
 from tt.models import TroubleTicket, TroubleTicketComment
 from journaling.models import ServiceStatusChanges, AbonentStatusChanges
@@ -156,22 +156,43 @@ def abonent_add(request,abonent_id=0):
 
 @login_required
 def abonent_search(request):
-    if request.is_ajax():
-        if request.GET['id'] == '0':
-            json_subcat = serializers.serialize("json", Plan.objects.all())
-        else:
-            json_subcat = serializers.serialize("json", Plan.objects.filter(tos__pk=request.GET['id']))
-        return HttpResponse(json_subcat, mimetype="application/javascript")
-
+    abonent_list = []
     if request.method == 'POST': # If the form has been submitted...
-        form = SearchForm(request.POST) # A form bound to the POST data
+        form = AbonentFilterForm(request.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
-            # Process the data in form.cleaned_data
-            # ...
-            return HttpResponseRedirect('#') # Redirect after POST
+            status = form.cleaned_data['status']
+            utype = form.cleaned_data['utype']
+            is_credit=form.cleaned_data['is_credit']
+            balance_lt=form.cleaned_data['balance_lt']
+            balance_gt=form.cleaned_data['balance_gt']
+            request.session['status'] = status
+            request.session['utype'] = utype
+            request.session['is_credit'] = is_credit
+            request.session['balance_lt'] = balance_lt
+            request.session['balance_gt'] = balance_gt
+            abonent_list = Abonent.obj.filter_list(status=status,utype=utype,is_credit=is_credit,balance_lt=balance_lt,balance_gt=balance_gt)
     else:
-        form = SearchForm() # An unbound form
-    return render_to_response('asearch.html', {'form': form }, context_instance = RequestContext(request) )
+        form = AbonentFilterForm()
+
+    if request.GET.get('page'):
+        abonent_list = Abonent.obj.filter_list(status=request.session['status'],
+                                           utype=request.session['utype'],
+                                           is_credit=request.session['is_credit'],
+                                           balance_lt=request.session['balance_lt'],
+                                           balance_gt=request.session['balance_gt'])
+    paginator = Paginator(abonent_list, 10)
+
+    page = request.GET.get('page')
+    try:
+        abonents = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        abonents = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        abonents = paginator.page(paginator.num_pages)
+
+    return render_to_response('asearch.html', {'form': form, 'abonents' : abonents, }, context_instance = RequestContext(request) )
 
 @login_required
 def service_add(request, abonent_id="0", tos_id="0"):

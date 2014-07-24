@@ -39,9 +39,8 @@
         </thead>
         <tbody>
         {% for abonent in abonents %}
-        <tr class='clickableRow' href="{% url 'abonent_info' abonent.id %}">
             <td>{{ abonent.contract }}</td>
-            <td>{{ abonent.title }}
+            <td><a href="{% url 'abonent_info' abonent.id %}">{{ abonent.title }}</a>
             <p><small>{{ abonent.get_utype_display }}</small><p></td>
             <td></td>
             <td>{{ abonent.balance|floatformat:2 }} руб.</td>
