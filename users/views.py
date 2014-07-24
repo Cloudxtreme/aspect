@@ -97,7 +97,7 @@ def feeds_ip_by_seg(request):
         json_subcat = serializers.serialize("json", IPAddr.objects.none())
     else:
         # data = IPAddr.objects.filter(net__segment__pk=request.GET['id'])
-        data = IPAddr.objects.filter(net__segment__pk=request.GET['id']).filter(Q(service=None))|IPAddr.objects.filter(service__pk=request.GET['id'])
+        data = IPAddr.objects.filter(net__segment__pk=request.GET['id']).filter(net__net_type='UN').filter(Q(service=None))|IPAddr.objects.filter(service__pk=request.GET['id'])
         json_subcat = serializers.serialize("json", data)
     return HttpResponse(json_subcat, mimetype="application/javascript")
 
@@ -276,7 +276,7 @@ def service_edit(request, abonent_id, service_id=0):
         # form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk,service=None)
         if not new:
             form.fields['plan'].queryset=Plan.objects.filter(tos__pk=service.plan.tos.pk)
-            form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk).filter(Q(service=None))|IPAddr.objects.filter(service__pk=service.pk)
+            form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk).filter(net__net_type='UN').filter(Q(service=None))|IPAddr.objects.filter(service__pk=service.pk)
         else:
             form.fields['plan'].queryset=Plan.objects.none()
             form.fields['ip'].queryset=IPAddr.objects.none()
