@@ -29,7 +29,7 @@ class TroubleTicket(models.Model):
     number = models.CharField(u'Номер', max_length=30, default=getnumber, unique=True)
     performer = models.ForeignKey(User, verbose_name=u'Исполнитель')
     category = models.ForeignKey(TroubleTicketCategory,verbose_name='Тип обращения')
-    description = models.CharField(u'Описание', max_length=2000)
+    description = models.TextField(u'Описание')
     create_date = models.DateTimeField(u'Дата создания', default=datetime.now)
     solve_date = models.DateTimeField(u'Дата закрытия', blank=True, null=True)
 
@@ -44,7 +44,7 @@ class TroubleTicket(models.Model):
 class TroubleTicketComment(models.Model):
     tt = models.ForeignKey(TroubleTicket,verbose_name=u'Обращение')
     author = models.ForeignKey(User, verbose_name=u'Комментатор')
-    comment = models.CharField(u'Описание', max_length=2000)
+    comment = models.TextField(u'Описание')
     create_date = models.DateTimeField(u'Дата создания', auto_now_add=True)
 
     class Meta:
