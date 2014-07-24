@@ -83,7 +83,7 @@ class EmailMessage(models.Model):
     abonent = models.ForeignKey('users.Abonent', verbose_name=u'Абонент', blank=True, null=True)
     destination = models.CharField(u'Получатель', max_length=70)
     subject = models.CharField(u'Тема', max_length=70)
-    content = models.CharField(u'Сообщение', max_length=500)
+    content = models.TextField(u'Сообщение')
     date = models.DateTimeField(default=datetime.now, verbose_name=u'Дата рассылки')
     sent = models.BooleanField(u'Отправлено', default=False)
     # group = models.ForeignKey(GroupEmailMessage, verbose_name=u'Групповая рассылка', blank=True, null=True)
