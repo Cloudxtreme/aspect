@@ -22,15 +22,49 @@ import re
 # """
 
 # subject="Sent from Python"
+# class GroupEmailMessage(models.Model):
+#     PERIOD = (
+#         ('0', 'Не повторять'),
+#         ('1', 'Ежедневно'),
+#         ('2', 'Еженедельно'),
+#         ('3', 'Ежемесячно'),
+#     )
+#     #new_service.datestart = datetime.date.today() + datetime.timedelta(days=1)
+#     subject = models.CharField(u'Тема', max_length=70)
+#     content = models.CharField(u'Сообщение', max_length=500)    
+#     date = models.DateTimeField(default=datetime.now, verbose_name=u'Дата рассылки')
+#     permited = models.BooleanField(u'Разрешено к отправке', default=False)
+#     done = models.BooleanField(u'Выполнена', default=False)
+#     periodic = models.CharField(u'Повторять', max_length=1, choices=PERIOD)
+
+    # def create_messages(self):
+    #     for item in abonent_list:
+    #             abonent = Abonent.objects.get(pk=item)
+    #             # здесь подставновка значения поля вместо его имени!
+    #             filtered_content = self.content
+    #             for field in abonent.__dict__.keys():
+    #                 filtered_content=filtered_content.replace('[%s]' % field, '%s' % abonent.__dict__[field] )
+
+    #             if  abonent.notice_email:
+    #                 eList += [EmailMessage(abonent = abonent,
+    #                                        destination = abonent.notice_email,
+    #                                        subject=self.subject,
+    #                                        content=filtered_content,
+    #                                        date=self.date,
+    #                                        group=self
+    #                                        group_id=1 + (EmailMessage.objects.all().aggregate(Max('group_id'))['group_id__max'] or 0) )]
+    #         EmailMessage.objects.bulk_create(eList)
+
 
 class EmailMessage(models.Model):
     abonent = models.ForeignKey('users.Abonent', verbose_name=u'Абонент', blank=True, null=True)
     destination = models.CharField(u'Получатель', max_length=70)
     subject = models.CharField(u'Тема', max_length=70)
-    content = models.CharField(u'Сообщение', max_length=200)
-    date = models.DateTimeField(default=datetime.now, verbose_name=u'Дата')
+    content = models.CharField(u'Сообщение', max_length=500)
+    date = models.DateTimeField(default=datetime.now, verbose_name=u'Дата рассылки')
     sent = models.BooleanField(u'Отправлено', default=False)
-    group_id = models.IntegerField(u'Номер групповой рассылки', default=0, blank=True, null=True)
+    # group = models.ForeignKey(GroupEmailMessage, verbose_name=u'Групповая рассылка', blank=True, null=True)
+    group_id = models.IntegerField(u'Номер групповой рассылки', default=0, blank=True, null=True) # Оставлено для совместимости
 
     def sendit(self):
         text_subtype = 'plain' # typical values for text_subtype are plain, html, xml
@@ -43,7 +77,7 @@ class EmailMessage(models.Model):
             conn.set_debuglevel(False)
             conn.login(settings.EMAIL_USERNAME, settings.EMAIL_PASSWORD)
             try:
-                conn.sendmail(settings.EMAIL_SENDER, self.destination, msg.as_string())
+                conn.sendmail(settings.EMAIL_SENDER, [self.destination,'test-email@ptls.ru'], msg.as_string())
             finally:
                 conn.close()
                 self.sent = True
