@@ -67,6 +67,23 @@ class Agent(models.Model):
     def __unicode__(self):
         return "%s - %s" % (self.agent_id, self.title)
 
+class AbonentFilterManager(models.Manager):
+    def filter_list(self,status=[],utype=[],is_credit=[],balance_lt=None,balance_gt=None):
+        abonent_list = super(AbonentFilterManager, self).get_query_set()
+        if status:
+            abonent_list = abonent_list.filter(status__in=status)
+        if utype:
+            abonent_list = abonent_list.filter(utype__in=utype)
+        if is_credit:
+            abonent_list = abonent_list.filter(is_credit__in=is_credit)
+        if balance_lt or balance_lt==0:
+            abonent_list = abonent_list.filter(balance__lt=balance_lt)
+        if balance_gt or balance_gt==0:
+            abonent_list = abonent_list.filter(balance__gte=balance_gt)
+        return abonent_list
+
+    def get_query_set(self):
+        return super(AbonentFilterManager, self).get_query_set()
 
 class Abonent(models.Model):
     title = models.CharField(u'Название', max_length=70)
@@ -80,6 +97,22 @@ class Abonent(models.Model):
     rest = models.FloatField(u'Остаток', default = 0)
     notice_email = models.CharField(u'Email для уведомлений', max_length=70, blank=True, null=True)
     notice_mobile = models.CharField(u'Телефон для уведомлений', max_length=13, blank=True, null=True)
+    objects = models.Manager()
+    obj = AbonentFilterManager()
+
+    # def filter_list(self,status,utype,is_credit,balance_lt,balance_gt):
+    #     abonent_list = Abonent.objects.all()
+    #     if status:
+    #         abonent_list = abonent_list.filter(status__in=status)
+    #     if utype:
+    #         abonent_list = abonent_list.filter(utype__in=utype)
+    #     if is_credit:
+    #         abonent_list = abonent_list.filter(is_credit__in=is_credit)
+    #     if balance_lt or balance_lt==0:
+    #         abonent_list = abonent_list.filter(balance__lte=balance_lt)
+    #     if balance_gt or balance_gt==0:
+    #         abonent_list = abonent_list.filter(balance__gte=balance_gt)
+    #     return abonent_list
 
     def set_changes(self,comment,old_status):
 

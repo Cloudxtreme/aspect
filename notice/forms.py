@@ -14,7 +14,7 @@ class AbonentFilterForm(forms.Form):
         self.fields['is_credit'].choices = settings.PAYTYPE
 
     balance_lt = forms.IntegerField(
-        label=u'Баланс =<', 
+        label=u'Баланс <', 
         required=False,
         # initial=0,
         widget=forms.NumberInput(attrs={'class' : 'form-control',})

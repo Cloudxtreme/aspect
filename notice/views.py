@@ -67,17 +67,18 @@ def mass_notice_add(request):
             is_credit=form.cleaned_data['is_credit']
             balance_lt=form.cleaned_data['balance_lt']
             balance_gt=form.cleaned_data['balance_gt']
-            abonent_list = Abonent.objects.all()
-            if status:
-                abonent_list = abonent_list.filter(status__in=status)
-            if utype:
-                abonent_list = abonent_list.filter(utype__in=utype)
-            if is_credit:
-                abonent_list = abonent_list.filter(is_credit__in=is_credit)
-            if balance_lt or balance_lt==0:
-                abonent_list = abonent_list.filter(balance__lte=balance_lt)
-            if balance_gt or balance_gt==0:
-                abonent_list = abonent_list.filter(balance__gte=balance_gt)
+            abonent_list = Abonent.obj.filter_list(status=status,utype=utype,is_credit=is_credit,balance_lt=balance_lt,balance_gt=balance_gt)
+            # abonent_list = Abonent.objects.all()
+            # if status:
+            #     abonent_list = abonent_list.filter(status__in=status)
+            # if utype:
+            #     abonent_list = abonent_list.filter(utype__in=utype)
+            # if is_credit:
+            #     abonent_list = abonent_list.filter(is_credit__in=is_credit)
+            # if balance_lt or balance_lt==0:
+            #     abonent_list = abonent_list.filter(balance__lte=balance_lt)
+            # if balance_gt or balance_gt==0:
+            #     abonent_list = abonent_list.filter(balance__gte=balance_gt)
     else:
         abonent_list = [] 
         form = AbonentFilterForm()
