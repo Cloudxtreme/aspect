@@ -1,7 +1,7 @@
 ﻿from django import forms
 from django.contrib.auth import authenticate
 from users.models import Abonent, Service, Plan, TypeOfService, Segment, Agent, Passport, Detail
-from vlans.models import Vlan
+# from vlans.models import Vlan
 from users.fields import JSONWidget
 from bootstrap3_datetime.widgets import DateTimePicker
 from django.forms.extras.widgets import SelectDateWidget

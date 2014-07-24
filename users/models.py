@@ -217,7 +217,7 @@ class Service(models.Model):
     segment = models.ForeignKey(Segment,verbose_name=u'Сегмент')
     plan = models.ForeignKey(Plan,verbose_name=u'Тарифный план')
     ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', blank=True, null= True)
-    vlan = models.OneToOneField(Vlan, verbose_name=u'Vlan', blank=True, null= True)
+    vlan = models.ForeignKey(Vlan, verbose_name=u'Vlan', blank=True, null= True)
     adm_status = models.CharField(u'Административный статус', max_length=1, choices=settings.ADM_STATUSES, default=settings.STATUS_NEW)
     speed_in = models.PositiveIntegerField(default=0, blank=True, null=True)
     speed_out = models.PositiveIntegerField(default=0, blank=True, null=True)
