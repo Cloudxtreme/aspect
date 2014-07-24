@@ -15,7 +15,7 @@ from django.db.models import Max
 def notice_email_del(request,  abonent_id, notice_id):
     EmailMessage.objects.get(pk=notice_id).delete()
     if abonent_id == '0':
-        return HttpResponseRedirect(reverse('email_all'),args=['0'])
+        return HttpResponseRedirect(reverse('email_all', args=[0]))
     else:
         return HttpResponseRedirect(reverse('for_abonent', args=[abonent_id]))
 
