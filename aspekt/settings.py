@@ -48,6 +48,7 @@ INSTALLED_APPS = (
     'notice',
     'contacts',
     'devices',
+    'tinymce',
 )
 
 MIDDLEWARE_CLASSES = (

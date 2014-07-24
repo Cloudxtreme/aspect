@@ -5,6 +5,7 @@ from datetime import datetime
 from smtplib import SMTP_SSL as SMTP       # this invokes the secure SMTP protocol (port 465, uses SSL)
 # from smtplib import SMTP                  # use this for standard SMTP protocol   (port 25, no encryption)
 from email.MIMEText import MIMEText
+from tinymce.models import HTMLField
 from django.conf import settings
 # from users.models import Abonent
 import sys
@@ -83,7 +84,8 @@ class EmailMessage(models.Model):
     abonent = models.ForeignKey('users.Abonent', verbose_name=u'Абонент', blank=True, null=True)
     destination = models.CharField(u'Получатель', max_length=70)
     subject = models.CharField(u'Тема', max_length=70)
-    content = models.TextField(u'Сообщение')
+    # content = models.TextField(u'Сообщение')
+    content = HTMLField(u'Сообщение')
     date = models.DateTimeField(default=datetime.now, verbose_name=u'Дата рассылки')
     sent = models.BooleanField(u'Отправлено', default=False)
     # group = models.ForeignKey(GroupEmailMessage, verbose_name=u'Групповая рассылка', blank=True, null=True)

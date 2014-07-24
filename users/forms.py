@@ -1,6 +1,7 @@
 ﻿from django import forms
 from django.contrib.auth import authenticate
 from users.models import Abonent, Service, Plan, TypeOfService, Segment, Agent, Passport, Detail
+from vlans.models import Vlan
 from users.fields import JSONWidget
 from bootstrap3_datetime.widgets import DateTimePicker
 from django.forms.extras.widgets import SelectDateWidget
@@ -86,6 +87,7 @@ class SearchForm(forms.ModelForm):
         }
         
 class ServiceForm(forms.ModelForm):
+    # team = forms.ModelChoiceField(queryset=Vlan.objects.order_by('number'))
     def __init__(self, *args, **kwargs):
         super(ServiceForm, self).__init__(*args, **kwargs)
         # adding css classes to widgets without define the fields:

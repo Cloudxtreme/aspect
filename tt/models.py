@@ -3,6 +3,7 @@ from django.db import models
 from datetime import datetime
 from django.contrib.auth.models import User
 from users.models import Abonent
+from tinymce.models import HTMLField
 
 TT_PREFIX = u''
 
@@ -29,7 +30,8 @@ class TroubleTicket(models.Model):
     number = models.CharField(u'Номер', max_length=30, default=getnumber, unique=True)
     performer = models.ForeignKey(User, verbose_name=u'Исполнитель')
     category = models.ForeignKey(TroubleTicketCategory,verbose_name='Тип обращения')
-    description = models.TextField(u'Описание')
+    # description = models.TextField(u'Описание')
+    description = HTMLField(u'Описание')
     create_date = models.DateTimeField(u'Дата создания', default=datetime.now)
     solve_date = models.DateTimeField(u'Дата закрытия', blank=True, null=True)
 
@@ -44,7 +46,8 @@ class TroubleTicket(models.Model):
 class TroubleTicketComment(models.Model):
     tt = models.ForeignKey(TroubleTicket,verbose_name=u'Обращение')
     author = models.ForeignKey(User, verbose_name=u'Комментатор')
-    comment = models.TextField(u'Описание')
+    # comment = models.TextField(u'Описание')
+    comment = HTMLField(u'Описание')
     create_date = models.DateTimeField(u'Дата создания', auto_now_add=True)
 
     class Meta:
