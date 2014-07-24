@@ -22,6 +22,7 @@ import re
 # """
 
 # subject="Sent from Python"
+
 # class GroupEmailMessage(models.Model):
 #     PERIOD = (
 #         ('0', 'Не повторять'),
@@ -36,24 +37,46 @@ import re
 #     permited = models.BooleanField(u'Разрешено к отправке', default=False)
 #     done = models.BooleanField(u'Выполнена', default=False)
 #     periodic = models.CharField(u'Повторять', max_length=1, choices=PERIOD)
+#     balance_lt
+#     balance_gt
+#     utype
+#     is_credit
+#     status
 
-    # def create_messages(self):
-    #     for item in abonent_list:
-    #             abonent = Abonent.objects.get(pk=item)
-    #             # здесь подставновка значения поля вместо его имени!
-    #             filtered_content = self.content
-    #             for field in abonent.__dict__.keys():
-    #                 filtered_content=filtered_content.replace('[%s]' % field, '%s' % abonent.__dict__[field] )
+#     def create_messages(self):
+#         status = form.cleaned_data['status']
+#         utype = form.cleaned_data['utype']
+#         is_credit=form.cleaned_data['is_credit']
+#         balance_lt=form.cleaned_data['balance_lt']
+#         balance_gt=form.cleaned_data['balance_gt']
+#         abonent_list = Abonent.objects.all()
+#         if status:
+#             abonent_list = abonent_list.filter(status__in=status)
+#         if utype:
+#             abonent_list = abonent_list.filter(utype__in=utype)
+#         if is_credit:
+#             abonent_list = abonent_list.filter(is_credit__in=is_credit)
+#         if balance_lt or balance_lt==0:
+#             abonent_list = abonent_list.filter(balance__lte=balance_lt)
+#         if balance_gt or balance_gt==0:
+#             abonent_list = abonent_list.filter(balance__gte=balance_gt)
 
-    #             if  abonent.notice_email:
-    #                 eList += [EmailMessage(abonent = abonent,
-    #                                        destination = abonent.notice_email,
-    #                                        subject=self.subject,
-    #                                        content=filtered_content,
-    #                                        date=self.date,
-    #                                        group=self
-    #                                        group_id=1 + (EmailMessage.objects.all().aggregate(Max('group_id'))['group_id__max'] or 0) )]
-    #         EmailMessage.objects.bulk_create(eList)
+#         for item in abonent_list:
+#                 abonent = Abonent.objects.get(pk=item)
+#                 # здесь подставновка значения поля вместо его имени!
+#                 filtered_content = self.content
+#                 for field in abonent.__dict__.keys():
+#                     filtered_content=filtered_content.replace('[%s]' % field, '%s' % abonent.__dict__[field] )
+
+#                 if  abonent.notice_email:
+#                     eList += [EmailMessage(abonent = abonent,
+#                                            destination = abonent.notice_email,
+#                                            subject=self.subject,
+#                                            content=filtered_content,
+#                                            date=self.date,
+#                                            group=self,
+#                                            group_id=1 + (EmailMessage.objects.all().aggregate(Max('group_id'))['group_id__max'] or 0) )]
+#         EmailMessage.objects.bulk_create(eList)
 
 
 class EmailMessage(models.Model):
