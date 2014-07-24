@@ -80,11 +80,8 @@ class PromisedPays(models.Model):
 class WriteOff(models.Model):
     def getnumber():
         # no = WriteOff.objects.filter(valid=True).count()
-        no = WriteOff.objects.all().order_by("-id")[0].id
-        if no == None:
-            return '1'
-        else:
-            return WRITEOFF_PREFIX + u'%06d' % (no + 1)
+        no = WriteOff.objects.all().order_by("-id")[0].id or 1
+        return WRITEOFF_PREFIX + u'%06d' % (no + 1)
 
     abonent = models.ForeignKey(Abonent, verbose_name=u'Абонент')
     service = models.ForeignKey(Service, verbose_name=u'Услуга', blank=True, null=True)
@@ -126,11 +123,8 @@ class WriteOff(models.Model):
 class Payment(models.Model):
     def getnumber():
         # no = Payment.objects.filter(valid=True).count()
-        no = Payment.objects.all().order_by("-id")[0].id
-        if no == None:
-            return '1'
-        else:
-            return PAYS_PREFIX + u'%06d' % (no + 1)
+        no = Payment.objects.all().order_by("-id")[0].id or 1
+        return PAYS_PREFIX + u'%06d' % (no + 1)
 
     abon = models.ForeignKey(Abonent, verbose_name=u'Абонент')
     top = models.ForeignKey(PaymentSystem, verbose_name=u'Платежная система')

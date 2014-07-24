@@ -219,7 +219,7 @@ class Service(models.Model):
             return False
 
         else:
-            if self.status in [STATUS_ACTIVE, STATUS_OUT_OF_BALANCE] and new_status in [settings.STATUS_ARCHIVED, settings.STATUS_PAUSED, settings.STATUS_NEW]:
+            if self.status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE] and new_status in [settings.STATUS_ARCHIVED, settings.STATUS_PAUSED, settings.STATUS_NEW]:
                 self.stop(newstatus=new_status)
             elif self.status in [settings.STATUS_ARCHIVED, settings.STATUS_PAUSED, settings.STATUS_NEW] and new_status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE]:
                 self.start(newstatus=new_status)
