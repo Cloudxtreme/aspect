@@ -1,0 +1,42 @@
+{% extends "index.html" %}
+{% block main %} 
+<div class="page-header">
+  <h2 class="sub-header">Список обещанных платежей</h2>
+</div>
+{% if promisedpays_list %}
+    <table class="table  h6">
+    <thead>
+          <tr>
+            <th>Абонент</th>
+            <th>Дата начала</th>
+            <th>Дата завершения</th>
+            <th>Оплачен</th>
+            <th>Сумма</th>
+            <th>Оператор</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+    {% for pay in promisedpays_list %}
+    <tr {% if not pay.pay_onaccount %}class="active"{% endif%}>
+            <td><a href="{% url 'abonent_info' pay.abonent.id %}">{{ pay.abonent }}</a></td>
+            <td>{{ pay.datestart }}</td>
+            <td>{{ pay.datefinish }}</td>
+            <td>{% if pay.repaid %}Да{% else %}Нет{% endif %}</td>
+            <td>{{ pay.summ }} руб.</td>
+            <td>{% if pay.user %} {{ pay.user.get_full_name }} {% else %} Пользовательский платеж {% endif %}</td>
+            <td>{% if pay.pay_onaccount %}
+            <a href="{% url 'closepromisedpay' pay.abonent.id pay.pk %}" role="button" class="btn btn-xs btn-primary">
+            <span class="glyphicon glyphicon-off"></span> Завершить</a>
+            {% else %}Платеж завершен{% endif%}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+</br>
+{% else %}
+  <h3 class="sub-header">Платежи не найдены</h3>
+{% endif %} 
+
+{% endblock %}

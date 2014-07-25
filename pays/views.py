@@ -36,6 +36,14 @@ def add_promisedpay(request, abonent_id):
 	return render(request, 'abonent/add_promisedpay.html', {'form': form, 'abonent' : abonent})
 
 @login_required
+def promisedpays_all(request):
+    promisedpays_list = PromisedPays.objects.filter(pay_onaccount=True).order_by('-pk')    
+
+    return render_to_response('promisedpays_all.html', { 
+                                'promisedpays_list' : promisedpays_list, }, 
+                              context_instance = RequestContext(request))
+
+@login_required
 def promisedpays(request, abonent_id):
     try:
         abonent = Abonent.objects.get(pk=abonent_id)
