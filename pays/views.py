@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*- 
 from django.shortcuts import render
 from django.template import RequestContext
-from pays.models import Payment, WriteOff, PromisedPays
+from pays.models import Payment, WriteOff, PromisedPays, PaymentSystem
 from users.models import Abonent, Service
-from pays.forms import PaymentForm, WriteOffForm, PromisedPayForm
+from pays.forms import PaymentForm, WriteOffForm, PromisedPayForm,QuickPaymentForm
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response, HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -56,6 +56,25 @@ def promisedpays(request, abonent_id):
                                 'promisedpays' : promisedpays, 
                                 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() }, 
                               context_instance = RequestContext(request))
+
+@login_required
+def add_quickpayment(request):
+	message = ''
+	if request.method == 'POST':
+		form = QuickPaymentForm(request.POST)
+		if form.is_valid():
+			payment = form.save(commit=False)
+			payment.top = PaymentSystem.objects.get(pk=3)
+			payment.user = request.user
+			payment.save()
+			# return HttpResponseRedirect(reverse('payments', args=[abonent_id]))
+			message  = "Платеж на сумму %s руб для %s зачислен" % (payment.sum, payment.abon)
+			form = QuickPaymentForm()
+		else:
+			message = "Ошибки в форме"
+	else:
+		form = QuickPaymentForm()
+	return render(request, 'add_quickpayment.html', {'form': form, 'message' : message })
 
 @login_required
 def add_payment(request, abonent_id):

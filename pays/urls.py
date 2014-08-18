@@ -4,6 +4,7 @@ from django.conf import settings
 
 urlpatterns = patterns('',
     url(r'^promisedpays/all$','pays.views.promisedpays_all', name='promisedpays_all'),
+    url(r'^quickpay/add$','pays.views.add_quickpayment', name='add_quickpayment'),
     url(r'^abonent/(?P<abonent_id>\d+)/payments/all$','pays.views.abonent_payments', name='payments'),
     url(r'^abonent/(?P<abonent_id>\d+)/payoffs/all$','pays.views.abonent_payoffs', name='writeoffs'),
     url(r'^abonent/(?P<abonent_id>\d+)/payoffs/add$','pays.views.add_payoff', name='addpayoff'),

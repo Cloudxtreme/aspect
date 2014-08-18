@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*- 
 from django import forms
 from bootstrap3_datetime.widgets import DateTimePicker
 from pays.models import WriteOff, Payment, PromisedPays
+from users.models import Abonent
 
 class WriteOffForm(forms.ModelForm):
     class Meta:
@@ -33,6 +35,19 @@ class PaymentForm(forms.ModelForm):
         widgets = {
             'num': forms.TextInput(attrs={'class': 'form-control',}),
             'top': forms.Select(attrs={'class': 'form-control',}),
+            'sum': forms.TextInput(attrs={'class': 'form-control',}),
+            'date': DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
+                                       "pickSeconds": False, }),
+        }
+
+class QuickPaymentForm(forms.ModelForm):
+    abon = forms.ModelChoiceField(queryset=Abonent.objects.order_by('title'),widget=forms.Select(attrs={'class':'form-control'}), label = u'Абонент')
+    class Meta:
+        model = Payment
+        fields = ['abon', 'sum', 'date']  
+        
+        widgets = {
+            # 'abon': forms.Select(attrs={'class': 'form-control',}),
             'sum': forms.TextInput(attrs={'class': 'form-control',}),
             'date': DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
                                        "pickSeconds": False, }),

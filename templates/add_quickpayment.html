@@ -1,0 +1,43 @@
+{% extends "index.html" %}
+
+{% block script %}
+    {{ form.media }}
+{% endblock %}
+
+{% block main %} 
+{% if message %}
+    <div class="alert alert-{% if form.errors %}danger{% else %}success{% endif %}" role="alert">{{ message }}</div>
+{% endif %}
+
+<h2>Данные о платеже</h2>     
+<hr>
+<form method="post" class="form-horizontal" role="form">{% csrf_token %}
+    <div class="form-group">
+        <label for="id_num" class="col-sm-3 control-label">Абонент
+        <small>{{ form.num.errors }}</small></label>
+        <div class="col-sm-3">
+            {{ form.abon }}    
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="id_num" class="col-sm-3 control-label">Сумма
+        <small>{{ form.sum.errors }}</small></label>
+        <div class="col-sm-3">
+            {{ form.sum }}
+        </div>
+    </div>    
+    <div class="form-group">
+        <label for="id_date" class="col-sm-3 control-label">Дата
+        <small>{{ form.date.errors }}</small></label>
+        <div class="col-sm-3">
+            {{ form.date }}
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <button id="btn_save" class="btn btn-primary" type="submit">Сохранить <span class="glyphicon glyphicon-save"></span></button>
+        </div>
+    </div>
+</form>
+
+{% endblock %}
