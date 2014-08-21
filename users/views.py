@@ -165,12 +165,20 @@ def abonent_search(request):
             is_credit=form.cleaned_data['is_credit']
             balance_lt=form.cleaned_data['balance_lt']
             balance_gt=form.cleaned_data['balance_gt']
+            tos=form.cleaned_data['tos']
+            print status
             request.session['status'] = status
             request.session['utype'] = utype
             request.session['is_credit'] = is_credit
             request.session['balance_lt'] = balance_lt
             request.session['balance_gt'] = balance_gt
-            abonent_list = Abonent.obj.filter_list(status=status,utype=utype,is_credit=is_credit,balance_lt=balance_lt,balance_gt=balance_gt)
+            request.session['tos'] = tos
+            abonent_list = Abonent.obj.filter_list(status=status,
+                                                    utype=utype,
+                                                    is_credit=is_credit,
+                                                    balance_lt=balance_lt,
+                                                    balance_gt=balance_gt,
+                                                    tos=tos)
     else:
         form = AbonentFilterForm()
 
@@ -179,7 +187,8 @@ def abonent_search(request):
                                            utype=request.session['utype'],
                                            is_credit=request.session['is_credit'],
                                            balance_lt=request.session['balance_lt'],
-                                           balance_gt=request.session['balance_gt'])
+                                           balance_gt=request.session['balance_gt'],
+                                           tos=request.session['tos'])
     paginator = Paginator(abonent_list, 10)
 
     page = request.GET.get('page')

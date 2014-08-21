@@ -2,7 +2,7 @@
 from django import forms
 from bootstrap3_datetime.widgets import DateTimePicker
 # from django.contrib.auth.models import User
-from users.models import Abonent
+from users.models import Abonent, TypeOfService, Plan
 from django.conf import settings
 from datetime import datetime
 
@@ -12,6 +12,7 @@ class AbonentFilterForm(forms.Form):
         self.fields['status'].choices = settings.STATUSES
         self.fields['utype'].choices = settings.U_TYPE
         self.fields['is_credit'].choices = settings.PAYTYPE
+        
 
     balance_lt = forms.IntegerField(
         label=u'Баланс <', 
@@ -44,6 +45,22 @@ class AbonentFilterForm(forms.Form):
         required=False,
         # initial=False,
         widget=forms.SelectMultiple(attrs={'class' : 'form-control select2-multiple','multiple' : 'multiple'})
+     )
+
+    plan = forms.MultipleChoiceField(
+        choices =Plan.objects.all().values_list('pk','title'),
+        label=u'Тарифный план', 
+        required=False,
+        # initial=False,
+        widget=forms.SelectMultiple(attrs={'class' : 'form-control select2-multiple','multiple' : 'multiple'}),
+     )
+
+    tos = forms.MultipleChoiceField(
+        choices =TypeOfService.objects.all().values_list('pk','title'),
+        label=u'Тип услуги', 
+        required=False,
+        # initial=False,
+        widget=forms.SelectMultiple(attrs={'class' : 'form-control select2-multiple','multiple' : 'multiple'}),
      )
 
 class GroupEmailForm(forms.Form):
