@@ -1,6 +1,6 @@
 from django.contrib import admin
 from users.models import TypeOfService, Plan, Service, Segment, Abonent, Agent, Bank, Detail, Passport, ServiceSuspension
-from django.contrib.admin.models import LogEntry
+# from django.contrib.admin.models import LogEntry
 
 class ServiceInline(admin.TabularInline):
     model = Service
@@ -32,7 +32,7 @@ class LogEntryAdmin(admin.ModelAdmin):
     search_fields = ['user__username',]
     date_hierarchy = 'action_time'
 
-admin.site.register(LogEntry, LogEntryAdmin)
+# admin.site.register(LogEntry, LogEntryAdmin)
 
 admin.site.register(TypeOfService)
 admin.site.register(Plan)

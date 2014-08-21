@@ -45,11 +45,28 @@
         <ol class="breadcrumb">
             <li><a href="{% url 'abonent_info' abonent.id %}">Абонент</a></li>
             <li><a href="{% url 'users.views.abonent_services' abonent.id %}">Услуги</a></li>
-            <li class="active">Изменение</li>
+            <li class="active">{% if new %}Добавление{% else %}Изменение{% endif %}</li>
         </ol>
 {% endblock %}
 
 {% block pages %}
+
+{% if form.errors %}
+    <div class="alert alert-danger" role="alert">
+    <p>Внимание! Ошибка заполнения формы.</p>
+    {% for field in form %}
+        {% if field.errors %}
+            <p>
+            <b>{{ field.label }}</b>
+            {% for error in field.errors %} 
+                - {{ error }} 
+            {% endfor %}
+            </p>
+        {% endif %}
+    {% endfor %}
+    </div>
+{% endif %}
+
 <h2>{% if new %} Добавление новой услуги{% else %}Изменение параметров услуги {% endif %}</h2>
 <hr>
 <form method="post" class="form-horizontal" role="form">{% csrf_token %}

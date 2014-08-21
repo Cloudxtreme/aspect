@@ -49,6 +49,7 @@ INSTALLED_APPS = (
     'contacts',
     'devices',
     'tinymce',
+    'logentry_admin',
 )
 
 MIDDLEWARE_CLASSES = (
