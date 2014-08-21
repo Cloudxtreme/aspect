@@ -57,7 +57,6 @@
                     <li><a href={% url "users.views.abonent_add" 0 %}>Добавить абонента</a></li>
                     <li><a href={% url "email_all" 0 %}>Уведомления</a></li>
                     <li><a href={% url "email_group" %}>Групповые уведомления</a></li>
-                    <li><a href={% url "promisedpays_all" %}>Обещанные платежи</a></li>
                     <li><a href={% url "add_quickpayment" %}>Внести платеж</a></li>
                 </ul>
             </li>
@@ -68,6 +67,8 @@
                     <li><a href={% url "journaling.views.report_paysbymonth" %}>Платежи по дням месяца</a></li>
                     <li><a href={% url "journaling.views.report_paysbyweek" %}>Платежи по дням недели</a></li>
                     <li><a href={% url "journaling.views.report_sumbymonth" %}>Платежи по месяцам</a></li>
+                    <li><a href={% url "payments_all" %}>Поступившие платежи</a></li>
+                    <li><a href={% url "promisedpays_all" %}>Обещанные платежи</a></li>
                 </ul>
             </li>
             <li><a href={% url "notes.views.notes_all" %}>Заметки <span class="badge">{{ notes }}</span></a></li>

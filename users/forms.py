@@ -87,7 +87,7 @@ class SearchForm(forms.ModelForm):
         }
         
 class ServiceForm(forms.ModelForm):
-    vlan = forms.ModelChoiceField(queryset=Vlan.objects.order_by('number'))
+    vlan = forms.ModelChoiceField(queryset=Vlan.objects.order_by('number'),required=False)
     def __init__(self, *args, **kwargs):
         super(ServiceForm, self).__init__(*args, **kwargs)
         # adding css classes to widgets without define the fields:

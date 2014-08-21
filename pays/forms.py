@@ -3,6 +3,20 @@ from django import forms
 from bootstrap3_datetime.widgets import DateTimePicker
 from pays.models import WriteOff, Payment, PromisedPays
 from users.models import Abonent
+from datetime import datetime
+
+class DateChoiceForm(forms.Form):
+    datestart = forms.DateField(label=u'Дата начала', widget=DateTimePicker(options={"format": "YYYY-MM-DD",
+                                       "pickTime": False, 'showToday': True }))
+    datefinish = forms.DateField(label=u'Дата окончания', widget=DateTimePicker(options={"format": "YYYY-MM-DD",
+                                       "pickTime": False, "showToday": True, }))
+
+    # def clean(self):
+    #     cleaned_data = super(DateChoiceForm, self).clean()
+    #     if not self.errors:
+    #         if self.datefinish < self.datestart:
+    #             raise forms.ValidationError(u'Дата окончания не может быть раньше даты начала')
+    #     return cleaned_data
 
 class WriteOffForm(forms.ModelForm):
     class Meta:

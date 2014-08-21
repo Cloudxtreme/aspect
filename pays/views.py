@@ -3,12 +3,13 @@ from django.shortcuts import render
 from django.template import RequestContext
 from pays.models import Payment, WriteOff, PromisedPays, PaymentSystem
 from users.models import Abonent, Service
-from pays.forms import PaymentForm, WriteOffForm, PromisedPayForm,QuickPaymentForm
+from pays.forms import PaymentForm, WriteOffForm, PromisedPayForm,QuickPaymentForm, DateChoiceForm
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.db.models import Avg, Max, Min, Sum
 from django.contrib.auth.models import User
+from datetime import timedelta
 
 # Create your views here.close_promisedpay
 @login_required
@@ -34,6 +35,24 @@ def add_promisedpay(request, abonent_id):
 	else:
 		form = PromisedPayForm(initial={'summ': round(abs(0 - abonent.balance),2) })
 	return render(request, 'abonent/add_promisedpay.html', {'form': form, 'abonent' : abonent})
+
+@login_required
+def payments_all(request):
+	payments_list = Payment.objects.none()
+	if request.method == 'POST':
+		form = DateChoiceForm(request.POST)
+		if form.is_valid():
+			datestart = form.cleaned_data['datestart']
+			datefinish = form.cleaned_data['datefinish']
+			datefinish = datefinish + timedelta(days=1)
+			payments_list = Payment.objects.filter(date__range=[datestart, datefinish],valid=True).order_by('-date')      
+	else:
+		# payments_list = Payment.objects.filter(valid=True).order_by('-date')    
+		form = DateChoiceForm()
+	return render_to_response('payments_all.html', { 
+                                'payments_list' : payments_list,
+                                'form' : form }, 
+                              context_instance = RequestContext(request))
 
 @login_required
 def promisedpays_all(request):

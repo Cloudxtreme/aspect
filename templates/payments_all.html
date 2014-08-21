@@ -1,0 +1,51 @@
+{% extends "index.html" %}
+
+{% block script %}
+    {{ form.media }}
+{% endblock %}
+
+{% block main %} 
+<div class="page-header">
+  <h2 class="sub-header">Список поступивших платежей</h2>
+</div>
+
+<form method="post" class="form-inline" role="form">{% csrf_token %}
+    <div class="form-group">
+    <div class="col-md-2">
+        {{ form.datestart }}
+    </div>
+    <div class="col-md-2">
+        {{ form.datefinish }}
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-default">Отфильтровать <span class="glyphicon glyphicon-filter"></span></button>
+    </div>
+    </div>
+</form>
+<hr>
+<h3>Найдено {{ payments_list.count }} платежей</h3>
+{% if payments_list %}
+<table class="table  h6">
+    <thead>
+          <tr>
+            <th>Дата</th>
+            <th>Сумма</th>
+            <th>Платежная система</th>
+            <th>Абонент</th>
+          </tr>
+        </thead>
+        <tbody>
+    {% for pay in payments_list %}
+        <tr>
+            <td>{{ pay.date }}</td>
+            <td>{{ pay.sum }} руб.</td>
+            <td>{{ pay.top }}</td>
+            <td><a href="{% url 'abonent_info' pay.abon.id %}">{{ pay.abon }}</a></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+</br>
+{% endif %} 
+
+{% endblock %}
