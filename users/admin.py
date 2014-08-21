@@ -1,5 +1,6 @@
 from django.contrib import admin
 from users.models import TypeOfService, Plan, Service, Segment, Abonent, Agent, Bank, Detail, Passport, ServiceSuspension
+from django.contrib.admin.models import LogEntry
 
 class ServiceInline(admin.TabularInline):
     model = Service
@@ -24,6 +25,14 @@ class AbonentAdmin(admin.ModelAdmin):
         PassportInline,
         DetailInline,
     ]
+
+class LogEntryAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'action_time', 'user', 'content_type', 'object_id', 'object_repr', 'action_flag', 'change_message')
+    list_filter = ('content_type',)
+    search_fields = ['user__username',]
+    date_hierarchy = 'action_time'
+
+admin.site.register(LogEntry, LogEntryAdmin)
 
 admin.site.register(TypeOfService)
 admin.site.register(Plan)

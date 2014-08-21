@@ -19,7 +19,7 @@ class WriteOffForm(forms.ModelForm):
             'date': DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
                                        "pickSeconds": False, }),
         }
-   
+
 
     # def __init__(self, *args, **kwargs):
     #     super(WriteOffForm, self).__init__(*args, **kwargs)
