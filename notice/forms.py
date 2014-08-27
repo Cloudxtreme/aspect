@@ -12,8 +12,21 @@ class AbonentFilterForm(forms.Form):
         self.fields['status'].choices = settings.STATUSES
         self.fields['utype'].choices = settings.U_TYPE
         self.fields['is_credit'].choices = settings.PAYTYPE
-        
 
+    contract = forms.CharField(
+        label=u'Номер договора', 
+        required=False,
+        # initial=0,
+        widget=forms.TextInput(attrs={'class' : 'form-control',})
+     )
+
+    title = forms.CharField(
+        label=u'Название', 
+        required=False,
+        # initial=0,
+        widget=forms.TextInput(attrs={'class' : 'form-control',})
+     )
+    
     balance_lt = forms.IntegerField(
         label=u'Баланс <', 
         required=False,

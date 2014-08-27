@@ -160,13 +160,16 @@ def abonent_search(request):
     if request.method == 'POST': # If the form has been submitted...
         form = AbonentFilterForm(request.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
+            contract = form.cleaned_data['contract']
+            title = form.cleaned_data['title']
             status = form.cleaned_data['status']
             utype = form.cleaned_data['utype']
             is_credit=form.cleaned_data['is_credit']
             balance_lt=form.cleaned_data['balance_lt']
             balance_gt=form.cleaned_data['balance_gt']
             tos=form.cleaned_data['tos']
-            print status
+            request.session['contract'] = contract
+            request.session['title'] = title
             request.session['status'] = status
             request.session['utype'] = utype
             request.session['is_credit'] = is_credit
@@ -178,7 +181,9 @@ def abonent_search(request):
                                                     is_credit=is_credit,
                                                     balance_lt=balance_lt,
                                                     balance_gt=balance_gt,
-                                                    tos=tos)
+                                                    tos=tos,
+                                                    title=title,
+                                                    contract=contract)
     else:
         form = AbonentFilterForm()
 
@@ -188,7 +193,9 @@ def abonent_search(request):
                                            is_credit=request.session['is_credit'],
                                            balance_lt=request.session['balance_lt'],
                                            balance_gt=request.session['balance_gt'],
-                                           tos=request.session['tos'])
+                                           tos=request.session['tos'],
+                                           title=request.session['title'],
+                                           contract=request.session['contract'],)
     paginator = Paginator(abonent_list, 10)
 
     page = request.GET.get('page')

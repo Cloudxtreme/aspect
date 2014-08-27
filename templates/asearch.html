@@ -9,58 +9,54 @@
         $(document).ready(function() { $("select").select2(); });
     </script>
     <script type="text/javascript">
-    $(function(){
-        $("select#id_tos").change(function(){
-            $.getJSON("/ajax/plans/",{id:+$(this).val()}, function(j) {
-                var options = '<option value="">--------- </option>';
-                for (var i = 0; i < j.length; i++) {
-                options += '<option value="' + parseInt(j[i].pk) + '">' + j[i].fields['title'] + '</option>';
-                }
-                $("#id_plan").html(options);
-                $("#id_plan option:first").attr('selected', 'selected');
-                $("#id_plan").attr('disabled', false);
-                })
-            $("#id_tos").attr('selected', 'selected');
+        $(function(){
+            $("select#id_tos").change(function(){
+                $.getJSON("/ajax/plans/",{id:+$(this).val()}, function(j) {
+                    var options = '<option value="">--------- </option>';
+                    for (var i = 0; i < j.length; i++) {
+                    options += '<option value="' + parseInt(j[i].pk) + '">' + j[i].fields['title'] + '</option>';
+                    }
+                    $("#id_plan").html(options);
+                    $("#id_plan option:first").attr('selected', 'selected');
+                    $("#id_plan").attr('disabled', false);
+                    })
+                $("#id_tos").attr('selected', 'selected');
+            })
         })
-    })
     </script>
-    
 {% endblock %}
 
 {% block main %} 
-<div class="jumbotron">
-<!--
-<form class="form-horizontal" role="form" action={% url "users.views.abonent_search" %} method="post">{% csrf_token %}
-    <div class="form-group">
-        {{ form.as_table }}
-    </div>
-    <p><button type="submit" class="btn btn-primary btn-lg">Найти</button></p>
-</form> -->
-<form method="post" class="form-horizontal" role="form">{% csrf_token %}
-{% for field in form %}
+<div class="row">
+<div class="jumbotron col-lg-6 col-lg-offset-3">
+    <h2>Форма поиска абонентов</h2>
+    <br>
+    <form method="post" class="form-horizontal" role="form">{% csrf_token %}
+    {% for field in form %}
+            <div class="form-group">
+                <label class="col-lg-4 control-label">
+                    <small>{{ field.errors }}</small>
+                    {{ field.label_tag }}
+                </label>
+                <div class="col-lg-8">
+                    {{ field }}
+                </div>
+            </div>
+        {% endfor %}
         <div class="form-group">
-            <label class="col-sm-2 control-label">
-                <small>{{ field.errors }}</small>
-                {{ field.label_tag }}
-            </label>
-            <div class="col-sm-4">
-                {{ field }}
+            <div class="pull-right">
+                <button class="btn btn-primary btn-lg" type="submit">Найти <span class="glyphicon glyphicon-search"></span>
+                </button>
             </div>
         </div>
-    {% endfor %}
-    <div class="form-group">
-        <div class="col-sm-offset-2">
-            <button class="btn btn-primary btn-lg" type="submit">Найти <span class="glyphicon glyphicon-search"></span>
-            </button>
-        </div>
-    </div>
-</form>
+    </form>
+</div>
 </div>
 {% if abonents %}
-{% load dict_extras %}
-<div class="page-header">
-    <h2 class="sub-header">Найдено абонентов: {{ abonent_list_count }}</h2>
-    <ul class="pagination pagination-lg">
+    {% load dict_extras %}
+    <div class="page-header">
+        <h2 class="sub-header">Найдено абонентов: {{ abonent_list_count }}</h2>
+        <ul class="pagination pagination-lg">
             {% if abonents.has_previous %}
                <li class="previous"><a href="?page={{ abonents.previous_page_number }}">&laquo;</a><li>
 
@@ -70,34 +66,34 @@
 
                 <li class="next"><a href="?page={{ abonents.next_page_number }}">&raquo;</a></li>
             {% endif %}
-            </ul>
-</div>
+        </ul>
+    </div>
 
-<div class="col-lg-12">
-    <table class="table table-striped table-hover">
-        <thead>
-          <tr>
-            <th>Договор</th>
-            <th>Абонент</th>
-            <th></th>
-            <th>Баланс</th>
-            <th>Статус</th>
-          </tr>
-        </thead>
-        <tbody>
-        {% for abonent in abonents %}
-        <tr>
-            <td>{{ abonent.contract }}</td>
-            <td><a href="{% url 'abonent_info' abonent.id %}">{{ abonent.title }}</a>
-            <p><small>{{ abonent.get_utype_display }}</small><p></td>
-            <td></td>
-            <td>{{ abonent.balance|floatformat:2 }} руб.</td>
-            <td class={{ abonent.status|get_color }}>{{ abonent.get_status_display }}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
+    <div class="col-lg-12">
+        <table class="table table-striped table-hover">
+            <thead>
+              <tr>
+                <th>Договор</th>
+                <th>Абонент</th>
+                <th></th>
+                <th>Баланс</th>
+                <th>Статус</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for abonent in abonents %}
+            <tr>
+                <td>{{ abonent.contract }}</td>
+                <td><a href="{% url 'abonent_info' abonent.id %}">{{ abonent.title }}</a>
+                <p><small>{{ abonent.get_utype_display }}</small><p></td>
+                <td></td>
+                <td>{{ abonent.balance|floatformat:2 }} руб.</td>
+                <td class={{ abonent.status|get_color }}>{{ abonent.get_status_display }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endif %}
 <!--<div class="col-lg-6">
     <div class="panel panel-primary">
