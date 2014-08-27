@@ -273,7 +273,7 @@ class Service(models.Model):
         self.status = newstatus
         today = datetime.datetime.today()
         qty_days = calendar.mdays[today.month]
-        summ = round(self.plan.price * (qty_days - today.day)/qty_days,2)
+        summ = self.plan.price * (qty_days - today.day)/qty_days
         if summ > 0:
             top = pays.models.PaymentSystem.objects.get(pk=4)
             payment = pays.models.Payment(abon=self.abon, top=top, sum=summ, date=datetime.datetime.now())
@@ -287,7 +287,7 @@ class Service(models.Model):
         if self.abon.is_credit == 'R':
             today = datetime.datetime.today()
             qty_days = calendar.mdays[today.month]
-            summ = round(self.plan.price * (qty_days - today.day + 1)/qty_days,2)
+            summ = self.plan.price * (qty_days - today.day + 1)/qty_days
             comment = u'Абонентская плата за %s дней месяца' % (qty_days - today.day + 1)
             wot = pays.models.WriteOffType.objects.get(pk=4)
             write_off = pays.models.WriteOff(abonent=self.abon, service=self, wot=wot,summ=summ, comment=comment, date=datetime.datetime.now())

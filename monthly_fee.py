@@ -27,12 +27,16 @@ for item in Service.objects.filter(status='A'):
     else:
         comment = descr + this_month
     summ = item.plan.price
+
     # Доп. проверка на старт услуги в предыдущем месяце
     if (item.datestart.month == yesterday.month) and (item.datestart.year == yesterday.year):
         qty_days = calendar.mdays[item.datestart.month]
-        summ = round(item.plan.price * (qty_days - item.datestart.day + 1)/qty_days,2)
+        # if item.datefinish and (item.datefinish.month == yesterday.month) and (item.datefinish.year == yesterday.year):
+            # summ = item.plan.price * (item.datefinish.day - item.datestart.day + 1)/qty_days 
+        # else:
+        summ = item.plan.price * (qty_days - item.datestart.day + 1)/qty_days
         comment = 'Абонентская плата за %s за %s дней месяца' % (item.datestart.strftime('%B %Y'), qty_days - item.datestart.day + 1)
-        print item.id, summ, comment
+        print summ,comment
 
     write_off = WriteOff(abonent=item.abon, service=item, wot=wot,summ=summ, date=datetime.datetime.now(), comment=comment)
-    # write_off.save()
+    write_off.save()
