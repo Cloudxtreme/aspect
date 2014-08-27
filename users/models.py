@@ -282,14 +282,16 @@ class Service(models.Model):
 
     def start(self, newstatus=settings.STATUS_ACTIVE):
         self.status = newstatus
-        today = datetime.datetime.today()
-        qty_days = calendar.mdays[today.month]
-        summ = round(self.plan.price * (qty_days - today.day + 1)/qty_days,2)
-        comment = u'Абонентская плата за %s дней месяца' % (qty_days - today.day + 1)
-        wot = pays.models.WriteOffType.objects.get(pk=4)
-        write_off = pays.models.WriteOff(abonent=self.abon, service=self, wot=wot,summ=summ, comment=comment, date=datetime.datetime.now())
         self.save()
-        write_off.save()
+        # Если предоплата, то списываем за услуги сразу. Если нет, платежи будут списаны в начале следующего месяца
+        if self.abon.is_credit == 'R':
+            today = datetime.datetime.today()
+            qty_days = calendar.mdays[today.month]
+            summ = round(self.plan.price * (qty_days - today.day + 1)/qty_days,2)
+            comment = u'Абонентская плата за %s дней месяца' % (qty_days - today.day + 1)
+            wot = pays.models.WriteOffType.objects.get(pk=4)
+            write_off = pays.models.WriteOff(abonent=self.abon, service=self, wot=wot,summ=summ, comment=comment, date=datetime.datetime.now())
+            write_off.save()
 
     def save(self, force_insert=False, force_update=False):
         is_new = True if not self.pk else False
