@@ -142,23 +142,32 @@ class Abonent(models.Model):
                 )
                 asc.save()
 
-    # Проверка на положительность баланса
+    # Установка статуса в зависимости от баланса
     def check_status(self, reason):
         old_status = self.status
-        if self.status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE]:
-            if self.is_credit == settings.PAY_BEFORE: # Предоплатников выключаем по балансу всегда
-                self.status = (settings.STATUS_ACTIVE if self.balance >= 0 else settings.STATUS_OUT_OF_BALANCE)
-            else: # Постоплатников выключаем 25 числа
-                self.status = (settings.STATUS_OUT_OF_BALANCE if self.balance < 0 and datetime.datetime.today().day > 24 else settings.STATUS_ACTIVE)
+        if self.vip:
+            self.status = settings.STATUS_ACTIVE
             super(Abonent, self).save()
             self.set_changes(reason, old_status)
+        else:
+            if self.status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE]:
+                if self.is_credit == settings.PAY_BEFORE: # Предоплатников выключаем по балансу всегда
+                    self.status = (settings.STATUS_ACTIVE if self.balance >= 0 else settings.STATUS_OUT_OF_BALANCE)
+                else: # Постоплатников выключаем 25 числа
+                    self.status = (settings.STATUS_OUT_OF_BALANCE if self.balance < 0 and datetime.datetime.today().day > 24 else settings.STATUS_ACTIVE)
+                super(Abonent, self).save()
+                self.set_changes(reason, old_status)
 
     def save(self, *args, **kwargs):
         if self.pk:
             old_status = Abonent.objects.get(pk=self.pk).status
+            last_vip_state = Abonent.objects.get(pk=self.pk).vip
             if old_status != self.status:
                 self.set_changes('Изменение статуса', old_status)
-            self.check_status('Комплексные причины')
+            if last_vip_state != self.vip:
+                self.check_status('Изменен VIP статус')
+            else:
+                self.check_status('Комплексные причины')
             super(Abonent, self).save(*args, **kwargs)
         else:
             super(Abonent, self).save(*args, **kwargs)

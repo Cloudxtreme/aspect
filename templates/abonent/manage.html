@@ -9,6 +9,7 @@
             $("#id_notice_mobile").attr('disabled', false);
             $("#id_status").attr('disabled', false);
             $("#id_is_credit").attr('disabled', false);
+            $("#id_vip").attr('disabled', false);
             $("#btn_save").show();
             $("#btn_edit").hide();
            }
@@ -19,30 +20,18 @@
 <h2>Настройки</h2>     
 <hr>
 <form method="post" class="form-horizontal" role="form">{% csrf_token %}
-    <div class="form-group">
-        <label for="id_notice_email" class="col-sm-3 control-label">E-Mail для уведомлений</label>
-        <div class="col-sm-4">
-            {{ form.notice_email }}    
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="id_notice_mobile" class="col-sm-3 control-label">Телефон для SMS уведомлений</label>
-        <div class="col-sm-4">
-            {{ form.notice_mobile }}
-        </div>
-    </div>    
-    <div class="form-group">
-        <label for="id_status" class="col-sm-3 control-label">Статус абонента</label>
-        <div class="col-sm-4">
-            {{ form.status }}
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="id_is_credit" class="col-sm-3 control-label">Форма оплаты</label>
-        <div class="col-sm-4">
-            {{ form.is_credit }}
-        </div>
-    </div>
+{% for field in form %}
+            <div class="form-group">
+                <label class="col-lg-3 control-label">
+                    <small>{{ field.errors }}</small>
+                    {{ field.label_tag }}
+                </label>
+                <div class="col-lg-4">
+                    {{ field }}
+                </div>
+            </div>
+        {% endfor %}
+
     <div class="form-group">
         <div class="col-sm-offset-3 col-sm-9">
             <button id="btn_save" class="btn btn-primary" style="display: none;" type="submit">Сохранить <span class="glyphicon glyphicon-save"></span></button>

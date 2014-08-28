@@ -11,13 +11,23 @@
             <div class="col-md-9">
                 <h2 class="sub-header">{{ abonent.title }}</h2>
                 <h6>{{ abonent.get_utype_display }}</h6>
-                <h3><span class="label label-default">{{ abonent.contract }}</span></h3>
             </div>
-            <div class="alert alert-{{ abonent.status|get_color }} col-md-3 pull-right"><strong>Статус:</strong> {{ abonent.get_status_display }}</div>
-           <div class="alert alert-info col-md-3 pull-right"><strong>Баланс:</strong> {{ abonent.balance|floatformat:2 }} руб.</div>
+            <div class="alert alert-{{ abonent.status|get_color }} col-md-3"><strong>Статус:</strong> {{ abonent.get_status_display }}</div>
         </div>
-
+        <div class="row">
+            <h3 class="col-md-9"><span class="label label-default">{{ abonent.contract }}</span></h3>
+            <div class="alert alert-info col-md-3"><strong>Баланс:</strong> {{ abonent.balance|floatformat:2 }} руб.</div>
+       </div>
+       {% if abonent.vip %}
+            <div class="row">
+                <div class="col-md-9">
+                    <h4><span class="label label-info">Включен VIP статус
+                    <span class="glyphicon glyphicon-exclamation-sign"></span></span><h4>
+                </div>
+            </div>
+        {% endif %}
 	</div>
+
 	<div class="panel-body">
     <div class="col-lg-12">
     	<ul class="nav nav-pills">
@@ -28,7 +38,9 @@
             {% include "includes/menu_item.html" with item_url='writeoffs' item_title='Списания' abonent=abonent request=request only %}
             {% include "includes/menu_item.html" with item_url='users.views.abonent_tts' item_title='ТТ' abonent=abonent request=request only %}
             {% include "includes/menu_item.html" with item_url='users.views.abonent_history' item_title='История' abonent=abonent request=request only %}
-            {% include "includes/menu_item.html" with item_url='pays.views.promisedpays' item_title='Обещанный платеж' abonent=abonent request=request only %}
+            {% if abonent.utype = 'F' %}
+                {% include "includes/menu_item.html" with item_url='pays.views.promisedpays' item_title='Обещанный платеж' abonent=abonent request=request only %}
+            {% endif %}
             {% include "includes/menu_item.html" with item_url='contacts' item_title='Контакты' abonent=abonent request=request only %}
             {% include "includes/menu_item.html" with item_url='for_abonent' item_title='Уведомления' abonent=abonent request=request only %}
 		</ul>

@@ -25,19 +25,15 @@ class AbonentForm(forms.ModelForm):
 class ManageForm(forms.ModelForm):
     class Meta:
         model = Abonent
-        fields = ['notice_email','notice_mobile', 'is_credit', 'status']
+        fields = ['notice_email','notice_mobile', 'is_credit', 'status','vip']
         widgets = {
             'notice_email': forms.EmailInput(attrs={'class': 'form-control', 'disabled':'disabled', 'placeholder': 'E-Mail'}),
             'notice_mobile': forms.TextInput(attrs={'class': 'form-control', 'disabled':'disabled', 'placeholder': 'Телефон' }),
             'is_credit': forms.Select(attrs={'class': 'form-control', 'disabled':'disabled'}),
             'status': forms.Select(attrs={'class': 'form-control', 'disabled':'disabled'}),
+            'vip': forms.CheckboxInput(attrs={'class': 'form-control', 'disabled':'disabled'}),
         }
 
-    # def __init__(self, *args, **kwargs):
-    #     super(ManageForm, self).__init__(*args, **kwargs)
-    #     for field in self.fields:
-    #         self.fields[field].widget.attrs['class'] = 'form-control'
-    #         self.fields[field].widget.attrs['disabled'] = 'disabled'
 
 class PassportForm(forms.ModelForm):
     class Meta:
