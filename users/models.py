@@ -101,6 +101,7 @@ class Abonent(models.Model):
     balance = models.FloatField(u'Баланс', default = 0)
     reserve = models.FloatField(u'Резерв', default = 0)
     rest = models.FloatField(u'Остаток', default = 0)
+    vip = models.BooleanField(u'VIP Клиент', default=False)
     notice_email = models.CharField(u'Email для уведомлений', max_length=70, blank=True, null=True)
     notice_mobile = models.CharField(u'Телефон для уведомлений', max_length=13, blank=True, null=True)
     objects = models.Manager()
