@@ -1,5 +1,6 @@
 #!/home/diamond/venv/billing/bin/python
 # -*- coding: utf-8 -*- 
+# Регулярная обработка обещанных платежей
 import os
 import sys
 

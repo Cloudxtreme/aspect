@@ -192,7 +192,6 @@ STATUS_ARCHIVED = 'D'
 STATUS_NEW = 'W'
 PAY_CREDIT = 'O'
 PAY_BEFORE = 'R'
-PAY_POST = 'R'
 
 STATUSES = (
     (STATUS_NEW, 'Новый'),

@@ -1,5 +1,6 @@
 #!/home/diamond/venv/billing/bin/python
 # -*- coding: utf-8 -*- 
+# Скрипт запускается 25-го числа и выключает абонентов с отрицательным балансом
 import os
 import sys
 
