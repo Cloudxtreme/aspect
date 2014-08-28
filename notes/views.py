@@ -16,6 +16,7 @@ def note_add(request):
 		form = NoteModelForm(request.POST)
         if form.is_valid(): 
             newnote = form.save(commit=False)
+            newnote.author = request.user
             newnote.save()
         else:
             print form.errors
@@ -23,6 +24,6 @@ def note_add(request):
 
 @login_required
 def notes_all(request):
-    note_list = Note.objects.all().order_by('-pk')
+    note_list = Note.objects.filter(author=request.user).order_by('-pk')|Note.objects.filter(public=True).order_by('-pk')
     form = NoteModelForm()
     return render_to_response('notes.html', { 'note_list': note_list, 'form' : form }, context_instance = RequestContext(request))

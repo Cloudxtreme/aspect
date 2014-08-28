@@ -31,7 +31,7 @@ class ManageForm(forms.ModelForm):
             'notice_mobile': forms.TextInput(attrs={'class': 'form-control', 'disabled':'disabled', 'placeholder': 'Телефон' }),
             'is_credit': forms.Select(attrs={'class': 'form-control', 'disabled':'disabled'}),
             'status': forms.Select(attrs={'class': 'form-control', 'disabled':'disabled'}),
-            'vip': forms.CheckboxInput(attrs={'class': 'form-control', 'disabled':'disabled'}),
+            'vip': forms.CheckboxInput(attrs={'disabled':'disabled'}),
         }
 
 
