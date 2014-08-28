@@ -121,7 +121,7 @@ class Abonent(models.Model):
     #     return abonent_list
 
     def set_changes(self,comment,old_status):
-
+            # Процедура смены статусов всех услуг абонента
             if old_status != self.status:
                 if self.status in [settings.STATUS_ACTIVE, settings.STATUS_PAUSED, settings.STATUS_OUT_OF_BALANCE]:
                     for item in self.service_set.all():
@@ -145,10 +145,10 @@ class Abonent(models.Model):
     def check_status(self, reason):
         old_status = self.status
         if self.status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE]:
-            if self.is_credit == settings.PAY_BEFORE:
+            if self.is_credit == settings.PAY_BEFORE: # Предоплатников выключаем по балансу всегда
                 self.status = (settings.STATUS_ACTIVE if self.balance >= 0 else settings.STATUS_OUT_OF_BALANCE)
-            else:
-                self.status = settings.STATUS_ACTIVE
+            else: # Постоплатников выключаем 25 числа
+                self.status = (settings.STATUS_OUT_OF_BALANCE if self.balance < 0 and datetime.datetime.today().day > 24 else settings.STATUS_ACTIVE)
             super(Abonent, self).save()
             self.set_changes(reason, old_status)
 
