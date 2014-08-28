@@ -6,8 +6,7 @@ import sys
 sys.path.append("/home/diamond/venv/billing/aspekt")
 os.environ['DJANGO_SETTINGS_MODULE'] = 'aspekt.settings'
 
-# from datetime import datetime
 from users.models import Abonent
 
-for item in Abonent.objects.filter(is_credit='R'):
-    item.check_status('Проверка баланса 25-го числа')    
+for item in Abonent.objects.filter(is_credit='O',balance__lt=0):
+    item.check_status('Проверка баланса 25-го числа')

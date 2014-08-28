@@ -9,7 +9,7 @@ from users.fields import JSONField
 from django.contrib.auth.models import User
 import datetime
 import calendar
-import pays.models
+# import pays.models
 from django.conf import settings
 
 class Segment(models.Model):
@@ -275,8 +275,9 @@ class Service(models.Model):
         qty_days = calendar.mdays[today.month]
         summ = self.plan.price * (qty_days - today.day)/qty_days
         if summ > 0:
-            top = pays.models.PaymentSystem.objects.get(pk=4)
-            payment = pays.models.Payment(abon=self.abon, top=top, sum=summ, date=datetime.datetime.now())
+            from pays.models import PaymentSystem,Payment
+            top = PaymentSystem.objects.get(pk=4)
+            payment = Payment(abon=self.abon, top=top, sum=summ, date=datetime.datetime.now())
             payment.save()
         self.save()
 
@@ -289,8 +290,9 @@ class Service(models.Model):
             qty_days = calendar.mdays[today.month]
             summ = self.plan.price * (qty_days - today.day + 1)/qty_days
             comment = u'Абонентская плата за %s дней месяца' % (qty_days - today.day + 1)
-            wot = pays.models.WriteOffType.objects.get(pk=4)
-            write_off = pays.models.WriteOff(abonent=self.abon, service=self, wot=wot,summ=summ, comment=comment, date=datetime.datetime.now())
+            from pays.models import WriteOff, WriteOffType
+            wot = WriteOffType.objects.get(pk=4)
+            write_off = WriteOff(abonent=self.abon, service=self, wot=wot,summ=summ, comment=comment, date=datetime.datetime.now())
             write_off.save()
 
     def save(self, force_insert=False, force_update=False):
@@ -317,8 +319,9 @@ class Service(models.Model):
             super(Service, self).save(force_insert=False, force_update=False)
             # Списываем плату за установку
             if is_new:
-                wot = pays.models.WriteOffType.objects.get(title=u'Инсталляция')
-                write_off = pays.models.WriteOff(abonent=self.abon, service=self, wot=wot,summ=self.plan.install_price, date=datetime.datetime.now(), comment=u'Подключение услуги [%s]' % (self.plan.title))
+                from pays.models import WriteOff, WriteOffType
+                wot = WriteOffType.objects.get(title=u'Инсталляция')
+                write_off = WriteOff(abonent=self.abon, service=self, wot=wot,summ=self.plan.install_price, date=datetime.datetime.now(), comment=u'Подключение услуги [%s]' % (self.plan.title))
                 write_off.save()
 
     class Meta:
