@@ -31,7 +31,7 @@
     </div>   
     <div class="form-group">
         <label for="id_public" class="col-sm-1 control-label">Публичная заметка</label>
-        <div class="col-sm-5">
+        <div class="col-sm-1">
             {{ form.public }}
         </div>
     </div>  
@@ -78,7 +78,7 @@
       <h3 class="panel-title">{{ note.title }}<a href={% url 'note_del' note.id %}><span class="glyphicon glyphicon-remove-circle pull-right"></span></a></h3>
     </div>
   <div class="panel-body">
-    {{ note.descr }}
+    {{ note.descr|safe }}
   </div>
   </div>
 {% endfor %}

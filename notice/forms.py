@@ -26,7 +26,6 @@ class AbonentFilterForm(forms.Form):
         # initial=0,
         widget=forms.TextInput(attrs={'class' : 'form-control',})
      )
-
    
     balance_lt = forms.IntegerField(
         label=u'Баланс <', 
