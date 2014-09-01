@@ -3,4 +3,12 @@ from tt.models import TroubleTicket
 from notes.models import Note
  
 def menu(request):
-    return { "open_tt" : TroubleTicket.objects.filter(solve_date=None).count, 'my_tt' : TroubleTicket.objects.filter(solve_date=None,performer__pk=request.user.pk).count, 'notes_count' : Note.objects.filter(author=request.user,read=False).count() }
+    if request.user.pk:
+        my_tt = TroubleTicket.objects.filter(solve_date=None,performer=request.user).count
+        notes_count = Note.objects.filter(author=request.user,read=False).count()
+    else:
+        my_tt = 0
+        notes_count = 0
+    return { "open_tt" : TroubleTicket.objects.filter(solve_date=None).count, 
+    'my_tt' : my_tt, 
+    'notes_count' : notes_count }
