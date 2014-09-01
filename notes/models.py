@@ -19,6 +19,7 @@ class Note(models.Model):
     author = models.ForeignKey(User, verbose_name=u'Автор', blank=True, null= True)
     public = models.BooleanField(u'Для всех',default=False)
     date = models.DateTimeField(default=datetime.now,auto_now_add=True)
+    read = models.BooleanField(u'Прочитано',default=False)
 
     class Meta:
         verbose_name = u'Заметка'
