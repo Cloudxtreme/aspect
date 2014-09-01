@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
+from django.db.models import Sum
 from vlans.models import IPAddr, Vlan, Node 
 from devices.models import Device
 # from contacts.models import Contact
@@ -153,8 +154,9 @@ class Abonent(models.Model):
             if self.status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE]:
                 if self.is_credit == settings.PAY_BEFORE: # Предоплатников выключаем по балансу всегда
                     self.status = (settings.STATUS_ACTIVE if self.balance >= 0 else settings.STATUS_OUT_OF_BALANCE)
-                else: # Постоплатников выключаем 25 числа
-                    self.status = (settings.STATUS_OUT_OF_BALANCE if self.balance < 0 and datetime.datetime.today().day > 24 else settings.STATUS_ACTIVE)
+                else: # Постоплатников c минусовым балансом выключаем 25 числа или в любой другой день, как только сумма на счете станет меньше чем сумма всех услуг
+                    service_sum = self.service_set.filter(status__in=['A','N']).aggregate(Sum('plan__price'))['plan__price__sum']
+                    self.status = (settings.STATUS_OUT_OF_BALANCE if (self.balance < -service_sum ) or (self.balance < 0 and datetime.datetime.today().day > 24) else settings.STATUS_ACTIVE)
                 super(Abonent, self).save()
                 self.set_changes(reason, old_status)
 
