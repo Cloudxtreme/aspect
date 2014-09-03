@@ -56,6 +56,11 @@ class PaymentForm(forms.ModelForm):
 
 class QuickPaymentForm(forms.ModelForm):
     abon = forms.ModelChoiceField(queryset=Abonent.objects.order_by('title'),widget=forms.Select(attrs={'class':'form-control'}), label = u'Абонент')
+    
+    def __init__(self, *args, **kwargs):
+         super(QuickPaymentForm, self).__init__(*args, **kwargs)
+         self.fields['sum'].localize = True
+
     class Meta:
         model = Payment
         fields = ['abon', 'sum', 'date']  
