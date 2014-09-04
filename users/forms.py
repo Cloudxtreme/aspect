@@ -25,8 +25,9 @@ class AbonentForm(forms.ModelForm):
 class ManageForm(forms.ModelForm):
     class Meta:
         model = Abonent
-        fields = ['notice_email','notice_mobile', 'is_credit', 'status','vip']
+        fields = ['title','notice_email','notice_mobile', 'is_credit', 'status','vip']
         widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'disabled':'disabled', 'placeholder': 'Доп.название' }),
             'notice_email': forms.EmailInput(attrs={'class': 'form-control', 'disabled':'disabled', 'placeholder': 'E-Mail'}),
             'notice_mobile': forms.TextInput(attrs={'class': 'form-control', 'disabled':'disabled', 'placeholder': 'Телефон' }),
             'is_credit': forms.Select(attrs={'class': 'form-control', 'disabled':'disabled'}),

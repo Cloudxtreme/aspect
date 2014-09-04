@@ -9,7 +9,10 @@
 	<div class="panel-heading">
         <div class="row">
             <div class="col-md-9">
-                <h2 class="sub-header">{{ abonent.title }}</h2>
+                <h2 class="sub-header">
+                 {% for item in abonent.detail_set.all %}
+                    {{ item.title }}
+                 {% endfor %}({{ abonent.title }})</h2>
                 <h6>{{ abonent.get_utype_display }}</h6>
             </div>
             <div class="alert alert-{{ abonent.status|get_color }} col-md-3"><strong>Статус:</strong> {{ abonent.get_status_display }}</div>

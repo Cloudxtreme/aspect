@@ -99,7 +99,7 @@ class AbonentFilterManager(models.Manager):
         return super(AbonentFilterManager, self).get_query_set()
 
 class Abonent(models.Model):
-    title = models.CharField(u'Название', max_length=70)
+    title = models.CharField(u'Доп. название', max_length=70)
     contract = models.CharField(u'Номер договора',max_length=15,blank=True, null=True)
     status = models.CharField(u'Статус',max_length=1, choices=settings.STATUSES, default=settings.STATUS_NEW)
     utype = models.CharField(u'Тип абонента', max_length=1, choices=settings.U_TYPE)
@@ -186,7 +186,8 @@ class Abonent(models.Model):
         verbose_name_plural = u'Абоненты'       
         
     def __unicode__(self):
-        return "%s - %s" % (self.contract, self.title)
+        company_name = (Detail.objects.get(abonent=self).title if self.utype == settings.U_TYPE_UR else '')
+        return "%s - %s (%s)" % (self.contract, company_name, self.title)
 
 class Bank(models.Model):
     title = models.CharField(u'Название', max_length=200)

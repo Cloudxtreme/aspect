@@ -191,6 +191,8 @@ STATUS_ARCHIVED = 'D'
 STATUS_NEW = 'W'
 PAY_CREDIT = 'O'
 PAY_BEFORE = 'R'
+U_TYPE_FIZ = 'F'
+U_TYPE_UR = 'U'
 
 STATUSES = (
     (STATUS_NEW, 'Новый'),
@@ -201,8 +203,8 @@ STATUSES = (
 )
 
 U_TYPE = (
-    ('F', 'Физическое лицо'),
-    ('U', 'Юридическое лицо'),
+    (U_TYPE_FIZ, 'Физическое лицо'),
+    (U_TYPE_UR, 'Юридическое лицо'),
 )
 PAYTYPE =(
     (PAY_BEFORE, 'Предоплата'),
