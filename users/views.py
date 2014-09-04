@@ -167,6 +167,8 @@ def abonent_search(request):
             is_credit=form.cleaned_data['is_credit']
             balance_lt=form.cleaned_data['balance_lt']
             balance_gt=form.cleaned_data['balance_gt']
+            speed_lt=form.cleaned_data['speed_lt']
+            speed_gt=form.cleaned_data['speed_gt']
             tos=form.cleaned_data['tos']
             request.session['contract'] = contract
             request.session['title'] = title
@@ -175,6 +177,8 @@ def abonent_search(request):
             request.session['is_credit'] = is_credit
             request.session['balance_lt'] = balance_lt
             request.session['balance_gt'] = balance_gt
+            request.session['speed_lt'] = speed_lt
+            request.session['speed_gt'] = speed_gt
             request.session['tos'] = tos
             abonent_list = Abonent.obj.filter_list(status=status,
                                                     utype=utype,
@@ -193,6 +197,8 @@ def abonent_search(request):
                                            is_credit=request.session['is_credit'],
                                            balance_lt=request.session['balance_lt'],
                                            balance_gt=request.session['balance_gt'],
+                                           speed_lt=request.session['speed_lt'],
+                                           speed_gt=request.session['speed_gt'],
                                            tos=request.session['tos'],
                                            title=request.session['title'],
                                            contract=request.session['contract'],)

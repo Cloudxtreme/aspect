@@ -10,5 +10,5 @@ def menu(request):
         my_tt = 0
         notes_count = 0
     return { "open_tt" : TroubleTicket.objects.filter(solve_date=None).count, 
-    'my_tt' : my_tt, 
-    'notes_count' : notes_count }
+               'my_tt' : my_tt, 
+         'notes_count' : notes_count }

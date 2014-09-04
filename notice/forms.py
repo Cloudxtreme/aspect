@@ -60,13 +60,26 @@ class AbonentFilterForm(forms.Form):
         widget=forms.SelectMultiple(attrs={'class' : 'form-control select2-multiple','multiple' : 'multiple'})
      )
 
-    plan = forms.MultipleChoiceField(
-        choices =Plan.objects.all().values_list('pk','title'),
-        label=u'Тарифный план', 
+    speed_lt = forms.IntegerField(
+        label=u'Скорость <', 
         required=False,
-        # initial=False,
-        widget=forms.SelectMultiple(attrs={'class' : 'form-control select2-multiple','multiple' : 'multiple'}),
+        # initial=0,
+        widget=forms.NumberInput(attrs={'class' : 'form-control',})
      )
+
+    speed_gt = forms.IntegerField(
+        label=u'Скорость >=', 
+        required=False,
+        # initial=0,
+        widget=forms.NumberInput(attrs={'class' : 'form-control',})
+     )
+    # plan = forms.MultipleChoiceField(
+    #     choices =Plan.objects.all().values_list('pk','title'),
+    #     label=u'Тарифный план', 
+    #     required=False,
+    #     # initial=False,
+    #     widget=forms.SelectMultiple(attrs={'class' : 'form-control select2-multiple','multiple' : 'multiple'}),
+    #  )
 
     tos = forms.MultipleChoiceField(
         choices =TypeOfService.objects.all().values_list('pk','title'),

@@ -42,6 +42,10 @@ class WriteOffForm(forms.ModelForm):
     #         self.fields[field].widget.attrs['class'] = 'form-control'
 
 class PaymentForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+         super(PaymentForm, self).__init__(*args, **kwargs)
+         self.fields['sum'].localize = True
+    
     class Meta:
         model = Payment
       	fields = ['top', 'sum', 'date','num']  
@@ -66,7 +70,7 @@ class QuickPaymentForm(forms.ModelForm):
         fields = ['abon', 'sum', 'date']  
         
         widgets = {
-            # 'abon': forms.Select(attrs={'class': 'form-control',}),
+            # 'abon': forms.TextInput(attrs={'class': 'form-control',}),
             'sum': forms.TextInput(attrs={'class': 'form-control',}),
             'date': DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
                                        "pickSeconds": False, }),

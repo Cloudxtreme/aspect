@@ -69,7 +69,7 @@ class Agent(models.Model):
         return "%s - %s" % (self.agent_id, self.title)
 
 class AbonentFilterManager(models.Manager):
-    def filter_list(self,title='',contract='',status=[],utype=[],tos=[],is_credit=[],balance_lt=None,balance_gt=None):
+    def filter_list(self,title='',contract='',status=[],utype=[],tos=[],is_credit=[],balance_lt=None,balance_gt=None,speed_lt=None,speed_gt=None):
         abonent_list = super(AbonentFilterManager, self).get_query_set()
         if title:
             abonent_list = abonent_list.filter(title__icontains=title)
@@ -87,6 +87,12 @@ class AbonentFilterManager(models.Manager):
             abonent_list = abonent_list.filter(balance__lt=balance_lt)
         if balance_gt or balance_gt==0:
             abonent_list = abonent_list.filter(balance__gte=balance_gt)
+        if speed_lt or speed_lt==0:
+            pass
+            # abonent_list = abonent_list.filter(balance__lt=balance_lt)
+        if speed_gt or speed_gt==0:
+            pass
+            # abonent_list = abonent_list.filter(balance__gte=balance_gt)
         return abonent_list
 
     def get_query_set(self):
