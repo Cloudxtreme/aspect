@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*- 
 from django import forms
 from bootstrap3_datetime.widgets import DateTimePicker
-from pays.models import WriteOff, Payment, PromisedPays
+from pays.models import WriteOff, Payment, PromisedPays, PaymentSystem
 from users.models import Abonent
 from datetime import datetime
 
@@ -10,6 +10,13 @@ class DateChoiceForm(forms.Form):
                                        "pickTime": False, 'showToday': True }))
     datefinish = forms.DateField(label=u'Дата окончания', widget=DateTimePicker(options={"format": "YYYY-MM-DD",
                                        "pickTime": False, "showToday": True, }))
+    paymentsystem = forms.MultipleChoiceField(
+        choices =PaymentSystem.objects.all().values_list('pk','title'),
+        label=u'Платежная система', 
+        required=False,
+        # initial=False,
+        widget=forms.SelectMultiple(attrs={'class' : 'form-control select2-multiple','multiple' : 'multiple'}),
+     )
 
     # def clean(self):
     #     cleaned_data = super(DateChoiceForm, self).clean()

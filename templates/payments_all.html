@@ -1,6 +1,22 @@
 {% extends "index.html" %}
 
 {% block script %}
+    <link href="/media/js/select2.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/media/js/select2-bootstrap.css">
+    <script src="/media/js/select2.js"></script>
+    <script>
+        $(document).ready(function() { 
+            $("select").select2(); 
+        });
+    </script>
+    <script type="text/javascript">
+        window.onload=function () {
+            var d = new Date();
+            d.setDate( d.getDate() );
+            $('#id_datestart_picker').data("DateTimePicker").setDate(d);
+            $('#id_datefinish_picker').data("DateTimePicker").setDate(d);
+            };
+    </script>
     {{ form.media }}
 {% endblock %}
 
@@ -9,21 +25,27 @@
   <h2 class="sub-header">Список поступивших платежей</h2>
 </div>
 
-<form method="post" class="form-inline" role="form">{% csrf_token %}
+<form method="post" class="form-horizontal" role="form">{% csrf_token %}
     <div class="form-group">
-    <div class="col-md-3">
-        <div class="input-group">
-            <span class="input-group-addon">c</span>{{ form.datestart }}
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">c</span>{{ form.datestart }}
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">по</span>{{ form.datefinish }}
+            </div>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-default">Отфильтровать <span class="glyphicon glyphicon-filter"></span></button>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="input-group">
-            <span class="input-group-addon">по</span>{{ form.datefinish }}
+    <div class="form-group">
+        <label for="id_paymentsystem" class="col-sm-3 control-label">Платежная система</label>
+        <div class="col-sm-3">
+            {{ form.paymentsystem }}
         </div>
-    </div>
-    <div class="col-md-2">
-        <button type="submit" class="btn btn-default">Отфильтровать <span class="glyphicon glyphicon-filter"></span></button>
-    </div>
     </div>
 </form>
 <hr>

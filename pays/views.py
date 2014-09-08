@@ -38,21 +38,25 @@ def add_promisedpay(request, abonent_id):
 
 @login_required
 def payments_all(request):
-	payments_list = Payment.objects.none()
-	if request.method == 'POST':
-		form = DateChoiceForm(request.POST)
-		if form.is_valid():
-			datestart = form.cleaned_data['datestart']
-			datefinish = form.cleaned_data['datefinish']
-			datefinish = datefinish + timedelta(days=1)
-			payments_list = Payment.objects.filter(date__range=[datestart, datefinish],valid=True).order_by('-date')      
-	else:
-		# payments_list = Payment.objects.filter(valid=True).order_by('-date')    
-		form = DateChoiceForm()
-	return render_to_response('payments_all.html', { 
+    payments_list = Payment.objects.none()
+    if request.method == 'POST':
+        form = DateChoiceForm(request.POST)
+        if form.is_valid():
+            datestart = form.cleaned_data['datestart']
+            datefinish = form.cleaned_data['datefinish']
+            paymentsystem = form.cleaned_data['paymentsystem']
+            datefinish = datefinish + timedelta(days=1)
+            payments_list = Payment.objects.filter(top__in=paymentsystem,date__range=[datestart, datefinish],valid=True).order_by('-date')
+            # if paymentsystem:
+            #     payments_list.filter(top__pk__in=[1,2])
+            #     print payments_list
+
+    else:
+        form = DateChoiceForm()
+    return render_to_response('payments_all.html', { 
                                 'payments_list' : payments_list,
                                 'form' : form }, 
-                              context_instance = RequestContext(request))
+                                context_instance = RequestContext(request))
 
 @login_required
 def promisedpays_all(request):
