@@ -40,6 +40,7 @@ class Plan(models.Model):
     speed_in = models.PositiveIntegerField(blank=True, null=True)
     speed_out = models.PositiveIntegerField(blank=True, null=True)
     comment = models.CharField(max_length=200,blank=True, null=True)
+    utype = models.CharField(u'Тип абонента', max_length=1, choices=settings.U_TYPE)
     price = models.FloatField(u'Абон. плата')
     install_price = models.FloatField(u'Стоимость подключения',default=0)
     visible = models.BooleanField(u'Видимость',default=True)

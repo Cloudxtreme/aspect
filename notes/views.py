@@ -7,7 +7,7 @@ from notes.forms import NoteModelForm
 
 @login_required
 def note_del(request, note_id):
-	Note.objects.get(pk=note_id).delete()
+	Note.objects.filter(pk=note_id).delete()
 	return HttpResponseRedirect(reverse('notes_all'))
 
 @login_required
