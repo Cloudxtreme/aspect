@@ -162,7 +162,7 @@ class Abonent(models.Model):
                 if self.is_credit == settings.PAY_BEFORE: # Предоплатников выключаем по балансу всегда
                     self.status = (settings.STATUS_ACTIVE if self.balance >= 0 else settings.STATUS_OUT_OF_BALANCE)
                 else: # Постоплатников c минусовым балансом выключаем 25 числа или в любой другой день, как только сумма на счете станет меньше чем сумма всех услуг
-                    service_sum = self.service_set.filter(status__in=['A','N']).aggregate(Sum('plan__price'))['plan__price__sum']
+                    service_sum = self.service_set.filter(status__in=['A','N']).aggregate(Sum('plan__price'))['plan__price__sum'] or 0
                     self.status = (settings.STATUS_OUT_OF_BALANCE if (self.balance < -service_sum ) or (self.balance < 0 and datetime.datetime.today().day > 24) else settings.STATUS_ACTIVE)
                 super(Abonent, self).save()
                 self.set_changes(reason, old_status)
@@ -247,7 +247,7 @@ class Service(models.Model):
     # vl = models.ForeignKey(Vlan, verbose_name=u'Vlan', blank=True, null= True,related_name='vl')
     vlan = models.ForeignKey(Vlan, verbose_name=u'Vlan', blank=True, null= True,related_name='vlan')
     # vlan_id = models.ForeignKey(Vlan, related_name='vlan_temp', verbose_name=u'Vlan', blank=True, null= True)
-    adm_status = models.CharField(u'Административный статус', max_length=1, choices=settings.ADM_STATUSES, default=settings.STATUS_NEW)
+    adm_status = models.CharField(u'Административный статус', max_length=1, choices=settings.ADM_STATUSES, default='0')
     speed_in = models.PositiveIntegerField(default=0, blank=True, null=True)
     speed_out = models.PositiveIntegerField(default=0, blank=True, null=True)
     mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=17,validators=[macvalidator])
