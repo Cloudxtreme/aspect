@@ -13,6 +13,7 @@ WRITEOFF_PREFIX = u''
 
 class PaymentSystem(models.Model):
     title = models.CharField(max_length=200)
+    stat = models.BooleanField(u'Учитывать в статистике')
 
     class Meta:
         verbose_name = u'Платежная система'
