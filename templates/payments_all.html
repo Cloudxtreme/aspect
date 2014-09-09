@@ -13,8 +13,8 @@
         window.onload=function () {
             var d = new Date();
             d.setDate( d.getDate() );
-            $('#id_datestart_picker').data("DateTimePicker").setDate(d);
-            $('#id_datefinish_picker').data("DateTimePicker").setDate(d);
+            // $('#id_datestart_picker').data("DateTimePicker").setDate(d);
+            // $('#id_datefinish_picker').data("DateTimePicker").setDate(d);
             };
     </script>
     {{ form.media }}
@@ -49,8 +49,8 @@
     </div>
 </form>
 <hr>
-<h3>Найдено {{ payments_list.count }} платежей</h3>
 {% if payments_list %}
+<h3>Найдено {{ payments_list.count }} платежей на сумму {{ summ }} руб.</h3>
 <table class="table  h6">
     <thead>
           <tr>

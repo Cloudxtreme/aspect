@@ -46,15 +46,16 @@ def payments_all(request):
             datefinish = form.cleaned_data['datefinish']
             paymentsystem = form.cleaned_data['paymentsystem']
             datefinish = datefinish + timedelta(days=1)
-            payments_list = Payment.objects.filter(top__in=paymentsystem,date__range=[datestart, datefinish],valid=True).order_by('-date')
-            # if paymentsystem:
-            #     payments_list.filter(top__pk__in=[1,2])
-            #     print payments_list
-
+            if paymentsystem == []:
+                payments_list = Payment.objects.filter(date__range=[datestart, datefinish],valid=True).order_by('-date')
+            else:
+                payments_list = Payment.objects.filter(date__range=[datestart, datefinish],valid=True).filter(top__pk__in=paymentsystem).order_by('-date')
     else:
         form = DateChoiceForm()
+
     return render_to_response('payments_all.html', { 
                                 'payments_list' : payments_list,
+                                'summ' : payments_list.aggregate(Sum('sum'))['sum__sum'],
                                 'form' : form }, 
                                 context_instance = RequestContext(request))
 
