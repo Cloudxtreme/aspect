@@ -173,8 +173,11 @@ class Abonent(models.Model):
         verbose_name_plural = u'Абоненты'       
         
     def __unicode__(self):
-        company_name = (Detail.objects.get(abonent=self).title if self.utype == settings.U_TYPE_UR else '')
-        return "%s - %s (%s)" % (self.contract, company_name, self.title)
+        if self.utype == settings.U_TYPE_UR:
+            company_name = Detail.objects.get(abonent=self).title
+            return "%s - %s (%s)" % (self.contract, company_name, self.title)
+        else:
+            return "%s - %s" % (self.contract, self.title)
 
 class Bank(models.Model):
     title = models.CharField(u'Название', max_length=200)
