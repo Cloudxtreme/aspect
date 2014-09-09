@@ -15,15 +15,52 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'pays', ['PaymentSystem'])
 
+        # Adding model 'WriteOffType'
+        db.create_table(u'pays_writeofftype', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('title', self.gf('django.db.models.fields.CharField')(max_length=200)),
+        ))
+        db.send_create_signal(u'pays', ['WriteOffType'])
+
+        # Adding model 'PromisedPays'
+        db.create_table(u'pays_promisedpays', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('abonent', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['users.Abonent'])),
+            ('summ', self.gf('django.db.models.fields.FloatField')()),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True, blank=True)),
+            ('datestart', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime.now)),
+            ('datefinish', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+            ('comment', self.gf('django.db.models.fields.CharField')(max_length=200, null=True, blank=True)),
+            ('pay_onaccount', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('repaid', self.gf('django.db.models.fields.BooleanField')(default=False)),
+        ))
+        db.send_create_signal(u'pays', ['PromisedPays'])
+
+        # Adding model 'WriteOff'
+        db.create_table(u'pays_writeoff', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('abonent', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['users.Abonent'])),
+            ('service', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['users.Service'], null=True, blank=True)),
+            ('wot', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['pays.WriteOffType'])),
+            ('summ', self.gf('django.db.models.fields.FloatField')()),
+            ('date', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime.now)),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True, blank=True)),
+            ('number', self.gf('django.db.models.fields.CharField')(default=u'000667', unique=True, max_length=20)),
+            ('valid', self.gf('django.db.models.fields.BooleanField')(default=True)),
+            ('comment', self.gf('django.db.models.fields.CharField')(max_length=200, null=True, blank=True)),
+        ))
+        db.send_create_signal(u'pays', ['WriteOff'])
+
         # Adding model 'Payment'
         db.create_table(u'pays_payment', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('abon', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['users.Abonent'])),
             ('top', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['pays.PaymentSystem'])),
             ('sum', self.gf('django.db.models.fields.FloatField')()),
-            ('date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+            ('date', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime.now)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True, blank=True)),
-            ('num', self.gf('django.db.models.fields.CharField')(max_length=20, null=True, blank=True)),
+            ('num', self.gf('django.db.models.fields.CharField')(default=u'001559', unique=True, max_length=30)),
+            ('valid', self.gf('django.db.models.fields.BooleanField')(default=True)),
         ))
         db.send_create_signal(u'pays', ['Payment'])
 
@@ -31,6 +68,15 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
         # Deleting model 'PaymentSystem'
         db.delete_table(u'pays_paymentsystem')
+
+        # Deleting model 'WriteOffType'
+        db.delete_table(u'pays_writeofftype')
+
+        # Deleting model 'PromisedPays'
+        db.delete_table(u'pays_promisedpays')
+
+        # Deleting model 'WriteOff'
+        db.delete_table(u'pays_writeoff')
 
         # Deleting model 'Payment'
         db.delete_table(u'pays_payment')
@@ -73,46 +119,165 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
+        u'devices.device': {
+            'Meta': {'object_name': 'Device'},
+            'devtype': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['devices.DevType']"}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'ip': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['vlans.IPAddr']", 'unique': 'True', 'null': 'True', 'blank': 'True'}),
+            'is_rooter': ('django.db.models.fields.BooleanField', [], {}),
+            'last_available': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
+            'mac': ('django.db.models.fields.CharField', [], {'max_length': '20', 'null': 'True', 'blank': 'True'}),
+            'mgmt_vlan': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'mgmt_vlan'", 'null': 'True', 'to': u"orm['vlans.Vlan']"}),
+            'sn': ('django.db.models.fields.CharField', [], {'max_length': '20', 'null': 'True', 'blank': 'True'}),
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '30'})
+        },
+        u'devices.devtype': {
+            'Meta': {'object_name': 'DevType'},
+            'description': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'model': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
+            'ports': ('django.db.models.fields.IntegerField', [], {}),
+            'supply': ('django.db.models.fields.CharField', [], {'max_length': '4'}),
+            'vendor': ('django.db.models.fields.CharField', [], {'max_length': '50'})
+        },
         u'pays.payment': {
             'Meta': {'object_name': 'Payment'},
             'abon': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.Abonent']"}),
-            'date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'num': ('django.db.models.fields.CharField', [], {'max_length': '20', 'null': 'True', 'blank': 'True'}),
+            'num': ('django.db.models.fields.CharField', [], {'default': "u'001559'", 'unique': 'True', 'max_length': '30'}),
             'sum': ('django.db.models.fields.FloatField', [], {}),
             'top': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['pays.PaymentSystem']"}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']", 'null': 'True', 'blank': 'True'})
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']", 'null': 'True', 'blank': 'True'}),
+            'valid': ('django.db.models.fields.BooleanField', [], {'default': 'True'})
         },
         u'pays.paymentsystem': {
             'Meta': {'object_name': 'PaymentSystem'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '200'})
         },
+        u'pays.promisedpays': {
+            'Meta': {'object_name': 'PromisedPays'},
+            'abonent': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.Abonent']"}),
+            'comment': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
+            'datefinish': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
+            'datestart': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'pay_onaccount': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'repaid': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'summ': ('django.db.models.fields.FloatField', [], {}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']", 'null': 'True', 'blank': 'True'})
+        },
+        u'pays.writeoff': {
+            'Meta': {'object_name': 'WriteOff'},
+            'abonent': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.Abonent']"}),
+            'comment': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
+            'date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'number': ('django.db.models.fields.CharField', [], {'default': "u'000667'", 'unique': 'True', 'max_length': '20'}),
+            'service': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.Service']", 'null': 'True', 'blank': 'True'}),
+            'summ': ('django.db.models.fields.FloatField', [], {}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']", 'null': 'True', 'blank': 'True'}),
+            'valid': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'wot': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['pays.WriteOffType']"})
+        },
+        u'pays.writeofftype': {
+            'Meta': {'object_name': 'WriteOffType'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '200'})
+        },
         u'users.abonent': {
             'Meta': {'object_name': 'Abonent'},
+            'agent': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.Agent']", 'null': 'True', 'blank': 'True'}),
             'balance': ('django.db.models.fields.FloatField', [], {'default': '0'}),
-            'contact': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['users.Contact']", 'symmetrical': 'False', 'blank': 'True'}),
             'contract': ('django.db.models.fields.CharField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_credit': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
+            'notice_email': ('django.db.models.fields.CharField', [], {'max_length': '70', 'null': 'True', 'blank': 'True'}),
+            'notice_mobile': ('django.db.models.fields.CharField', [], {'max_length': '13', 'null': 'True', 'blank': 'True'}),
             'reserve': ('django.db.models.fields.FloatField', [], {'default': '0'}),
             'rest': ('django.db.models.fields.FloatField', [], {'default': '0'}),
-            'status': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
+            'status': ('django.db.models.fields.CharField', [], {'default': "'W'", 'max_length': '1'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '70'}),
-            'utype': ('django.db.models.fields.CharField', [], {'max_length': '1'})
+            'utype': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
+            'vip': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
         },
-        u'users.contact': {
-            'Meta': {'object_name': 'Contact'},
-            'address': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
-            'email': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
-            'fax': ('django.db.models.fields.CharField', [], {'max_length': '12', 'null': 'True', 'blank': 'True'}),
-            'first_name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
+        u'users.agent': {
+            'Meta': {'object_name': 'Agent'},
+            'agent_id': ('django.db.models.fields.CharField', [], {'max_length': '20'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'mobile': ('django.db.models.fields.CharField', [], {'max_length': '12', 'null': 'True', 'blank': 'True'}),
-            'phone': ('django.db.models.fields.CharField', [], {'max_length': '12', 'null': 'True', 'blank': 'True'}),
-            'position': ('django.db.models.fields.CharField', [], {'max_length': '30', 'null': 'True', 'blank': 'True'}),
-            'second_name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
-            'surname': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'})
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '70'})
+        },
+        u'users.plan': {
+            'Meta': {'object_name': 'Plan'},
+            'comment': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'install_price': ('django.db.models.fields.FloatField', [], {'default': '0'}),
+            'price': ('django.db.models.fields.FloatField', [], {}),
+            'segment': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['users.Segment']", 'symmetrical': 'False'}),
+            'speed_in': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'speed_out': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
+            'tos': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.TypeOfService']"}),
+            'utype': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
+            'visible': ('django.db.models.fields.BooleanField', [], {'default': 'True'})
+        },
+        u'users.segment': {
+            'Meta': {'object_name': 'Segment'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '200'})
+        },
+        u'users.service': {
+            'Meta': {'object_name': 'Service'},
+            'abon': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.Abonent']"}),
+            'address': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
+            'adm_status': ('django.db.models.fields.CharField', [], {'default': "'0'", 'max_length': '1'}),
+            'bs_device': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'bs_device'", 'null': 'True', 'to': u"orm['devices.Device']"}),
+            'datefinish': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
+            'datestart': ('django.db.models.fields.DateField', [], {'default': 'datetime.datetime(2014, 9, 9, 0, 0)'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'ip': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['vlans.IPAddr']", 'unique': 'True', 'null': 'True', 'blank': 'True'}),
+            'lat': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
+            'lon': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
+            'mac': ('django.db.models.fields.CharField', [], {'max_length': '17', 'null': 'True', 'blank': 'True'}),
+            'plan': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.Plan']"}),
+            'segment': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.Segment']"}),
+            'speed_in': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'null': 'True', 'blank': 'True'}),
+            'speed_out': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'null': 'True', 'blank': 'True'}),
+            'status': ('django.db.models.fields.CharField', [], {'default': "'W'", 'max_length': '1'}),
+            'tos': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.TypeOfService']"}),
+            'user_device': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'user_device'", 'null': 'True', 'to': u"orm['devices.Device']"}),
+            'vlan': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'vlan'", 'null': 'True', 'to': u"orm['vlans.Vlan']"})
+        },
+        u'users.typeofservice': {
+            'Meta': {'object_name': 'TypeOfService'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '200'})
+        },
+        u'vlans.ipaddr': {
+            'Meta': {'ordering': "['decip']", 'object_name': 'IPAddr'},
+            'decip': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'ip': ('django.db.models.fields.IPAddressField', [], {'unique': 'True', 'max_length': '15'}),
+            'net': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['vlans.Network']"})
+        },
+        u'vlans.network': {
+            'Meta': {'ordering': "['decip']", 'unique_together': "(('ip', 'mask'),)", 'object_name': 'Network'},
+            'decip': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'ip': ('django.db.models.fields.IPAddressField', [], {'max_length': '15'}),
+            'mask': ('django.db.models.fields.IntegerField', [], {'max_length': '2'}),
+            'net_type': ('django.db.models.fields.CharField', [], {'max_length': '2'}),
+            'parent': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'children'", 'null': 'True', 'to': u"orm['vlans.Network']"}),
+            'segment': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.Segment']"}),
+            'vlan': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['vlans.Vlan']", 'null': 'True', 'blank': 'True'})
+        },
+        u'vlans.vlan': {
+            'Meta': {'object_name': 'Vlan'},
+            'description': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'number': ('django.db.models.fields.IntegerField', [], {}),
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '30'})
         }
     }
 

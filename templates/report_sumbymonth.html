@@ -9,7 +9,7 @@
        var data = google.visualization.arrayToDataTable([
           ['Месяц', 'Сумма платежей', { role: 'annotation' } ],
           {% for item in data%} 
-          ['{{ item.month }}.{{ item.year }}', {{ item.dsum|floatformat:"0" }}, {{ item.dcount }}],
+            ['{{ item.month }}.{{ item.year }}', {{ item.dsum|floatformat:"0" }}, {{ item.dcount }}],
           {% endfor%}
         ]);
 

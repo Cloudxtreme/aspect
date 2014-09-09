@@ -125,7 +125,7 @@ class Payment(models.Model):
         # no = Payment.objects.filter(valid=True).count()
         no = Payment.objects.all().order_by("-id")[0].id or 1
         return PAYS_PREFIX + u'%06d' % (no + 1)
-
+    
     abon = models.ForeignKey(Abonent, verbose_name=u'Абонент')
     top = models.ForeignKey(PaymentSystem, verbose_name=u'Платежная система')
     sum = models.FloatField(u'Сумма')
@@ -133,6 +133,7 @@ class Payment(models.Model):
     user = models.ForeignKey(User, verbose_name=u'Пользователь', blank=True, null= True)
     num = models.CharField(u'Номер документа', max_length=30, unique=True, default=getnumber)
     valid = models.BooleanField(u'Действителен', default=True)
+    # stat = models.BooleanField(u'Учитывать в отчетах', default=True)
 
     def save(self, *args, **kwargs):
         isNew = not self.pk

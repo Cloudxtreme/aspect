@@ -8,7 +8,7 @@
        var data = google.visualization.arrayToDataTable([
           ['День', 'Количество' ],
           {% for item in data%} 
-          ['{{ item.weekday }}', {{ item.id__count }} ],
+            ['{{ item.weekday }}', {{ item.id__count }} ],
           {% endfor%}
         ]);
 
