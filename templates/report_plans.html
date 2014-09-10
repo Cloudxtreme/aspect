@@ -7,7 +7,7 @@
       function drawChart() {
        var data = google.visualization.arrayToDataTable([
           ['Скорость', 'Количество', { role: 'style' }],
-          {% for item in data%} 
+          {% for item in data %} 
           ['{{ item.plan__speed_in }} Кбит/с', {{ item.plan__speed_in__count }}, 'silver' ],
           {% endfor%}
         ]);
@@ -24,7 +24,7 @@
 
 {% block main %} 
   <div class="page-header">
-    <h2 class="sub-header">Распределение абонентов по скоростям</h2>
+    <h2 class="sub-header">Распределение абонентов по скоростям, всего услуг: {{ service_count }}</h2>
   </div>
   <div class="col-lg-6">
     <div id="chart_div" style="width: 900px; height: 500px;"></div> 
