@@ -4,12 +4,19 @@ from bootstrap3_datetime.widgets import DateTimePicker
 from pays.models import WriteOff, Payment, PromisedPays, PaymentSystem
 from users.models import Abonent
 from datetime import datetime
+from django.conf import settings
 
 class DateChoiceForm(forms.Form):
     datestart = forms.DateField(label=u'Дата начала', widget=DateTimePicker(options={"format": "YYYY-MM-DD",
                                        "pickTime": False, 'showToday': True }))
     datefinish = forms.DateField(label=u'Дата окончания', widget=DateTimePicker(options={"format": "YYYY-MM-DD",
                                        "pickTime": False, "showToday": True, }))
+    utype = forms.MultipleChoiceField(
+        choices = settings.U_TYPE,
+        label=u'Тип абонента', 
+        required=False,
+        widget=forms.SelectMultiple(attrs={'class' : 'form-control select2-multiple','multiple' : 'multiple'})
+     )
     paymentsystem = forms.MultipleChoiceField(
         choices =PaymentSystem.objects.all().values_list('pk','title'),
         label=u'Платежная система', 

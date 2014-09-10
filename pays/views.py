@@ -45,11 +45,12 @@ def payments_all(request):
             datestart = form.cleaned_data['datestart']
             datefinish = form.cleaned_data['datefinish']
             paymentsystem = form.cleaned_data['paymentsystem']
+            utype = form.cleaned_data['utype']
             datefinish = datefinish + timedelta(days=1)
-            if paymentsystem == []:
-                payments_list = Payment.objects.filter(date__range=[datestart, datefinish],valid=True).order_by('-date')
-            else:
-                payments_list = Payment.objects.filter(date__range=[datestart, datefinish],valid=True).filter(top__pk__in=paymentsystem).order_by('-date')
+            payments_list = Payment.obj.filter_list(datestart=datestart,
+                                                    datefinish=datefinish,
+                                                    top=paymentsystem,
+                                                    utype=utype)
     else:
         form = DateChoiceForm()
 

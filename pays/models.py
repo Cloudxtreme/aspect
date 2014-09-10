@@ -120,6 +120,19 @@ class WriteOff(models.Model):
 
     def __unicode__(self):
         return u"%s, %s,  %s руб., %s" % (self.abonent.contract, self.wot,  self.summ, self.date.ctime())
+
+class PaymentFilterManager(models.Manager):
+    def filter_list(self,utype=[],top=[],datestart=None,datefinish=None):
+        payment_list = super(PaymentFilterManager, self).get_query_set()
+        payment_list = payment_list.filter(date__range=[datestart, datefinish],valid=True)
+        if top:
+            payment_list = payment_list.filter(top__in=top)
+        if utype:
+            payment_list = payment_list.filter(abon__utype__in=utype)
+        return payment_list.order_by('-date')
+
+    def get_query_set(self):
+        return super(PaymentFilterManager, self).get_query_set()
         
 class Payment(models.Model):
     def getnumber():
@@ -134,7 +147,8 @@ class Payment(models.Model):
     user = models.ForeignKey(User, verbose_name=u'Пользователь', blank=True, null= True)
     num = models.CharField(u'Номер документа', max_length=30, unique=True, default=getnumber)
     valid = models.BooleanField(u'Действителен', default=True)
-    # stat = models.BooleanField(u'Учитывать в отчетах', default=True)
+    objects = models.Manager()
+    obj = PaymentFilterManager()
 
     def save(self, *args, **kwargs):
         isNew = not self.pk
