@@ -38,7 +38,8 @@
             </td>
             <td>{{ service.datestart }}</td>
             <td>
-                {{ service.plan.title }} - {{ service.plan.price }} руб/мес
+                {{ service.plan.title }} - {{ service.plan.price }} руб/мес <a href="{% url 'users.views.service_plan_changes' abonent.id service.id %}" >
+                <span class="glyphicon glyphicon-edit"></span></a>
                 <p><small>{{ service.tos }}</small></p>
             </td>
             <td>
@@ -79,12 +80,12 @@
         </table>
 
     <div class="btn-group">
-        <a href="{% url 'users.views.service_edit' abonent.id 0 %}" class="btn btn-success">Добавить услугу</a>
+        <a href="{% url 'users.views.service_add' abonent.id 0 %}" class="btn btn-success">Добавить услугу</a>
         <a id='btn_toggle' class="btn btn-warning" onclick="this.innerHTML = this.innerHTML == 'Скрыть архивные' ? 'Показать архивные' : 'Скрыть архивные'; return false;">Показать архивные</a>
     </div>
 {% else %}
     <h3 class="sub-header">Услуги не найдены</h3>
-    <a href="{% url 'users.views.service_edit' abonent.id 0 %}" class="btn btn-success">Добавить услугу</a>
+    <a href="{% url 'users.views.service_add' abonent.id 0 %}" class="btn btn-success">Добавить услугу</a>
 {% endif %}
 
 {% endblock %}

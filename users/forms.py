@@ -82,9 +82,36 @@ class SearchForm(forms.ModelForm):
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'contract': forms.TextInput(attrs={'class': 'form-control'}),
         }
-        
+
+class ServicePlanForm(forms.Form):
+    plan = forms.ModelChoiceField(
+        queryset =Plan.objects.all().values_list('pk','title'),
+        label=u'Тарифный план', 
+        widget=forms.Select(attrs={'class' : 'form-control'}),
+     )
+
+    datechange = forms.DateField(
+        label=u'Даты смены тарифа', 
+        widget=DateTimePicker(options={"format": "YYYY-MM-DD", "pickTime": False}),
+     )
+
+class ServiceEditForm(forms.ModelForm):
+    vlan = forms.ModelChoiceField(queryset=Vlan.objects.order_by('number'),required=False)
+
+    def __init__(self, *args, **kwargs):
+        super(ServiceEditForm, self).__init__(*args, **kwargs)
+        # adding css classes to widgets without define the fields:
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'
+
+    class Meta:
+        model = Service
+        exclude = {'abon', 'status', 'tos', 'datestart','datefinish', 'segment', 'plan' }
+
+
 class ServiceForm(forms.ModelForm):
     vlan = forms.ModelChoiceField(queryset=Vlan.objects.order_by('number'),required=False)
+
     def __init__(self, *args, **kwargs):
         super(ServiceForm, self).__init__(*args, **kwargs)
         # adding css classes to widgets without define the fields:
@@ -93,7 +120,7 @@ class ServiceForm(forms.ModelForm):
 
     class Meta:
         model = Service
-        exclude = {'abon', 'status'}
+        exclude = {'abon', 'status', }
 
         widgets = {
             # 'segment': forms.Select(attrs={'class': 'form-control'}),

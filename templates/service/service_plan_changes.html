@@ -1,0 +1,36 @@
+{% extends "abonent/main.html" %}
+
+{% block script %}
+    {{ form.media }}
+{% endblock %}
+
+{% block breadcrumb %}
+        <ol class="breadcrumb">
+            <li><a href="{% url 'abonent_info' abonent.id %}">Абонент</a></li>
+            <li><a href="{% url 'users.views.abonent_services' abonent.id %}">Услуги</a></li>
+            <li class="active">Изменение тарифного плана</li>
+        </ol>
+{% endblock %}
+
+{% block pages %}
+<form method="post" class="form-horizontal" role="form">{% csrf_token %}
+    {% for field in form %}
+        <div class="form-group">
+            <label class="col-sm-3 control-label">
+                <small>{{ field.errors }}</small>
+                {{ field.label_tag }}
+            </label>
+            <div class="col-sm-4">
+                {{ field }}
+            </div>
+        </div>
+    {% endfor %}
+    <div class="form-group">
+    <label class="col-sm-3 control-label"></label>
+        <div class="col-sm-2">
+            <button class="btn btn-primary" type="submit">Сохранить <span class="glyphicon glyphicon-save"></span>
+            </button>
+        </div>
+    </div>
+</form>
+{% endblock %}

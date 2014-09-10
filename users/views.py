@@ -10,7 +10,7 @@ from django.core import serializers
 # from django.views.decorators.csrf import csrf_exempt, csrf_protect
 # from django.core.context_processors import csrf
 from django.template import RequestContext
-from users.forms import  ServiceForm, SearchForm, LoginForm, PassportForm, DetailForm, ManageForm, AbonentForm
+from users.forms import  ServiceForm, SearchForm, LoginForm, PassportForm, DetailForm, ManageForm, AbonentForm, ServicePlanForm, ServiceEditForm
 from journaling.forms import ServiceStatusChangesForm
 from notice.forms import AbonentFilterForm
 from users.models import Abonent, Service, TypeOfService, Plan, Passport, Detail
@@ -21,36 +21,7 @@ from vlans.models import Network, IPAddr
 from django.db.models import Avg, Max, Min, Sum, Q
 import datetime
 from django.conf import settings
-
 from pays.models import Payment
-
-# @login_required
-# def contact(request):
-#     if request.method == 'POST': # If the form has been submitted...
-#         form = ContactForm(request.POST) # A form bound to the POST data
-#         if form.is_valid(): # All validation rules pass
-#             # Process the data in form.cleaned_data
-#             # ...
-#             return HttpResponseRedirect('#') # Redirect after POST
-#     else:
-#         form = AbonentForm() # An unbound form
-
-#     return render_to_response('fizik.html', {
-#         'form': form,
-#     }, context_instance = RequestContext(request))
-
-# @login_required	
-# def aquicksearch(request):
-#     if request.method == 'POST': # If the form has been submitted...
-#         data = request.POST
-#         abonents = Abonent.objects.filter(contract__icontains=data['q'])|Abonent.objects.filter(title__icontains=data['q'])
-#         if abonents.count() == 1:
-#             return redirect('abonent_info', abonent_id = abonents[0].pk) 
-#         elif abonents.count() == 0:
-#             return render_to_response('deadend.html', { 'message' : u'Абоненты не найдены', 'previous_page' : request.META['HTTP_REFERER'] }  , context_instance = RequestContext(request))
-#         else:
-#             return render_to_response('aqsearch_result.html', { 'abonents' : abonents } , context_instance = RequestContext(request))
-#     #return redirect(request.META['HTTP_REFERER'])        
 
 @login_required 
 def aquicksearch(request):
@@ -217,27 +188,27 @@ def abonent_search(request):
     return render_to_response('asearch.html', {'form': form, 'abonents' : abonents, 'abonent_list_count' : len(abonent_list) }, context_instance = RequestContext(request) )
 
 @login_required
-def service_add(request, abonent_id="0", tos_id="0"):
-    if request.method == 'POST':
-        form = ServiceForm(request.POST)
-        if form.is_valid(): 
-            newservice = form.save(commit=False)
-            newservice.abon = Abonent.objects.get(pk=abonent_id)
-            newservice.save()
-        else:
-            print form.errors
-    else:
-        form = ServiceForm() 
-        form.fields['plan'].queryset=Plan.objects.filter(tos__pk=tos_id)
-    try:
-        abonent = Abonent.objects.get(pk=abonent_id)
-    except:
-        abonent, services = None	
-    return render_to_response('service/service_edit.html', {
-                                'abonent' : abonent, 
-                                'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), 
-                                'form': form }, 
-                                context_instance = RequestContext(request) )    
+# def service_add(request, abonent_id="0", tos_id="0"):
+#     if request.method == 'POST':
+#         form = ServiceForm(request.POST)
+#         if form.is_valid(): 
+#             newservice = form.save(commit=False)
+#             newservice.abon = Abonent.objects.get(pk=abonent_id)
+#             newservice.save()
+#         else:
+#             print form.errors
+#     else:
+#         form = ServiceForm() 
+#         form.fields['plan'].queryset=Plan.objects.filter(tos__pk=tos_id)
+#     try:
+#         abonent = Abonent.objects.get(pk=abonent_id)
+#     except:
+#         abonent, services = None	
+#     return render_to_response('service/service_edit.html', {
+#                                 'abonent' : abonent, 
+#                                 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), 
+#                                 'form': form }, 
+#                                 context_instance = RequestContext(request) )    
 
 @login_required
 def service_status_change(request, abonent_id, service_id):
@@ -269,7 +240,59 @@ def service_status_change(request, abonent_id, service_id):
                                 context_instance = RequestContext(request) )   
 
 @login_required
-def service_edit(request, abonent_id, service_id=0):
+# Смена тарифного плана на услуге
+def service_plan_changes(request, abonent_id, service_id):
+    try:
+        abonent = Abonent.objects.get(pk = abonent_id)
+    except:
+        abonent = None
+
+    service = Service.objects.get(pk=service_id)
+
+    if request.method == 'POST':
+        form = ServicePlanForm(request.POST)
+        if form.is_valid():
+            # form.save(commit=False)
+            # service.save()
+            return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
+    else:
+        form = ServicePlanForm(initial={'plan': service.plan})
+        form.fields['plan'].queryset=Plan.objects.filter(tos__pk=service.plan.tos.pk, utype=abonent.utype)
+
+    return render_to_response('service/service_plan_changes.html', {
+                                'form': form,
+                                'abonent' : abonent,
+                                'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), },
+                                context_instance = RequestContext(request)
+                                ) 
+@login_required
+def service_edit(request, abonent_id, service_id):
+    try:
+        abonent = Abonent.objects.get(pk = abonent_id)
+    except:
+        abonent = None
+
+    service = Service.objects.get(pk=service_id)
+
+    if request.method == 'POST':
+        form = ServiceEditForm(request.POST, instance=service)
+        if form.is_valid():
+            # form.save(commit=False)
+            # service.save()
+            return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
+    else:
+        form = ServiceEditForm(instance=service)
+        form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk).filter(net__net_type='UN').filter(Q(service=None))|IPAddr.objects.filter(service__pk=service.pk)
+
+    return render_to_response('service/service_manage.html', {
+                                'form': form,
+                                'abonent' : abonent,
+                                'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), },
+                                context_instance = RequestContext(request)
+                                ) 
+
+@login_required
+def service_add(request, abonent_id, service_id=0):
     if service_id != '0' :
         message = u'Изменение параметров услуги [%s]' % (service_id)
         new = False
@@ -291,16 +314,16 @@ def service_edit(request, abonent_id, service_id=0):
             service.abon=abonent
             service.save()
             return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
-        else:
-            print form.errors
+        # else:
+        #     print form.errors
     else:
         form = ServiceForm(instance=service)
         # form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk,service=None)
         if not new:
-            form.fields['plan'].queryset=Plan.objects.filter(tos__pk=service.plan.tos.pk)
+            # form.fields['plan'].queryset=Plan.objects.filter(tos__pk=service.plan.tos.pk)
             form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk).filter(net__net_type='UN').filter(Q(service=None))|IPAddr.objects.filter(service__pk=service.pk)
         else:
-            form.fields['plan'].queryset=Plan.objects.none()
+            # form.fields['plan'].queryset=Plan.objects.none()
             form.fields['ip'].queryset=IPAddr.objects.none()
 
     return render_to_response('service/service_edit.html', {
