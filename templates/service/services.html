@@ -33,12 +33,15 @@
         <tr id="tr-{{ service.pk }}" {% ifequal service.status 'D' %} class="active" style=" display:none" {% endifequal %}>
             <td>[{{ service.pk }}]</td>
             <td>
-                {{ service.address }}
+                {{ service.location.address }}
+                <a href="{% url 'users.views.service_location_edit' abonent.id service.id %}">
+                <span class="glyphicon glyphicon-edit"></span></a>
                 <p><small>{{ service.segment.title }}</small></p>
             </td>
             <td>{{ service.datestart }}</td>
             <td>
-                {{ service.plan.title }} - {{ service.plan.price }} руб/мес <a href="{% url 'users.views.service_plan_changes' abonent.id service.id %}" >
+                {{ service.plan.title }} - {{ service.plan.price }} руб/мес 
+                <a href="{% url 'users.views.service_plan_edit' abonent.id service.id %}">
                 <span class="glyphicon glyphicon-edit"></span></a>
                 <p><small>{{ service.tos }}</small></p>
             </td>

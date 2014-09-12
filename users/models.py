@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from django.db.models import Sum
-from vlans.models import IPAddr, Vlan, Node 
+from vlans.models import IPAddr, Vlan, Node, Location 
 from devices.models import Device
 # from contacts.models import Contact
 from journaling.models import AbonentStatusChanges, ServiceStatusChanges
@@ -241,10 +241,10 @@ class Service(models.Model):
     speed_in = models.PositiveIntegerField(default=0, blank=True, null=True)
     speed_out = models.PositiveIntegerField(default=0, blank=True, null=True)
     status = models.CharField(u'Статус', max_length=1, choices=settings.STATUSES, default=settings.STATUS_NEW)
-    lat = models.FloatField(u'Latitude', blank=True, null=True)
-    lon = models.FloatField(u'Longitude', blank=True, null=True)
-    address = models.CharField(u'Адрес', blank=True, null= True, max_length=100)
-    # location = models.ForeignKey(Node, verbose_name=u'Местонахождение')
+    # lat = models.FloatField(u'Latitude', blank=True, null=True)
+    # lon = models.FloatField(u'Longitude', blank=True, null=True)
+    # address = models.CharField(u'Адрес', blank=True, null= True, max_length=100)
+    location = models.ForeignKey(Location, blank=True, null=True, verbose_name=u'Местонахождение')
     datestart = models.DateField(auto_now=False, auto_now_add=False, default=datetime.datetime.now(), verbose_name=u'Дата начала')
     datefinish = models.DateField(auto_now=False, auto_now_add=False, blank=True, null= True, verbose_name=u'Дата окончания')
     user_device = models.ForeignKey(Device, related_name='user_device',verbose_name=u'Абонентское устройство', blank=True, null= True)

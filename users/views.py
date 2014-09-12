@@ -18,6 +18,7 @@ from tt.models import TroubleTicket, TroubleTicketComment
 from journaling.models import ServiceStatusChanges, AbonentStatusChanges
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from vlans.models import Network, IPAddr
+from vlans.forms import LocationForm
 from django.db.models import Avg, Max, Min, Sum, Q
 import datetime
 from django.conf import settings
@@ -188,29 +189,6 @@ def abonent_search(request):
     return render_to_response('asearch.html', {'form': form, 'abonents' : abonents, 'abonent_list_count' : len(abonent_list) }, context_instance = RequestContext(request) )
 
 @login_required
-# def service_add(request, abonent_id="0", tos_id="0"):
-#     if request.method == 'POST':
-#         form = ServiceForm(request.POST)
-#         if form.is_valid(): 
-#             newservice = form.save(commit=False)
-#             newservice.abon = Abonent.objects.get(pk=abonent_id)
-#             newservice.save()
-#         else:
-#             print form.errors
-#     else:
-#         form = ServiceForm() 
-#         form.fields['plan'].queryset=Plan.objects.filter(tos__pk=tos_id)
-#     try:
-#         abonent = Abonent.objects.get(pk=abonent_id)
-#     except:
-#         abonent, services = None	
-#     return render_to_response('service/service_edit.html', {
-#                                 'abonent' : abonent, 
-#                                 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), 
-#                                 'form': form }, 
-#                                 context_instance = RequestContext(request) )    
-
-@login_required
 def service_status_change(request, abonent_id, service_id):
     try:
         abonent = Abonent.objects.get(pk=abonent_id)
@@ -240,8 +218,31 @@ def service_status_change(request, abonent_id, service_id):
                                 context_instance = RequestContext(request) )   
 
 @login_required
+# Редактирование местоположения услуги
+def service_location_edit(request, abonent_id, service_id):
+    try:
+        abonent = Abonent.objects.get(pk=abonent_id)
+        service = Service.objects.get(pk=service_id)
+    except:
+        abonent = None
+        service = None
+
+    if request.method == 'POST':
+        form = LocationForm(request.POST,instance=service.location)
+        if form.is_valid():
+            form.save()
+    else:
+        form = LocationForm(instance=service.location)
+
+    return render_to_response('service/service_location_changes.html', { 
+                                'abonent' : abonent, 
+                                'form': form, 
+                                'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() },
+                                 context_instance = RequestContext(request))
+
+@login_required
 # Смена тарифного плана на услуге
-def service_plan_changes(request, abonent_id, service_id):
+def service_plan_edit(request, abonent_id, service_id):
     try:
         abonent = Abonent.objects.get(pk = abonent_id)
     except:
