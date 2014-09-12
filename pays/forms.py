@@ -33,6 +33,10 @@ class DateChoiceForm(forms.Form):
     #     return cleaned_data
 
 class WriteOffForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+         super(WriteOffForm, self).__init__(*args, **kwargs)
+         self.fields['summ'].localize = True
+  
     class Meta:
         model = WriteOff
       	exclude = ['abonent', 'user', 'valid']

@@ -1,7 +1,15 @@
 {% extends "abonent/main.html" %}
 
 {% block pages %} 
-     
+
+<div class="row">
+    <div class="col-xs-3">
+        <a href="{% url 'addpayment' abonent.id %}" class="btn btn-primary btn-xm" role="button">
+            Добавить платеж
+        </a>
+    </div>
+</div>   
+<hr>  
 {% if pays %}	
 		<table class="table table-striped h6">
 		<thead>
@@ -26,26 +34,7 @@
 		</tbody>
 		</table>
 </br>
-<div class="row">
-        <div class="col-xs-6">
-                <p>Всего платежей: <b>{{ pay_stat.sum__sum|floatformat }}</b> руб.</p>
-                <p>Средний платеж: <b>{{ pay_stat.sum__avg|floatformat }}</b> руб.</p>
-        </div>
-        <div class="col-xs-3 pull-right">
-            <a href="{% url 'addpayment' abonent.id %}" class="btn btn-primary btn-xm pull-right" role="button">
-                Добавить платеж
-            </a>
-        </div>
-</div>
-{% else %}
-	<h3 class="sub-header">Платежи не найдены</h3>
-<div class="row">
-        <div class="col-xs-3 pull-right">
-            <a href="{% url 'addpayment' abonent.id %}" class="btn btn-primary btn-xm pull-right" role="button">
-                Добавить платеж
-            </a>
-        </div>
-</div>    
-{% endif %}        
+{% endif %} 
+    
     
 {% endblock %}

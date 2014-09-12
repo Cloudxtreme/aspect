@@ -1,11 +1,18 @@
 {% extends "abonent/main.html" %}
 
 {% block script %}
-{{ form.media }}
+    {{ form.media }}
 {% endblock %}
 
 {% block pages %} 
-     
+<div class="row">
+    <div class="col-xs-3">
+        <a href="{% url 'addpromisedpay' abonent.id %}" class="btn btn-primary btn-xm" role="button">
+            Добавить обещаный платеж
+        </a>
+    </div>
+</div>    
+<hr/>
 {% if promisedpays %}	
 		<table class="table  h6">
 		<thead>
@@ -37,14 +44,7 @@
 		</table>
 </br>
 {% else %}
-	<h3 class="sub-header">Платежи не найдены</h3>
+	<h3 class="sub-header">Обещанных платежей не было</h3>
 {% endif %} 
-<div class="row">
-        <div class="col-xs-3 pull-right">
-            <a href="{% url 'addpromisedpay' abonent.id %}" class="btn btn-primary btn-xm" role="button">
-                Добавить обещаный платеж
-            </a>
-        </div>
-</div>    
     
 {% endblock %}

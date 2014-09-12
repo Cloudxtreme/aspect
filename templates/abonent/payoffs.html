@@ -1,7 +1,14 @@
 {% extends "abonent/main.html" %}
 
 {% block pages %} 
-     
+    <div class='row'>
+        <div class="col-xs-3">
+            <a href="{% url 'addpayoff' abonent.id %}" class="btn btn-primary btn-xm" role="button">
+                Списать средства
+            </a>
+        </div>
+    </div>  
+<hr>   
 {% if payoffs %}	
 		<table class="table table-striped h6">
 		<thead>
@@ -30,15 +37,8 @@
 		</tbody>
 		</table>
 
-
 {% else %}
 	<h3 class="sub-header">Списания не найдены</h3>
 {% endif %} 
-<div class='row'>
-    <div class="col-xs-3 pull-right">
-        <a href="{% url 'addpayoff' abonent.id %}" class="btn btn-primary btn-xm pull-right" role="button">
-            Списать средства
-        </a>
-    </div>
-</div>
+
 {% endblock %}

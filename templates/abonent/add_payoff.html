@@ -1,48 +1,34 @@
 {% extends "abonent/main.html" %}
-    {% block script %}
-        {{ form.media }}
-    {% endblock %}
+
+{% block script %}
+    {{ form.media }}
+{% endblock %}
+
+{% block breadcrumb %}
+        <ol class="breadcrumb">
+            <li><a href="{% url 'abonent_info' abonent.id %}">Абонент</a></li>
+            <li><a href="{% url 'writeoffs' abonent.id %}">Списания</a></li>
+            <li class="active">Добавить списание</li>
+        </ol>
+{% endblock %}
+
 {% block pages %} 
 
 <h2>Данные о списании</h2>     
 <hr>
 <form method="post" class="form-horizontal" role="form">{% csrf_token %}
-    <div class="form-group">
-        <label for="id_number" class="col-sm-3 control-label">Номер</label>
-        <div class="col-sm-3">
-            {{ form.number }}    
+    {% for field in form %}
+        <div class="form-group">
+            <label class="col-sm-3 control-label">
+                <small>{{ field.errors }}</small>
+                {{ field.label_tag }}
+            </label>
+            <div class="col-sm-4">
+                {{ field }}
+            </div>
         </div>
-    </div>
-    <div class="form-group">
-        <label for="id_summ" class="col-sm-3 control-label">Сумма</label>
-        <div class="col-sm-3">
-            {{ form.summ }}
-        </div>
-    </div>    
-    <div class="form-group">
-        <label for="id_wot" class="col-sm-3 control-label">Тип списания</label>
-        <div class="col-sm-3">
-            {{ form.wot }}
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="id_service" class="col-sm-3 control-label">Услуга</label>
-        <div class="col-sm-3">
-            {{ form.service }}
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="id_date" class="col-sm-3 control-label">Дата</label>
-        <div class="col-sm-3">
-            {{ form.date }}
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="id_comment" class="col-sm-3 control-label">Комментарий</label>
-        <div class="col-sm-6">
-            {{ form.comment }}
-        </div>
-    </div>
+    {% endfor %}
+    
     <div class="form-group">
         <div class="col-sm-offset-3 col-sm-9">
             <button id="btn_save" class="btn btn-primary" type="submit">Сохранить <span class="glyphicon glyphicon-save"></span></button>

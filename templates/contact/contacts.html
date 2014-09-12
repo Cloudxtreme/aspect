@@ -12,7 +12,14 @@
 {% endblock %}
 
 {% block pages %}
-
+<div class="row">
+    <div class="col-xs-3">
+        <a href="{% url 'contact_edit' abonent.id 0 %}" class="btn btn-primary btn-xm" role="button">
+            Добавить контакт
+        </a>
+    </div>
+</div>    
+<hr/>
 {% if contacts %}
 {% load dict_extras %}<div class="table-responsive">
         <table class="table table-striped h6">
@@ -55,5 +62,5 @@
 {% else %}
     <h3 class="sub-header">Контакты не найдены</h3>
  {% endif %}
-    <a href="{% url 'contact_edit' abonent.id 0 %}" class="btn btn-success">Добавить контакт</a>
+    
 {% endblock %}
