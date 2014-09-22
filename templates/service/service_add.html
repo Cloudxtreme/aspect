@@ -1,0 +1,93 @@
+{% extends "abonent/main.html" %}
+    {% block script %}
+    <script type="text/javascript">
+    $(function(){
+        $("select#id_segment").change(function(){
+            $.getJSON("/abonent/ajax/ipbyseg/",{id:+$(this).val()}, function(j) {
+                var options = '<option value="">--------- </option>';
+                for (var i = 0; i < j.length; i++) {
+                options += '<option value="' + parseInt(j[i].pk) + '">' + j[i].fields['ip'] + '</option>';
+                }
+                $("#id_ip").html(options);
+                $("#id_ip option:first").attr('selected', 'selected');
+                $("#id_ip").attr('disabled', false);
+                })
+            $("#id_ip").attr('selected', 'selected');
+            $("select#id_tos").change();
+        });
+        $("select#id_tos").change(function(){
+            $.getJSON("/abonent/ajax/planbytos/",{id:+$(this).val(), seg:+$("select#id_segment").val(), utype:'{{abonent.utype}}'}, function(j) {
+                var options = '<option value="">--------- </option>';
+                for (var i = 0; i < j.length; i++) {
+                options += '<option value="' + parseInt(j[i].pk) + '">' + j[i].fields['title'] + ' - ' + j[i].fields['price'] + ' руб/мес </option>';
+                }
+                $("#id_plan").html(options);
+                $("#id_plan option:first").attr('selected', 'selected');
+                $("#id_plan").attr('disabled', false);
+                })
+            $("#id_ip").attr('selected', 'selected');
+        });
+        $("#saveSpeed").click(function () {
+        });
+        $("#editSpeed").click(function () {
+            $("#id_speed_in").attr('disabled', false);
+            $("#id_speed_out").attr('disabled', false);
+            $("#editSpeed").hide();
+            $("#saveSpeed").show();
+        });
+    })
+    </script>
+
+{{ form.media }}
+{% endblock %}
+
+{% block breadcrumb %}
+        <ol class="breadcrumb">
+            <li><a href="{% url 'abonent_info' abonent.id %}">Абонент</a></li>
+            <li><a href="{% url 'users.views.abonent_services' abonent.id %}">Услуги</a></li>
+            <li class="active">{% if new %}Добавление{% else %}Изменение{% endif %}</li>
+        </ol>
+{% endblock %}
+
+{% block pages %}
+
+{% if form.errors %}
+    <div class="alert alert-danger" role="alert">
+    <p>Внимание! Ошибка заполнения формы.</p>
+    {% for field in form %}
+        {% if field.errors %}
+            <p>
+            <b>{{ field.label }}</b>
+            {% for error in field.errors %} 
+                - {{ error }} 
+            {% endfor %}
+            </p>
+        {% endif %}
+    {% endfor %}
+    </div>
+{% endif %}
+
+<h2>Добавление новой услуги</h2>
+<hr>
+<form method="post" class="form-horizontal" role="form">{% csrf_token %}
+    {% for field in form %}
+        <div class="form-group">
+            <label class="col-sm-3 control-label">
+                <small>{{ field.errors }}</small>
+                {{ field.label_tag }}
+            </label>
+            <div class="col-sm-4">
+                {{ field }}
+            </div>
+        </div>
+    {% endfor %}
+
+    
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <button id="btn_save" class="btn btn-primary" type="submit">Сохранить <span class="glyphicon glyphicon-save"></span>
+            </button>
+        </div>
+    </div>
+</form>
+{% endblock %}

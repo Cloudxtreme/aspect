@@ -57,7 +57,7 @@ def feeds_plans_by_tos(request):
         if request.GET['id'] == '0' or request.GET['seg'] == '0':
             json_subcat = serializers.serialize("json", Plan.objects.none())
         else:
-            json_subcat = serializers.serialize("json", Plan.objects.filter(tos__pk=request.GET['id'],segment__pk=request.GET['seg']))
+            json_subcat = serializers.serialize("json", Plan.objects.filter(utype=request.GET['utype'],tos__pk=request.GET['id'],segment__pk=request.GET['seg']))
         return HttpResponse(json_subcat, mimetype="application/javascript")
     else:
         form = ServiceForm() # An unbound form
@@ -293,15 +293,9 @@ def service_edit(request, abonent_id, service_id):
                                 ) 
 
 @login_required
-def service_add(request, abonent_id, service_id=0):
-    if service_id != '0' :
-        message = u'Изменение параметров услуги [%s]' % (service_id)
-        new = False
-        service = Service.objects.get(pk=service_id)
-    else:
-        message = u'Добавление новой услуги'
-        new = True
-        service = Service()
+def service_add(request, abonent_id):
+    new = True
+    service = Service()
 
     try:
         abonent = Abonent.objects.get(pk = abonent_id)
@@ -320,17 +314,11 @@ def service_add(request, abonent_id, service_id=0):
     else:
         form = ServiceForm(instance=service)
         # form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk,service=None)
-        if not new:
-            # form.fields['plan'].queryset=Plan.objects.filter(tos__pk=service.plan.tos.pk)
-            form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk).filter(net__net_type='UN').filter(Q(service=None))|IPAddr.objects.filter(service__pk=service.pk)
-        else:
-            # form.fields['plan'].queryset=Plan.objects.none()
-            form.fields['ip'].queryset=IPAddr.objects.none()
+        # form.fields['plan'].queryset=Plan.objects.none()
+        # form.fields['ip'].queryset=IPAddr.objects.none()
 
-    return render_to_response('service/service_edit.html', {
+    return render_to_response('service/service_add.html', {
                                 'form': form,
-                                'message': message,
-                                'new': new,
                                 'abonent' : abonent,
                                 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), },
                                 context_instance = RequestContext(request)

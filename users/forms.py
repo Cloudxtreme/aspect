@@ -110,7 +110,6 @@ class ServiceEditForm(forms.ModelForm):
 
 
 class ServiceForm(forms.ModelForm):
-    vlan = forms.ModelChoiceField(queryset=Vlan.objects.order_by('number'),required=False)
 
     def __init__(self, *args, **kwargs):
         super(ServiceForm, self).__init__(*args, **kwargs)
@@ -120,19 +119,7 @@ class ServiceForm(forms.ModelForm):
 
     class Meta:
         model = Service
-        exclude = {'abon', 'status', }
-
-        widgets = {
-            # 'segment': forms.Select(attrs={'class': 'form-control'}),
-            'datestart': DateTimePicker(options={"format": "YYYY-MM-DD", "pickTime": False}),
-            'datefinish': DateTimePicker(options={"format": "YYYY-MM-DD", "pickTime": False }),
-            'mac': forms.TextInput(attrs={'class': 'form-control', 'placeholder' : '00:12:34:56:78:90'}),
-            'speed_in': forms.TextInput(attrs={'class': 'form-control',  'placeholder' : 'Kbps', 'disabled' : 'disabled'}),
-            'speed_out': forms.TextInput(attrs={'class': 'form-control', 'placeholder' : 'Kbps', 'disabled' : 'disabled'}),
-            'lat': forms.TextInput(attrs={'class': 'form-control', 'placeholder' : '60.00000'}),
-            'lon': forms.TextInput(attrs={'class': 'form-control', 'placeholder' : '30.00000'}),
-            # 'status': forms.Select(attrs={'class': 'form-control',}),
-        }
+        exclude = {'abon', 'status', 'datestart','datefinish','speed_in','speed_out', 'ip','vlan','adm_status','mac','user_device','bs_device' }
 
 class LoginForm(forms.Form):
     username = forms.CharField(label=u'Имя пользователя', widget=forms.TextInput(attrs={'class':'form-control', 'placeholder' : "Имя пользователя" } ))
