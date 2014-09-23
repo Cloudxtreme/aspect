@@ -118,7 +118,7 @@ class Abonent(models.Model):
     vip = models.BooleanField(u'VIP Клиент', default=False)
     notice_email = models.CharField(u'Email для уведомлений', max_length=70, blank=True, null=True)
     notice_mobile = models.CharField(u'Телефон для уведомлений', max_length=13, blank=True, null=True)
-    tag = models.ManyToManyField(Tag,verbose_name=u'Тэг')
+    tag = models.ManyToManyField(Tag,verbose_name=u'Тэг', blank=True, null=True)
     objects = models.Manager()
     obj = AbonentFilterManager()
 
