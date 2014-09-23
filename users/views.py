@@ -253,8 +253,8 @@ def service_plan_edit(request, abonent_id, service_id):
     if request.method == 'POST':
         form = ServicePlanForm(request.POST)
         if form.is_valid():
-            # form.save(commit=False)
-            # service.save()
+            form.save(commit=False)
+            service.save()
             return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
     else:
         form = ServicePlanForm(initial={'plan': service.plan})
@@ -278,8 +278,8 @@ def service_edit(request, abonent_id, service_id):
     if request.method == 'POST':
         form = ServiceEditForm(request.POST, instance=service)
         if form.is_valid():
-            # form.save(commit=False)
-            # service.save()
+            form.save(commit=False)
+            service.save()
             return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
     else:
         form = ServiceEditForm(instance=service)
