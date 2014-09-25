@@ -34,7 +34,7 @@ class TypeOfService(models.Model):
         return self.title
 
 class Tag(models.Model):
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, unique=True)
 
     def __unicode__(self):
         return u"%s" % (self.title)
@@ -79,7 +79,7 @@ class AbonentFilterManager(models.Manager):
     def filter_list(self,title='',contract='',status=[],utype=[],tos=[],is_credit=[],balance_lt=None,balance_gt=None,speed_lt=None,speed_gt=None):
         abonent_list = super(AbonentFilterManager, self).get_query_set()
         if title:
-            abonent_list = abonent_list.filter(title__icontains=title)
+            abonent_list = abonent_list.filter(title__icontains=title)|abonent_list.filter(detail__title__icontains=title)
         if contract:
             abonent_list = abonent_list.filter(contract__icontains=contract)            
         if status:
@@ -106,7 +106,7 @@ class AbonentFilterManager(models.Manager):
         return super(AbonentFilterManager, self).get_query_set()
 
 class Abonent(models.Model):
-    title = models.CharField(u'Доп. название', max_length=70)
+    title = models.CharField(u'Доп. название', max_length=200)
     contract = models.CharField(u'Номер договора',max_length=15,blank=True, null=True)
     status = models.CharField(u'Статус',max_length=1, choices=settings.STATUSES, default=settings.STATUS_NEW)
     utype = models.CharField(u'Тип абонента', max_length=1, choices=settings.U_TYPE)

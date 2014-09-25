@@ -27,7 +27,7 @@ from pays.models import Payment
 @login_required 
 def aquicksearch(request):
     data = request.GET
-    abonent_list = Abonent.objects.filter(contract__icontains=data['q'])|Abonent.objects.filter(title__icontains=data['q'])
+    abonent_list = Abonent.objects.filter(contract__icontains=data['q'])|Abonent.objects.filter(title__icontains=data['q'])|Abonent.objects.filter(detail__title__icontains=data['q'])
     paginator = Paginator(abonent_list, 10)
 
     page = request.GET.get('page')

@@ -24,6 +24,38 @@ import re
 
 # subject="Sent from Python"
 
+class GroupEmailMessage(models.Model):
+    abonent_list = models.ManyToManyField('users.Abonent', verbose_name=u'Абоненты', blank=True, null=True)
+    subject = models.CharField(u'Тема', max_length=70)
+    content = HTMLField(u'Сообщение')
+    date = models.DateTimeField(default=datetime.now, verbose_name=u'Дата рассылки')
+    sent = models.BooleanField(u'Отправлено', default=False) 
+
+    def create_messages(self):
+        eList = []
+        for abonent in self.abonent_list:
+           if  abonent.notice_email:
+                # здесь подставновка значения поля вместо его имени!
+                filtered_content = self.content
+                for field in abonent.__dict__.keys():
+                    filtered_content=filtered_content.replace('[%s]' % field, '%s' % abonent.__dict__[field] )
+                # формируем список сообщений
+                eList += [EmailMessage(abonent = abonent,
+                                       destination = abonent.notice_email,
+                                       subject=self.subject,
+                                       content=filtered_content,
+                                       date=self.date,
+                                       group=self,
+                                       group_id=1 + (EmailMessage.objects.all().aggregate(Max('group_id'))['group_id__max'] or 0) )]
+        EmailMessage.objects.bulk_create(eList)
+
+    class Meta:
+        verbose_name = u'Групповое сообщение'
+        verbose_name_plural = u'Групповые сообщения'
+
+    def __unicode__(self):
+        return u"[%s] %s - %s" % ( self.pk, self.date.ctime(), self.subject )    
+
 # class GroupEmailMessage(models.Model):
 #     PERIOD = (
 #         ('0', 'Не повторять'),

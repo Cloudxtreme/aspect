@@ -31,7 +31,7 @@
 <div class="jumbotron col-lg-6 col-lg-offset-3">
     <h2>Форма поиска абонентов</h2>
     <br>
-    <form method="post" class="form-horizontal" role="form">{% csrf_token %}
+    <form action='#pager' method="post" class="form-horizontal" role="form">{% csrf_token %}
     {% for field in form %}
             <div class="form-group">
                 <label class="col-lg-4 control-label">
@@ -84,8 +84,18 @@
             {% for abonent in abonents %}
             <tr>
                 <td>{{ abonent.contract }}</td>
-                <td><a href="{% url 'abonent_info' abonent.id %}">{{ abonent.title }}</a>
-                <p><small>{{ abonent.get_utype_display }}</small><p></td>
+                <td>
+                    <a href="{% url 'abonent_info' abonent.id %}">
+                        {% ifequal abonent.utype "U" %}
+                            {% for item in abonent.detail_set.all %}
+                                {{ item.title }}
+                            {% endfor %}
+                        {% else %}
+                            {{ abonent.title }}
+                        {% endifequal %}
+                    </a>
+                    <p><small>{{ abonent.get_utype_display }}</small><p>
+                </td>
                 <td></td>
                 <td>{{ abonent.balance|floatformat:2 }} руб.</td>
                 <td class={{ abonent.status|get_color }}>{{ abonent.get_status_display }}</td>

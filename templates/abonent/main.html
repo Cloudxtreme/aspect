@@ -14,7 +14,9 @@
                     {{ item.title }}
                  {% endfor %}
                  {% ifequal abonent.utype "U" %}
-                    ({{ abonent.title }})
+                    {% for item in abonent.tag.all %}
+                        <small><span class="label label-primary">{{ item.title }}</span></small>
+                    {% endfor %}
                  {% else %}
                     {{ abonent.title }}
                 {% endifequal %}

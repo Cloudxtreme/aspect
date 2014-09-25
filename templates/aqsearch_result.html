@@ -40,8 +40,18 @@
         <tbody>
         {% for abonent in abonents %}
             <td>{{ abonent.contract }}</td>
-            <td><a href="{% url 'abonent_info' abonent.id %}">{{ abonent.title }}</a>
-            <p><small>{{ abonent.get_utype_display }}</small><p></td>
+            <td>
+                <a href="{% url 'abonent_info' abonent.id %}">
+                    {% ifequal abonent.utype "U" %}
+                        {% for item in abonent.detail_set.all %}
+                            {{ item.title }}
+                        {% endfor %}
+                    {% else %}
+                        {{ abonent.title }}
+                    {% endifequal %}
+                </a>
+                <p><small>{{ abonent.get_utype_display }}</small><p>
+            </td>
             <td></td>
             <td>{{ abonent.balance|floatformat:2 }} руб.</td>
             <td class={{ abonent.status|get_color }}>{{ abonent.get_status_display }}</td>
