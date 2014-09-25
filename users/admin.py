@@ -21,7 +21,7 @@ class PassportInline(admin.TabularInline):
 
 class AbonentAdmin(admin.ModelAdmin):
     inlines = [
-        ServiceInline,
+        # ServiceInline,
         PassportInline,
         DetailInline,
     ]

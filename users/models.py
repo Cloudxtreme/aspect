@@ -153,10 +153,10 @@ class Abonent(models.Model):
         else:
             if self.status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE]:
                 if self.is_credit == settings.PAY_BEFORE: # Предоплатников выключаем по балансу всегда
-                    self.status = (settings.STATUS_ACTIVE if self.balance >= 0 else settings.STATUS_OUT_OF_BALANCE)
+                    self.status = (settings.STATUS_ACTIVE if self.balance >= -10 else settings.STATUS_OUT_OF_BALANCE)
                 else: # Постоплатников c минусовым балансом выключаем 25 числа или в любой другой день, как только сумма на счете станет меньше чем сумма всех услуг
                     service_sum = self.service_set.filter(status__in=['A','N']).aggregate(Sum('plan__price'))['plan__price__sum'] or 0
-                    self.status = (settings.STATUS_OUT_OF_BALANCE if (self.balance < -service_sum ) or (self.balance < 0 and datetime.datetime.today().day > 24) else settings.STATUS_ACTIVE)
+                    self.status = (settings.STATUS_OUT_OF_BALANCE if (self.balance < -service_sum ) or (self.balance < -10 and datetime.datetime.today().day > 24) else settings.STATUS_ACTIVE)
                 super(Abonent, self).save()
                 self.set_changes(reason, old_status)
 
