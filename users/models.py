@@ -316,23 +316,24 @@ class Service(models.Model):
         if self.mac:
              self.mac.translate(':,.,-').upper().strip()
         # Проверяем не поменялся ли тарифный план
-        if self.pk != None and self.plan.pk != Service.objects.get(pk=self.pk).plan.pk:
-            # print Service.objects.get(pk=self.pk).pk
-            # print self.plan.pk
-            new_service = Service.objects.get(pk=self.pk)
-            new_service.pk = None
-            new_service.plan = self.plan
-            new_service.status = self.status
-            new_service.datestart = datetime.date.today() + datetime.timedelta(days=1)
-            new_service.save()
-            self.datefinish = datetime.date.today()
-            self.status = STATUS_ARCHIVED
-            if self.datestart and self.datefinish and self.datestart > self.datefinish:
-                self.delete()
-            else:
-                super(Service, self).save(update_fields=['datefinish','status'])
-        else:
-            super(Service, self).save(force_insert=False, force_update=False)
+        # Убрано в связи с изменение механизма смены тарифного плана
+        # if self.pk != None and self.plan.pk != Service.objects.get(pk=self.pk).plan.pk:
+        #     # print Service.objects.get(pk=self.pk).pk
+        #     # print self.plan.pk
+        #     new_service = Service.objects.get(pk=self.pk)
+        #     new_service.pk = None
+        #     new_service.plan = self.plan
+        #     new_service.status = self.status
+        #     new_service.datestart = datetime.date.today() + datetime.timedelta(days=1)
+        #     new_service.save()
+        #     self.datefinish = datetime.date.today()
+        #     self.status = STATUS_ARCHIVED
+        #     if self.datestart and self.datefinish and self.datestart > self.datefinish:
+        #         self.delete()
+        #     else:
+        #         super(Service, self).save(update_fields=['datefinish','status'])
+        # else:
+        #     super(Service, self).save(force_insert=False, force_update=False)
             # Списываем плату за установку
             # Пока закоментирую, т.к. списывать инстрал нужно при старте услуги
             # if is_new:
