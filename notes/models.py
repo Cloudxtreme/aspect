@@ -26,4 +26,4 @@ class Note(models.Model):
         verbose_name_plural = u'Заметки'
 
     def __unicode__(self):
-        return self.title
+        return u'[%s] %s - %s' % (self.date.ctime(), self.title, self.author.get_full_name())

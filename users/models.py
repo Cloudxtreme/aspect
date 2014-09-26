@@ -272,44 +272,49 @@ class Service(models.Model):
 
         else:
             if self.status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE] and new_status in [settings.STATUS_ARCHIVED, settings.STATUS_PAUSED, settings.STATUS_NEW]:
-                self.stop(newstatus=new_status)
+                self.stop(date, newstatus=new_status)
             elif self.status in [settings.STATUS_ARCHIVED, settings.STATUS_PAUSED, settings.STATUS_NEW] and new_status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE]:
-                self.start(newstatus=new_status)
+                self.start(date, newstatus=new_status)
             self.status = new_status if not new_status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE] else self.abon.status
             self.save()
             return True
 
-    def stop(self, newstatus=settings.STATUS_ARCHIVED):
+    def stop(self, date=datetime.datetime.now(), newstatus=settings.STATUS_ARCHIVED):
         self.status = newstatus
-        today = datetime.datetime.today()
+        # today = datetime.datetime.today()
+        today = date.date()
         qty_days = calendar.mdays[today.month]
         summ = self.plan.price * (qty_days - today.day)/qty_days
-        if summ > TURNOFFBALANCE:
+        if summ > 0:
             from pays.models import PaymentSystem,Payment
             top = PaymentSystem.objects.get(pk=4)
-            payment = Payment(abon=self.abon, top=top, sum=summ, date=datetime.datetime.now())
+            payment = Payment(abon=self.abon, top=top, sum=summ, date=date)
             payment.save()
+        self.datefinish = date
         self.save()
 
-    def start(self, newstatus=settings.STATUS_ACTIVE):
+    def start(self, date=datetime.datetime.now(), newstatus=settings.STATUS_ACTIVE):
         self.status = newstatus
+        self.datestart = date
+        today = date.date()
         self.save()
 
         from pays.models import WriteOff, WriteOffType
         wot = WriteOffType.objects.get(title=u'Инсталляция')
-        write_off = WriteOff(abonent=self.abon, service=self, wot=wot,summ=self.plan.install_price, date=datetime.datetime.now(), comment=u'Подключение услуги [%s]' % (self.plan.title))
+        write_off = WriteOff(abonent=self.abon, service=self, wot=wot,summ=self.plan.install_price, date=date, comment=u'Подключение услуги [%s]' % (self.plan.title))
         write_off.save()
    
         # Если предоплата, то списываем за услуги сразу. Если нет, платежи будут списаны в начале следующего месяца
         if self.abon.is_credit == 'R':
-            today = datetime.datetime.today()
+            # today = datetime.datetime.today()
             qty_days = calendar.mdays[today.month]
             summ = self.plan.price * (qty_days - today.day + 1)/qty_days
-            comment = u'Абонентская плата за %s дней месяца' % (qty_days - today.day + 1)
+            comment = u'Абонентская плата за %s дней %s' % (qty_days - today.day + 1,today.strftime('%B %Y'))
             # from pays.models import WriteOff, WriteOffType
             wot = WriteOffType.objects.get(pk=4)
             write_off = WriteOff(abonent=self.abon, service=self, wot=wot,summ=summ, comment=comment, date=datetime.datetime.now())
             write_off.save()
+
 
     # def save(self, force_insert=False, force_update=False):
     #     is_new = True if not self.pk else False
