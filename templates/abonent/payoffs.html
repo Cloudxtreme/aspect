@@ -28,7 +28,7 @@
             <td>{{ payoff.wot.title }}
             {% if payoff.comment %} <p><small>{{ payoff.comment }}</small></p>{% endif %}
             </td>
-            <td>{% if payoff.service %} {{ payoff.service }} {% endif %}</td>
+            <td>{% if payoff.service %} [{{payoff.service.pk}}] {{ payoff.service.plan }} {% endif %}</td>
             <td>{% if payoff.user %} {{ payoff.user.get_full_name }} {% else %} Автоматическое списание {% endif %}</td>
             <td>{{ payoff.summ }} руб. </td>
             <td>{{ payoff.date|date:'Y-M-d' }}</td>

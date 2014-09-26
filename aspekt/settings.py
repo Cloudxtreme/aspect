@@ -156,9 +156,9 @@ TEMPLATE_DIRS = (
 
 # STATIC = ''
 
-SERIALIZATION_MODULES = {
-    'json': 'wadofstuff.django.serializers.json'
-}
+# SERIALIZATION_MODULES = {
+#     'json': 'wadofstuff.django.serializers.json'
+# }
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
@@ -193,6 +193,8 @@ PAY_CREDIT = 'O'
 PAY_BEFORE = 'R'
 U_TYPE_FIZ = 'F'
 U_TYPE_UR = 'U'
+# Пороговая сумма выключения
+TURNOFFSUM = -10
 
 STATUSES = (
     (STATUS_NEW, 'Новый'),

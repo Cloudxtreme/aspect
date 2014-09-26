@@ -10,7 +10,7 @@ from django.core import serializers
 # from django.views.decorators.csrf import csrf_exempt, csrf_protect
 # from django.core.context_processors import csrf
 from django.template import RequestContext
-from users.forms import  ServiceForm, SearchForm, LoginForm, PassportForm, DetailForm, ManageForm, AbonentForm, ServicePlanForm, ServiceEditForm
+from users.forms import  ServiceForm, OrgServiceForm, SearchForm, LoginForm, PassportForm, DetailForm, ManageForm, AbonentForm, ServicePlanForm, ServiceEditForm
 from journaling.forms import ServiceStatusChangesForm
 from notice.forms import AbonentFilterForm
 from users.models import Abonent, Service, TypeOfService, Plan, Passport, Detail
@@ -303,19 +303,38 @@ def service_add(request, abonent_id):
         abonent = None
 
     if request.method == 'POST':
-        form = ServiceForm(request.POST, instance=service)
+        if abonent.utype == settings.U_TYPE_FIZ:
+            form = ServiceForm(request.POST, instance=service)
+        else:
+            form = OrgServiceForm(request.POST, instance=service)
+
         if form.is_valid():
             form.save(commit=False)
             service.abon=abonent
+            if abonent.utype == settings.U_TYPE_UR:
+                speed = form.cleaned_data['speed']
+                price = form.cleaned_data['price']
+                install_price = form.cleaned_data['install_price']
+                title = u'%s Кбит/с' % (speed)
+                plan = Plan(title = title,
+                            tos = service.tos,
+                            speed_in = speed,
+                            speed_out = speed,
+                            comment = 'Автоматически созданный тарифный план',
+                            utype = abonent.utype,
+                            price = price,
+                            install_price = install_price,
+                            visible = False)
+                plan.save()
+                plan.segment.add(service.segment)
+                service.plan = plan
             service.save()
             return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
-        # else:
-        #     print form.errors
     else:
-        form = ServiceForm(instance=service)
-        # form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk,service=None)
-        # form.fields['plan'].queryset=Plan.objects.none()
-        # form.fields['ip'].queryset=IPAddr.objects.none()
+        if abonent.utype == settings.U_TYPE_FIZ:
+            form = ServiceForm(instance=service)
+        else:
+            form = OrgServiceForm(instance=service)
 
     return render_to_response('service/service_add.html', {
                                 'form': form,

@@ -24,7 +24,15 @@ def get_ip(request):
         json_subcat = serializers.serialize("json", IPAddr.objects.none())
     else:
         data = IPAddr.objects.filter(net__pk=request.GET['id'])
-        json_subcat = serializers.serialize("json", data, indent=4, relations={'service'})
+        # ip_list =[]
+        
+        # for ip in IPAddr.objects.filter(net__pk=request.GET['id']):
+        #     d = {}
+        #     d['ip'] = ip.ip
+        #     # d['service'] = ip.service
+        #     ip_list += [d] 
+
+        json_subcat = serializers.serialize("json", data,fields=('ip',))
     return HttpResponse(json_subcat, mimetype="application/javascript")
 
 def vlans_all(request):

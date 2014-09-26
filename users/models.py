@@ -153,10 +153,10 @@ class Abonent(models.Model):
         else:
             if self.status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE]:
                 if self.is_credit == settings.PAY_BEFORE: # Предоплатников выключаем по балансу всегда
-                    self.status = (settings.STATUS_ACTIVE if self.balance >= -10 else settings.STATUS_OUT_OF_BALANCE)
+                    self.status = (settings.STATUS_ACTIVE if self.balance >= settings.TURNOFFSUM else settings.STATUS_OUT_OF_BALANCE)
                 else: # Постоплатников c минусовым балансом выключаем 25 числа или в любой другой день, как только сумма на счете станет меньше чем сумма всех услуг
                     service_sum = self.service_set.filter(status__in=['A','N']).aggregate(Sum('plan__price'))['plan__price__sum'] or 0
-                    self.status = (settings.STATUS_OUT_OF_BALANCE if (self.balance < -service_sum ) or (self.balance < -10 and datetime.datetime.today().day > 24) else settings.STATUS_ACTIVE)
+                    self.status = (settings.STATUS_OUT_OF_BALANCE if (self.balance < -service_sum ) or (self.balance < settings.TURNOFFSUM and datetime.datetime.today().day > 24) else settings.STATUS_ACTIVE)
                 super(Abonent, self).save()
                 self.set_changes(reason, old_status)
 
@@ -294,13 +294,19 @@ class Service(models.Model):
     def start(self, newstatus=settings.STATUS_ACTIVE):
         self.status = newstatus
         self.save()
+
+        from pays.models import WriteOff, WriteOffType
+        wot = WriteOffType.objects.get(title=u'Инсталляция')
+        write_off = WriteOff(abonent=self.abon, service=self, wot=wot,summ=self.plan.install_price, date=datetime.datetime.now(), comment=u'Подключение услуги [%s]' % (self.plan.title))
+        write_off.save()
+   
         # Если предоплата, то списываем за услуги сразу. Если нет, платежи будут списаны в начале следующего месяца
         if self.abon.is_credit == 'R':
             today = datetime.datetime.today()
             qty_days = calendar.mdays[today.month]
             summ = self.plan.price * (qty_days - today.day + 1)/qty_days
             comment = u'Абонентская плата за %s дней месяца' % (qty_days - today.day + 1)
-            from pays.models import WriteOff, WriteOffType
+            # from pays.models import WriteOff, WriteOffType
             wot = WriteOffType.objects.get(pk=4)
             write_off = WriteOff(abonent=self.abon, service=self, wot=wot,summ=summ, comment=comment, date=datetime.datetime.now())
             write_off.save()
@@ -328,18 +334,19 @@ class Service(models.Model):
         else:
             super(Service, self).save(force_insert=False, force_update=False)
             # Списываем плату за установку
-            if is_new:
-                from pays.models import WriteOff, WriteOffType
-                wot = WriteOffType.objects.get(title=u'Инсталляция')
-                write_off = WriteOff(abonent=self.abon, service=self, wot=wot,summ=self.plan.install_price, date=datetime.datetime.now(), comment=u'Подключение услуги [%s]' % (self.plan.title))
-                write_off.save()
+            # Пока закоментирую, т.к. списывать инстрал нужно при старте услуги
+            # if is_new:
+            #     from pays.models import WriteOff, WriteOffType
+            #     wot = WriteOffType.objects.get(title=u'Инсталляция')
+            #     write_off = WriteOff(abonent=self.abon, service=self, wot=wot,summ=self.plan.install_price, date=datetime.datetime.now(), comment=u'Подключение услуги [%s]' % (self.plan.title))
+            #     write_off.save()
 
     class Meta:
         verbose_name = u'Услуга'
         verbose_name_plural = u'Услуги'
 
     def __unicode__(self):
-        return "[%s] : %s - %s" % (self.pk, self.plan.title, self.get_status_display())
+        return "[%s] %s : %s - %s" % (self.pk, self.abon.title, self.plan.title, self.get_status_display())
 
 class ServiceSuspension(models.Model):
     service = models.ForeignKey(Service, verbose_name=u'Услуга')

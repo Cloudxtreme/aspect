@@ -122,6 +122,22 @@ class ServiceForm(forms.ModelForm):
         model = Service
         exclude = {'abon', 'status', 'datestart','datefinish','speed_in','speed_out', 'ip','vlan','adm_status','mac','user_device','bs_device' }
 
+class OrgServiceForm(forms.ModelForm):
+    speed = forms.IntegerField(label=u'Скорость доступа')
+    price = forms.FloatField(label=u'Абон. плата')
+    install_price = forms.FloatField(label=u'Стоимость подключения')
+
+    def __init__(self, *args, **kwargs):
+        super(OrgServiceForm, self).__init__(*args, **kwargs)
+        # adding css classes to widgets without define the fields:
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'
+
+    class Meta:
+        model = Service
+        exclude = {'abon', 'plan','status', 'datestart','datefinish','speed_in','speed_out', 'ip','vlan','adm_status','mac','user_device','bs_device' }
+
+
 class LoginForm(forms.Form):
     username = forms.CharField(label=u'Имя пользователя', widget=forms.TextInput(attrs={'class':'form-control', 'placeholder' : "Имя пользователя" } ))
     password = forms.CharField(label=u'Пароль', widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder' : "Пароль"} ))
