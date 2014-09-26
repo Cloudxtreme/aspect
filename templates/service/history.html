@@ -9,8 +9,7 @@
 {% endblock %}
 
 {% block pages %} 
-<h2>История услуги </h2>
-<small>{{ service }}</small>     
+<h2>История услуги {{ service }}</h2>
 <hr>
        <a id='btn_toggle' class="btn btn-primary btn-xm" href="{% url 'users.views.service_status_change' abonent.id service.id %}"> Запланировать изменение статуса&nbsp <span class="glyphicon glyphicon-plus"></span></a>
 {% if sscs %}	

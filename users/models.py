@@ -153,10 +153,10 @@ class Abonent(models.Model):
         else:
             if self.status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE]:
                 if self.is_credit == settings.PAY_BEFORE: # Предоплатников выключаем по балансу всегда
-                    self.status = (settings.STATUS_ACTIVE if self.balance >= settings.TURNOFFSUM else settings.STATUS_OUT_OF_BALANCE)
+                    self.status = (settings.STATUS_ACTIVE if self.balance >= settings.TURNOFFBALANCE else settings.STATUS_OUT_OF_BALANCE)
                 else: # Постоплатников c минусовым балансом выключаем 25 числа или в любой другой день, как только сумма на счете станет меньше чем сумма всех услуг
                     service_sum = self.service_set.filter(status__in=['A','N']).aggregate(Sum('plan__price'))['plan__price__sum'] or 0
-                    self.status = (settings.STATUS_OUT_OF_BALANCE if (self.balance < -service_sum ) or (self.balance < settings.TURNOFFSUM and datetime.datetime.today().day > 24) else settings.STATUS_ACTIVE)
+                    self.status = (settings.STATUS_OUT_OF_BALANCE if (self.balance < -service_sum ) or (self.balance < settings.TURNOFFBALANCE and datetime.datetime.today().day > 24) else settings.STATUS_ACTIVE)
                 super(Abonent, self).save()
                 self.set_changes(reason, old_status)
 
@@ -284,7 +284,7 @@ class Service(models.Model):
         today = datetime.datetime.today()
         qty_days = calendar.mdays[today.month]
         summ = self.plan.price * (qty_days - today.day)/qty_days
-        if summ > 0:
+        if summ > TURNOFFBALANCE:
             from pays.models import PaymentSystem,Payment
             top = PaymentSystem.objects.get(pk=4)
             payment = Payment(abon=self.abon, top=top, sum=summ, date=datetime.datetime.now())
@@ -311,10 +311,10 @@ class Service(models.Model):
             write_off = WriteOff(abonent=self.abon, service=self, wot=wot,summ=summ, comment=comment, date=datetime.datetime.now())
             write_off.save()
 
-    def save(self, force_insert=False, force_update=False):
-        is_new = True if not self.pk else False
-        if self.mac:
-             self.mac.translate(':,.,-').upper().strip()
+    # def save(self, force_insert=False, force_update=False):
+    #     is_new = True if not self.pk else False
+    #     if self.mac:
+    #          self.mac.translate(':,.,-').upper().strip()
         # Проверяем не поменялся ли тарифный план
         # Убрано в связи с изменение механизма смены тарифного плана
         # if self.pk != None and self.plan.pk != Service.objects.get(pk=self.pk).plan.pk:
@@ -335,7 +335,7 @@ class Service(models.Model):
         # else:
         #     super(Service, self).save(force_insert=False, force_update=False)
             # Списываем плату за установку
-            # Пока закоментирую, т.к. списывать инстрал нужно при старте услуги
+            # Пока закоментирую, т.к. списывать инстал нужно при старте услуги
             # if is_new:
             #     from pays.models import WriteOff, WriteOffType
             #     wot = WriteOffType.objects.get(title=u'Инсталляция')

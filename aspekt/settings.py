@@ -194,7 +194,7 @@ PAY_BEFORE = 'R'
 U_TYPE_FIZ = 'F'
 U_TYPE_UR = 'U'
 # Пороговая сумма выключения
-TURNOFFSUM = -10
+TURNOFFBALANCE = -10
 
 STATUSES = (
     (STATUS_NEW, 'Новый'),

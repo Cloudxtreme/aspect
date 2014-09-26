@@ -123,13 +123,15 @@ class ServiceForm(forms.ModelForm):
         exclude = {'abon', 'status', 'datestart','datefinish','speed_in','speed_out', 'ip','vlan','adm_status','mac','user_device','bs_device' }
 
 class OrgServiceForm(forms.ModelForm):
-    speed = forms.IntegerField(label=u'Скорость доступа')
-    price = forms.FloatField(label=u'Абон. плата')
-    install_price = forms.FloatField(label=u'Стоимость подключения')
+    speed = forms.IntegerField(label=u'Скорость доступа, Кбит/с')
+    price = forms.FloatField(label=u'Абон. плата, руб.')
+    install_price = forms.FloatField(label=u'Стоимость подключения, руб.')
 
     def __init__(self, *args, **kwargs):
         super(OrgServiceForm, self).__init__(*args, **kwargs)
         # adding css classes to widgets without define the fields:
+        self.fields['price'].localize = True
+        self.fields['install_price'].localize = True
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
 
