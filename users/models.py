@@ -296,24 +296,64 @@ class Service(models.Model):
     def start(self, date=datetime.datetime.now(), newstatus=settings.STATUS_ACTIVE):
         self.status = newstatus
         self.datestart = date
-        today = date.date()
+        targetday = date.date() # Дата начала услуги
+        now = datetime.datetime.now() # Текущая дата
         self.save()
 
         from pays.models import WriteOff, WriteOffType
-        wot = WriteOffType.objects.get(title=u'Инсталляция')
-        write_off = WriteOff(abonent=self.abon, service=self, wot=wot,summ=self.plan.install_price, date=date, comment=u'Подключение услуги [%s]' % (self.plan.title))
+        wot_install = WriteOffType.objects.get(title=u'Инсталляция')
+        wot_abon = WriteOffType.objects.get(title=u'Абонентская плата')
+
+        qty_days = calendar.mdays[targetday.month] # Считаем число дней в месяце
+        summ = self.plan.price * (qty_days - targetday.day + 1)/qty_days # Считаем абоненскую плату за остаток месяца
+        comment = u'Абонентская плата за %s дней %s' % (qty_days - targetday.day + 1,targetday.strftime('%B %Y'))
+
+        # Списываем инсталляцию датой активации услуги
+        write_off = WriteOff(abonent=self.abon, service=self, wot=wot_install,summ=self.plan.install_price, date=targetday, comment=u'Подключение услуги [%s]' % (self.plan.title))
         write_off.save()
    
-        # Если предоплата, то списываем за услуги сразу. Если нет, платежи будут списаны в начале следующего месяца
-        if self.abon.is_credit == 'R':
-            # today = datetime.datetime.today()
-            qty_days = calendar.mdays[today.month]
-            summ = self.plan.price * (qty_days - today.day + 1)/qty_days
-            comment = u'Абонентская плата за %s дней %s' % (qty_days - today.day + 1,today.strftime('%B %Y'))
-            # from pays.models import WriteOff, WriteOffType
-            wot = WriteOffType.objects.get(pk=4)
-            write_off = WriteOff(abonent=self.abon, service=self, wot=wot,summ=summ, comment=comment, date=datetime.datetime.now())
+        # Если кредитная форма оплаты, но подключен в предыдущем месяце, то списываем абон первым числом.
+        if self.abon.is_credit == settings.PAY_CREDIT and (targetday.year*12 + targetday.month) != (now.year*12 + now.month):
+            write_off = WriteOff(abonent=self.abon, service=self, wot=wot_abon,summ=summ, comment=comment, date=datetime.datetime(targetday.year,targetday.month+1,1))
             write_off.save()
+
+        # Если предоплата, то списываем за услуги сразу. Если нет, платежи будут списаны в начале следующего месяца
+        if self.abon.is_credit == settings.PAY_BEFORE:
+            write_off = WriteOff(abonent=self.abon, service=self, wot=wot_abon,summ=summ, comment=comment, date=targetday)
+            write_off.save()
+
+        # Списываем абонентскую плату за прошедшие месяцы
+        post_month_shift = 0 if self.abon.is_credit == settings.PAY_BEFORE else 1 # Сдвиг месяцев для постоплатчиков
+        
+        for month in range((targetday.year*12)+targetday.month+1+post_month_shift,(now.year*12)+now.month+1):
+            summa = self.plan.price
+            # Дурацкая проблема с декабрем, решаем пока вручную
+            if month%12 == 0:
+                y = month/12 - 1
+                m = 12
+            else:
+                y = month/12
+                m = month%12
+
+            comment = u'Абонентская плата за %s %s г.' % (calendar.month_name[m - post_month_shift],y)
+            write_off = WriteOff(abonent=self.abon, service=self, wot=wot_abon,summ=summa, comment=comment, date=datetime.datetime(y,m,1))
+            write_off.save()
+
+
+        # if self.abon.is_credit == settings.PAY_BEFORE:
+        #     # Для предоплаты
+        #     for month in range((targetday.year*12)+targetday.month+1,(now.year*12)+now.month+1):
+        #         summa = self.plan.price
+        #         comment = u'Абонентская плата за %s' % calendar.month_name[month%12]
+        #         write_off = WriteOff(abonent=self.abon, service=self, wot=wot,summ=summa, comment=comment, date=datetime.datetime(month/12,month%12,1))
+        #         write_off.save()
+        # else:
+        #     # Для постоплаты
+        #     for month in range((targetday.year*12)+targetday.month+1,(now.year*12)+now.month+1):
+        #         summa = self.plan.price
+        #         comment = u'Абонентская плата за %s' % calendar.month_name[month%12-1]
+        #         write_off = WriteOff(abonent=self.abon, service=self, wot=wot,summ=summa, comment=comment, date=datetime.datetime(month/12,month%12,1))
+        #         write_off.save()
 
 
     # def save(self, force_insert=False, force_update=False):
