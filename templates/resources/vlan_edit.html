@@ -1,0 +1,27 @@
+{% extends "index.html" %}
+{% block main %} 
+
+<h2>{% if new %}Добавление нового Vlan{% else %}Редактирование Vlan{% endif %}</h2>
+<hr>
+<form method="post" class="form-horizontal" role="form">{% csrf_token %}
+    {% for field in form %}
+        <div class="form-group">
+            <label class="col-sm-3 control-label">
+                <small>{{ field.errors }}</small>
+                {{ field.label_tag }}
+            </label>
+            <div class="col-sm-4">
+                {{ field }}
+            </div>
+        </div>
+    {% endfor %}
+
+    
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <button id="btn_save" class="btn btn-primary" type="submit">Сохранить <span class="glyphicon glyphicon-save"></span>
+            </button>
+        </div>
+    </div>
+</form>
+{% endblock %}

@@ -110,13 +110,6 @@ def abonent_add(request,abonent_id=0):
             print form.errors
     else:
         form = AbonentForm(instance=abonent)
-        # form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk,service=None)
-        # if not new:
-        #     form.fields['plan'].queryset=Plan.objects.filter(tos__pk=service.plan.tos.pk)
-        #     form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk).filter(Q(service=None))|IPAddr.objects.filter(service__pk=service.pk)
-        # else:
-        #     form.fields['plan'].queryset=Plan.objects.none()
-        #     form.fields['ip'].queryset=IPAddr.objects.none()
 
     return render_to_response('abonent/add.html', {
                                 'form': form,
