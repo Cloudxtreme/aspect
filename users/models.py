@@ -232,7 +232,6 @@ class Detail(models.Model):
         return "%s - %s" % (self.title, self.inn)
 
 class Service(models.Model):
-
     macvalidator = RegexValidator('[0-9a-f]{2}([-:])[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$', u'Неправильный формат MAC адреса')    
     abon = models.ForeignKey(Abonent,verbose_name=u'Абонент')
     segment = models.ForeignKey(Segment,verbose_name=u'Сегмент')

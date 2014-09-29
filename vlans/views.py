@@ -38,10 +38,12 @@ def get_ip(request):
         json_subcat = serializers.serialize("json", data,fields=('ip',))
     return HttpResponse(json_subcat, mimetype="application/javascript")
 
+@login_required
 def vlans_all(request):
     vlan_list = Vlan.objects.all().order_by('number')
     return render_to_response('resources/vlan_list.html', { 'vlan_list': vlan_list }, context_instance = RequestContext(request))
 
+@login_required
 def ips(request, parent_id):
 	parent_nets = Network.objects.filter(net_type='DN')
 	if parent_id == '0':

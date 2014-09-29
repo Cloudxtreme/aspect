@@ -97,7 +97,7 @@ class ServicePlanForm(forms.Form):
      )
 
 class ServiceEditForm(forms.ModelForm):
-    vlan = forms.ModelChoiceField(queryset=Vlan.objects.order_by('number'),required=False)
+    # vlan = forms.ModelChoiceField(queryset=Vlan.objects.order_by('number'),required=False)
 
     def __init__(self, *args, **kwargs):
         super(ServiceEditForm, self).__init__(*args, **kwargs)

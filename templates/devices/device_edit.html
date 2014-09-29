@@ -1,7 +1,7 @@
 {% extends "index.html" %}
 {% block main %} 
 
-<h2>{% if new %}Добавление нового Vlan{% else %}Редактирование Vlan{% endif %}</h2>
+<h2>{% if new %}Добавление нового Устройства{% else %}Редактирование устройства{% endif %}</h2>
 <hr>
 <form method="post" class="form-horizontal" role="form">{% csrf_token %}
     {% for field in form %}

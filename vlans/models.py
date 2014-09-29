@@ -32,6 +32,7 @@ class Vlan(models.Model):
     class Meta:
         verbose_name = _('Vlan')
         verbose_name_plural = _('Vlans')
+        ordering = ['number']
 
     def __unicode__(self):
         return "%s - %s" % (self.number, self.description)
