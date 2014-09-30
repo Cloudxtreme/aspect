@@ -48,7 +48,7 @@ class Device(models.Model):
     mgmt_vlan = models.ForeignKey(Vlan, related_name='mgmt_vlan',
         verbose_name=u'VLAN управления', blank=True, null= True)
     devtype = models.ForeignKey(DevType, verbose_name=u'Модель')
-    is_rooter = models.BooleanField(u'Роутер?')
+    is_rooter = models.BooleanField(u'Роутер?',default=False)
     mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=20)
     sn = models.CharField(u'Серийный номер', blank=True, 
                                  null=True, max_length=20)

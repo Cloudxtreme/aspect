@@ -3,8 +3,40 @@ from django.shortcuts import render_to_response, HttpResponse, HttpResponseRedir
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
-from devices.models import Device
+from devices.models import Device, DevType
 from devices.forms import DeviceEditForm
+from vlans.models import IPAddr
+from journaling.models import DeviceStatusEntry
+
+@login_required
+def set_state(request):
+    ip = request.GET['ip']
+    date = request.GET['date']
+    title = request.GET['title']
+    state = True if request.GET['state']=='up' else False
+    devtype = DevType.objects.get(pk=3) # Получаем Unknown device, для заглушки
+
+    try:
+        ipaddr = IPAddr.objects.get(ip=ip)
+    except IPAddr.DoesNotExist:
+        return HttpResponse('IP address not found, create network before')
+    
+    device, created = Device.objects.get_or_create(ip=ipaddr, 
+                        defaults={'title': title,
+                                    'ip' : ipaddr, 
+                             'mgmt_vlan' : ipaddr.net.vlan,
+                               'devtype' : devtype,
+                                })
+    dse = DeviceStatusEntry(device=device,
+                            state_up=state,
+                            # date=date
+                            )
+    dse.save()
+
+    if created:
+        return HttpResponse('Device created')
+    else:
+        return HttpResponse('Device found')
 
 @login_required
 def devices_all(request):

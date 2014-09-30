@@ -9,8 +9,7 @@ from django.conf import settings
 
 class DeviceStatusEntry(models.Model):
     device = models.ForeignKey(Device, verbose_name=u'Устройство')
-    status = models.CharField(u'Новый статус', max_length=1, 
-        choices=( ('A', 'Доступен'),('N','Недоступен') ))
+    state_up = models.BooleanField(u'Up',default=False)
     date = models.DateTimeField(auto_now_add=True)
 
 
