@@ -3,10 +3,9 @@ from django.shortcuts import render_to_response, HttpResponse, HttpResponseRedir
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
-from devices.models import Device, DevType
+from devices.models import Device, DevType, DeviceStatusEntry
 from devices.forms import DeviceEditForm
 from vlans.models import IPAddr
-from journaling.models import DeviceStatusEntry
 
 @login_required
 def set_state(request):
@@ -27,6 +26,7 @@ def set_state(request):
                              'mgmt_vlan' : ipaddr.net.vlan,
                                'devtype' : devtype,
                                 })
+
     dse = DeviceStatusEntry(device=device,
                             state_up=state,
                             # date=date

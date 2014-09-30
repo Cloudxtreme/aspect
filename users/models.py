@@ -25,6 +25,7 @@ class Segment(models.Model):
 
 class TypeOfService(models.Model):
     title = models.CharField(max_length=200)
+    visible = models.BooleanField(u'Видимость',default=True)
 
     class Meta:
         verbose_name = u'Тип услуги'
@@ -56,7 +57,7 @@ class Plan(models.Model):
         verbose_name_plural = u'Тарифные планы'
 
     def __unicode__(self):
-        return u"%s %s - %s руб/мес" % (self.tos, self.title, self.price)
+        return u"[%s] %s %s - %s руб/мес" % (self.pk, self.tos, self.title, self.price)
 
 def has_changed(instance, field):
     if not instance.pk:

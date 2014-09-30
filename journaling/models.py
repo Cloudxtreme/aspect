@@ -7,12 +7,6 @@ from django.conf import settings
 
 # Create your models here.
 
-class DeviceStatusEntry(models.Model):
-    device = models.ForeignKey(Device, verbose_name=u'Устройство')
-    state_up = models.BooleanField(u'Up',default=False)
-    date = models.DateTimeField(auto_now_add=True)
-
-
 class SomeEntityWithReason(models.Model):
     comment = models.CharField(u'Комментарий', max_length=30, blank=True, null=True)
     attach = models.FileField(u'Приложение', upload_to='user_files', blank=True, null=True)

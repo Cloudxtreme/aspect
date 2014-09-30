@@ -34,3 +34,14 @@ for item in Service.objects.filter(~Q(adm_status = '0'))|Service.objects.filter(
             author = user,
             )
         new_note.save()
+
+for item in Service.objects.filter(tos__pk=1,status__in=['A','N'],ip=None):
+    for user in Group.objects.get(name='Инженеры').user_set.all():
+        url = reverse('abonent_info', args=[item.abon.pk])
+        new_note = Note(
+            title = u'Отсутствует IP адрес на услуге',
+            descr = u'У абонента <a href=%s>%s</a> на услуге [%s] не проставлен IP-адрес' % (url,item.abon.title,item.pk)  ,
+            marks = 'panel-warning',
+            author = user,
+            )
+        new_note.save()

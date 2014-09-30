@@ -65,3 +65,17 @@ class Device(models.Model):
 
     def __unicode__(self):
         return "%s - %s - %s - %s" % (self.pk, self.devtype, self.title, self.ip)
+
+class DeviceStatusEntry(models.Model):
+    device = models.ForeignKey(Device, verbose_name=u'Устройство')
+    state_up = models.BooleanField(u'Up',default=False)
+    date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = u'Изменение статуса устройства'
+        verbose_name_plural = u'Изменение статусов устройств'
+        ordering = ['date']
+
+    def __unicode__(self):
+        state = 'up' if self.state_up else 'down'
+        return "[%s] %s - is now %s " % (self.date, self.device, state)
