@@ -73,10 +73,14 @@
                 </ul>
             </li>
             <li class="dropdown">
-                <a href='#' class="dropdown-toggle" data-toggle="dropdown" id="dropdownNotice">Уведомления <span class="badge">{{ notes_count|default:"0" }}</span><b class="caret"></b></a>
+                <a href='#' class="dropdown-toggle" data-toggle="dropdown" id="dropdownNotice">Уведомления 
+                    <span class="badge">{% if notes_count %}!{% endif %}</span><b class="caret"></b>
+                </a>
                 <ul class="dropdown-menu" aria-labelledby="dropdownNotice">
-                    <li><a href={% url "notes.views.notes_all" %}>Заметки <span class="badge">{{ notes_count|default:"0" }}</span></a></li>
-                    <li><a href='#'>Сообщения</a></li>
+                    <li>
+                        <a href={% url "notes.views.notes_all" %}>Заметки <span class="badge">{{ notes_count|default:"0" }}</span></a>
+                    </li>
+                    <li><a href='#'>Технические параметры услуг</a></li>
                 </ul>
             </li>
             <li><a href={% url 'tt_all' 0 %}>TT <span class="badge">{{ open_tt|default:"0" }}</span></a></li>
@@ -91,7 +95,8 @@
     {% if user.is_authenticated %}            
             <li class="dropdown">
                 <a href='#' class="dropdown-toggle" data-toggle="dropdown" id="dropdownMenu2">
-                <span class="glyphicon glyphicon-user"></span>  {{ user.get_full_name }} <span class="badge">{{ my_tt|default:"0" }}</span><b class="caret"></b></a>
+                    <span class="glyphicon glyphicon-user"></span>  {{ user.get_full_name }} <span class="badge">{% if my_tt %}!{% endif %}</span><b class="caret"></b>
+                </a>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
                     <li><a href={% url 'tt_all' user.pk %}>Мои TT</a></li>
                     <li><a href={% url "users.views.log_out" %}><span class="glyphicon glyphicon-log-out"></span> Выход</a></li>

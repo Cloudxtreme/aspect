@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*- 
 # from django.shortcuts import render
-from django.shortcuts import render_to_response, render, HttpResponse, HttpResponseRedirect
+from django.shortcuts import render_to_response, render, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseNotFound, Http404
+from django.contrib.auth.models import User, Group
 from django.contrib.auth import login, logout
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
@@ -23,6 +25,7 @@ from django.db.models import Avg, Max, Min, Sum, Q
 import datetime
 from django.conf import settings
 from pays.models import Payment
+from notes.models import Note
 
 @login_required 
 def aquicksearch(request):
@@ -73,17 +76,6 @@ def feeds_ip_by_seg(request):
         json_subcat = serializers.serialize("json", data)
     return HttpResponse(json_subcat, mimetype="application/javascript")
 
-# def feeds_subcatplans(request):
-#     if request.is_ajax():
-#         if request.GET['id'] == '0':
-#             json_subcat = serializers.serialize("json", Plan.objects.all())
-#         else:
-#             json_subcat = serializers.serialize("json", Plan.objects.filter(tos__pk=request.GET['id']))
-#         return HttpResponse(json_subcat, mimetype="application/javascript")
-#     else:
-#         form = SearchForm() # An unbound form
-#         return render_to_response('asearch.html', {'form': form} )
-
 @login_required
 def abonent_add(request,abonent_id=0):
     if abonent_id != '0' :
@@ -92,7 +84,8 @@ def abonent_add(request,abonent_id=0):
         try:
             abonent = Abonent.objects.get(pk = abonent_id)
         except:
-            abonent = Abonent()
+            # abonent = Abonent()
+            raise Http404
     else:
         message = u'Добавление нового абонента'
         new = True
@@ -187,7 +180,7 @@ def service_status_change(request, abonent_id, service_id):
         abonent = Abonent.objects.get(pk=abonent_id)
         service = Service.objects.get(pk=service_id)
     except:
-        abonent, service = None 
+        raise Http404 
 
     if request.method == 'POST':
         form = ServiceStatusChangesForm(request.POST)
@@ -217,8 +210,7 @@ def service_location_edit(request, abonent_id, service_id):
         abonent = Abonent.objects.get(pk=abonent_id)
         service = Service.objects.get(pk=service_id)
     except:
-        abonent = None
-        service = None
+        raise Http404
 
     if request.method == 'POST':
         form = LocationForm(request.POST,instance=service.location)
@@ -238,10 +230,9 @@ def service_location_edit(request, abonent_id, service_id):
 def service_plan_edit(request, abonent_id, service_id):
     try:
         abonent = Abonent.objects.get(pk = abonent_id)
+        service = Service.objects.get(pk=service_id)
     except:
-        abonent = None
-
-    service = Service.objects.get(pk=service_id)
+        raise Http404
 
     if request.method == 'POST':
         form = ServicePlanForm(request.POST)
@@ -263,10 +254,9 @@ def service_plan_edit(request, abonent_id, service_id):
 def service_edit(request, abonent_id, service_id):
     try:
         abonent = Abonent.objects.get(pk = abonent_id)
+        service = Service.objects.get(pk = service_id)
     except:
-        abonent = None
-
-    service = Service.objects.get(pk=service_id)
+        raise Http404
 
     if request.method == 'POST':
         form = ServiceEditForm(request.POST, instance=service)
@@ -293,7 +283,7 @@ def service_add(request, abonent_id):
     try:
         abonent = Abonent.objects.get(pk = abonent_id)
     except:
-        abonent = None
+        raise Http404
 
     if request.method == 'POST':
         if abonent.utype == settings.U_TYPE_FIZ:
@@ -322,6 +312,18 @@ def service_add(request, abonent_id):
                 plan.segment.add(service.segment)
                 service.plan = plan
             service.save()
+            # Создаем уведомление о новой услуге для всех инженеров
+            for user in Group.objects.get(name='Инженеры').user_set.all():
+                url_abonent = reverse('abonent_info', args=[abonent.pk])
+                url_service = reverse('service_edit', args=[abonent.pk,service.pk])
+                new_note = Note(
+                    title = u'Добавлена новая услуга',
+                    descr = u'У абонента <a href=%s>%s</a> добавлена новая услуга <a href=%s>[%s]</a>. Заполните технические параметры' % (url_abonent,abonent.title,url_service,service.pk)  ,
+                    marks = 'panel-warning',
+                    author = user,
+                    )
+                new_note.save()
+
             return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
     else:
         if abonent.utype == settings.U_TYPE_FIZ:
@@ -341,7 +343,7 @@ def abonent_services(request, abonent_id):
     try:
         abonent = Abonent.objects.get(pk=abonent_id)
     except:
-        abonent = None
+        raise Http404
 
     return render_to_response('service/services.html', { 
                                 'abonent' : abonent, 
@@ -362,8 +364,8 @@ def service_history(request, abonent_id, service_id):
         service = Service.objects.get(pk=service_id)
         abonent = Abonent.objects.get(pk=abonent_id)
     except:
-        abonent = None
-        service = None
+        raise Http404
+
     sscs = ServiceStatusChanges.objects.filter(service__pk=service_id).order_by('-pk')
     return render_to_response('service/history.html', { 'abonent' : abonent, 'service' : service,  'sscs' : sscs, 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() }, context_instance = RequestContext(request))
 
@@ -372,7 +374,8 @@ def abonent_history(request, abonent_id):
     try:
         abonent = Abonent.objects.get(pk=abonent_id)
     except:
-        abonent = None
+        raise Http404
+        
     ascs = AbonentStatusChanges.objects.filter(abonent__pk=abonent_id).order_by('-pk')
     return render_to_response('abonent/history.html', { 'abonent' : abonent,  'ascs' : ascs, 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() }, context_instance = RequestContext(request))
 
@@ -381,7 +384,7 @@ def abonent_manage(request, abonent_id):
     try:
         abonent = Abonent.objects.get(pk=abonent_id)
     except:
-        abonent = None
+        raise Http404
 
     if request.method == 'POST':
         form = ManageForm(request.POST,instance=abonent)
