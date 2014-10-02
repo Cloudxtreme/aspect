@@ -80,7 +80,7 @@
                     <li>
                         <a href={% url "notes.views.notes_all" %}>Заметки <span class="badge">{{ notes_count|default:"0" }}</span></a>
                     </li>
-                    <li><a href='#'>Технические параметры услуг</a></li>
+                    <li><a href={% url "service_analysis" %}>Технические параметры услуг</a></li>
                 </ul>
             </li>
             <li><a href={% url 'tt_all' 0 %}>TT <span class="badge">{{ open_tt|default:"0" }}</span></a></li>
@@ -116,9 +116,13 @@
     </div>
 
     <div class="container theme-showcase" role="main">
-    {% block main %}
-    {% endblock %}
+        {% block main %}
+        {% endblock %}
+        <div class="footer pull-right">
+        <p>User control system version 1.1.0 &copy; Albeon Ltd. 2014</p>
     </div>
+    </div>
+
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster 

@@ -64,7 +64,7 @@ def feeds_plans_by_tos(request):
         return HttpResponse(json_subcat, mimetype="application/javascript")
     else:
         form = ServiceForm() # An unbound form
-        return render_to_response('asearch.html', {'form': form} )
+        return render_to_response('asearch.html', {'form': form})
 
 @login_required
 def feeds_ip_by_seg(request):
@@ -75,6 +75,22 @@ def feeds_ip_by_seg(request):
         data = IPAddr.objects.filter(net__segment__pk=request.GET['id']).filter(net__net_type='UN').filter(Q(service=None))|IPAddr.objects.filter(service__pk=request.GET['id'])
         json_subcat = serializers.serialize("json", data)
     return HttpResponse(json_subcat, mimetype="application/javascript")
+
+@login_required
+def service_analysis(request):
+    internet_services = Service.objects.filter(tos__pk=1,ip=None,status__in=['A','N'])
+    external_channel = Service.objects.filter(tos__pk=3,vlan=None,status__in=['A','N'])
+    internal_channel = Service.objects.filter(tos__pk=5)
+    internet_pptp = Service.objects.filter(tos__pk=4,mac=None)|Service.objects.filter(tos__pk=4,ip=None)
+
+    return render_to_response('service/analysis.html', {
+                                'internet_services': internet_services,
+                                'external_channel': external_channel,
+                                'internal_channel' : internal_channel,
+                                'internet_pptp' : internet_pptp,
+                                },
+                                context_instance = RequestContext(request)
+                                )  
 
 @login_required
 def abonent_add(request,abonent_id=0):
@@ -375,7 +391,7 @@ def abonent_history(request, abonent_id):
         abonent = Abonent.objects.get(pk=abonent_id)
     except:
         raise Http404
-        
+
     ascs = AbonentStatusChanges.objects.filter(abonent__pk=abonent_id).order_by('-pk')
     return render_to_response('abonent/history.html', { 'abonent' : abonent,  'ascs' : ascs, 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() }, context_instance = RequestContext(request))
 

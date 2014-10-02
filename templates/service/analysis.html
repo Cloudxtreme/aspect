@@ -1,0 +1,68 @@
+{% extends "index.html" %}
+
+{% block main %} 
+<div class="page-header">
+    <h2 class="sub-header">Проверка технических параметров услуг</h2>
+</div>
+
+{% if internet_services %}
+<div class="panel panel-default">
+  <!-- Default panel contents -->
+  <div class="panel-heading">Интернет</div>
+  <div class="panel-body">
+    <p>На следующих услугах не проставлены IP-адреса</p>
+  </div>
+ 
+  <table class="table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Абонент</th>
+            <th>Услуга</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for service in internet_services %}
+        <tr>
+            <td>{{forloop.counter}}</td>
+            <td><a href="{% url 'abonent_info' service.abon.id %}">{{ service.abon }}</a></td>
+            <td><a href="{% url 'service_edit' service.abon.id service.id %}">{{ service }}</a></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if external_channel %}
+<div class="panel panel-default">
+  <!-- Default panel contents -->
+  <div class="panel-heading">Каналы передачи данных</div>
+  <div class="panel-body">
+    <p>На следующих услугах не проставлены Vlanы. Кроме того проверьте настройки шейпера на клиентских устройствах</p>
+  </div>
+ 
+  <table class="table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Абонент</th>
+            <th>Услуга</th>
+            <th>Абонентское устройство</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for service in external_channel %}
+        <tr>
+            <td>{{forloop.counter}}</td>
+            <td><a href="{% url 'abonent_info' service.abon.id %}">{{ service.abon }}</a></td>
+            <td><a href="{% url 'service_edit' service.abon.id service.id %}">{{ service }}</a></td>
+            <td>{{ service.user_device }}</a></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% endblock %}
