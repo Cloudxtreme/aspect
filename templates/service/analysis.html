@@ -13,12 +13,13 @@
     <p>На следующих услугах не проставлены IP-адреса</p>
   </div>
  
-  <table class="table">
+  <table class="table h6">
     <thead>
         <tr>
             <th>#</th>
             <th>Абонент</th>
             <th>Услуга</th>
+            <th>Адрес</th>
         </tr>
     </thead>
     <tbody>
@@ -27,6 +28,7 @@
             <td>{{forloop.counter}}</td>
             <td><a href="{% url 'abonent_info' service.abon.id %}">{{ service.abon }}</a></td>
             <td><a href="{% url 'service_edit' service.abon.id service.id %}">{{ service }}</a></td>
+            <td>{{ service.location }}</td>
         </tr>
     {% endfor %}
     </tbody>
@@ -39,10 +41,11 @@
   <!-- Default panel contents -->
   <div class="panel-heading">Каналы передачи данных</div>
   <div class="panel-body">
-    <p>На следующих услугах не проставлены Vlanы. Кроме того проверьте настройки шейпера на клиентских устройствах</p>
+    <p>На следующих услугах не проставлены Vlanы.</p>
+    <p>Кроме того проверьте настройки шейпера на клиентских устройствах</p>
   </div>
  
-  <table class="table">
+  <table class="table h6">
     <thead>
         <tr>
             <th>#</th>

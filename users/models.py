@@ -241,6 +241,7 @@ class Service(models.Model):
     ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', blank=True, null= True)
     mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=17,validators=[macvalidator])
     vlan = models.ForeignKey(Vlan, verbose_name=u'Vlan', blank=True, null= True,related_name='vlan')
+    vlan_list = models.ManyToManyField(Vlan, verbose_name=u'Список Vlan', blank=True, null= True,related_name='vlan_list')
     adm_status = models.CharField(u'Административный статус', max_length=1, choices=settings.ADM_STATUSES, default='0')
     speed_in = models.PositiveIntegerField(default=0, blank=True, null=True)
     speed_out = models.PositiveIntegerField(default=0, blank=True, null=True)

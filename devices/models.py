@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 from django.db import models
 from vlans.models import IPAddr, Vlan
 
@@ -37,25 +37,17 @@ def calcnet(net, mask):
     return ((net,mask1),(net1,mask1), calcnet(net,mask1),calcnet(net1,mask1))
 
 class Device(models.Model):
-    # TYPE_OF_CHECK = (
-    #     ('NC','Не проверять'),
-    #     ('PC','ICMP Проверка'),
-    #     ('SC','SNMP Проверка'),
-    # )
     title = models.CharField(u'Название', max_length=30)
     ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', 
         blank=True, null= True)
-    mgmt_vlan = models.ForeignKey(Vlan, related_name='mgmt_vlan',
+    ip_list = models.ManyToManyField(IPAddr, through='Iface', related_name='ip_list', blank=True, null=True)
+    mgmt_vlan = models.ForeignKey(Vlan, related_name=u'mgmt_vlan',
         verbose_name=u'VLAN управления', blank=True, null= True)
     devtype = models.ForeignKey(DevType, verbose_name=u'Модель')
     is_rooter = models.BooleanField(u'Роутер?',default=False)
     mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=20)
     sn = models.CharField(u'Серийный номер', blank=True, 
                                  null=True, max_length=20)
-    # node = models.ForeignKey(Node, verbose_name=u'Местонахождение')
-    # check_type = models.CharField(u'Тип проверки', max_length = 2, 
-        # choices=TYPE_OF_CHECK)
-    # snmp_community = models.CharField(max_length = 20, blank=True, null= True)
     last_available = models.DateTimeField(auto_now=False, auto_now_add=False, 
         blank=True, null=True, verbose_name=u'Последний ответ')
 
@@ -65,6 +57,15 @@ class Device(models.Model):
 
     def __unicode__(self):
         return "%s - %s - %s - %s" % (self.pk, self.devtype, self.title, self.ip)
+
+class Iface(models.Model):
+    title = models.CharField(u'Название', max_length=50)
+    device = models.ForeignKey(Device, verbose_name=u'Устройство')
+    ip = models.ForeignKey(IPAddr, verbose_name=u'IP адрес')
+
+    class Meta:
+        verbose_name = u'Интерфейс'
+        verbose_name_plural = u'Интерфейсы'
 
 class DeviceStatusEntry(models.Model):
     device = models.ForeignKey(Device, verbose_name=u'Устройство')

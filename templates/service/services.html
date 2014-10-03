@@ -15,7 +15,7 @@
 
 {% if services %}
 {% load dict_extras %}
-        <table class="table h6 table-condensed">
+        <table class="table h6 table-condensed table-striped">
         <thead>
           <tr>
             <th>#</th>
@@ -25,18 +25,17 @@
             <th>Скорость</th>
             <th>Параметры</th>
             <th>Статус</th>
-            <th></th>
           </tr>
         </thead>
         <tbody>
         {% for service in services %}
         <tr id="tr-{{ service.pk }}" {% ifequal service.status 'D' %} class="active" style=" display:none" {% endifequal %}>
             <td>[{{ service.pk }}]</td>
-            <td>
+            <td class="col-md-3">
                 {{ service.location.address }}
                 <a href="{% url 'users.views.service_location_edit' abonent.id service.id %}">
                 <span class="glyphicon glyphicon-edit"></span></a>
-                <p><small>{{ service.segment.title }}</small></p>
+                <p><small>{{ service.location.comment }}</small></p>
             </td>
             <td>{{ service.datestart }}</td>
             <td>
@@ -65,6 +64,8 @@
                 {% if service.vlan %}
                     <p>vlan{{ service.vlan.number }}</p>
                 {% endif %} 
+                <a href="{% url 'users.views.service_edit' abonent.id service.id %}">
+                <span class="glyphicon glyphicon-cog"></span></a>
             </td>
             <td>
                 {% ifequal service.adm_status '0' %}
@@ -72,14 +73,8 @@
                 {% else %}
                     {{ service.get_adm_status_display}}
                 {% endifequal %}
-            </td>
-            <td>
-                <div class="btn-group">
-                    <a href="{% url 'users.views.service_history' abonent.id service.id %}" role="button" class="btn btn-warning btn-xm ">
-                    <span class="glyphicon glyphicon-list"></span></a>
-                    <a href="{% url 'users.views.service_edit' abonent.id service.id %}" role="button" class="btn btn-primary btn-xm ">
-                    <span class="glyphicon glyphicon-cog"></span></a>
-                </div>
+                <a href="{% url 'users.views.service_history' abonent.id service.id %}">
+                <span class="glyphicon glyphicon-list"></span></a>
             </td>
         </tr>
         {% endfor %}

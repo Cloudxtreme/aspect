@@ -5,6 +5,7 @@ class ContactModelForm( forms.ModelForm ):
     # descr = forms.CharField( widget=forms.Textarea )
     class Meta:
         model = Contact
+        exclude = ['abonent']
     
     def __init__(self, *args, **kwargs):
         super(ContactModelForm, self).__init__(*args, **kwargs)

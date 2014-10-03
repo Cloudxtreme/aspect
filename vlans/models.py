@@ -45,7 +45,7 @@ class Location(models.Model):
     lon = models.FloatField(u'Долгота', blank=True, null=True)
     bs_type = models.CharField(u'Тип', max_length = 2, 
                                choices=TYPE_OF_OBJECTS)
-    comment  = models.CharField(u'Комментарий', max_length=300, blank=True, null=True)
+    comment  = models.CharField(u'Комментарий', max_length=300, blank=True, null=True, default='')
 
     class Meta:
         verbose_name = u'Местонахождение'
