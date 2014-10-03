@@ -5,12 +5,12 @@ class IfaceInline(admin.TabularInline):
     model = Iface
     extra = 0
 
-# class DeviceAdmin(admin.ModelAdmin):
-#     inlines = [
-#         IfaceInline,
-#     ]
+class DeviceAdmin(admin.ModelAdmin):
+    inlines = [
+        IfaceInline,
+    ]
 
-admin.site.register(Device)
+admin.site.register(Device,DeviceAdmin)
 admin.site.register(Iface)
 admin.site.register(DevType)
 admin.site.register(DeviceStatusEntry)

@@ -61,7 +61,7 @@ class Device(models.Model):
 class Iface(models.Model):
     title = models.CharField(u'Название', max_length=50)
     device = models.ForeignKey(Device, verbose_name=u'Устройство')
-    ip = models.ForeignKey(IPAddr, verbose_name=u'IP адрес')
+    ip = models.ForeignKey(IPAddr, verbose_name=u'IP адрес', unique=True)
 
     class Meta:
         verbose_name = u'Интерфейс'

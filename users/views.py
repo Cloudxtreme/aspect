@@ -231,7 +231,10 @@ def service_location_edit(request, abonent_id, service_id):
     if request.method == 'POST':
         form = LocationForm(request.POST,instance=service.location)
         if form.is_valid():
-            form.save()
+            location = form.save()
+            service.location = location
+            service.save()
+            return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
     else:
         form = LocationForm(instance=service.location)
 

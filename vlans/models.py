@@ -26,7 +26,7 @@ TYPE_OF_NETS = (
 
 class Vlan(models.Model):
     title = models.CharField(u'Название',max_length=30)
-    number = models.IntegerField(u'Номер')
+    number = models.IntegerField(u'Номер', unique=True)
     description = models.CharField(u'Описание',max_length=200, blank=True, null=True)
 
     class Meta:

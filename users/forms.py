@@ -137,7 +137,7 @@ class OrgServiceForm(forms.ModelForm):
 
     class Meta:
         model = Service
-        exclude = {'abon', 'plan','status', 'datestart','datefinish','speed_in','speed_out', 'ip','vlan','adm_status','mac','user_device','bs_device' }
+        exclude = {'abon', 'plan','status', 'datestart','datefinish','speed_in','speed_out', 'ip','vlan','vlan_list','adm_status','mac','user_device','bs_device' }
 
 
 class LoginForm(forms.Form):
