@@ -233,13 +233,12 @@ class Detail(models.Model):
         return "%s - %s" % (self.title, self.inn)
 
 class Service(models.Model):
-    macvalidator = RegexValidator('[0-9a-f]{2}([-:])[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$', u'Неправильный формат MAC адреса')    
     abon = models.ForeignKey(Abonent,verbose_name=u'Абонент')
     segment = models.ForeignKey(Segment,verbose_name=u'Сегмент')
     tos = models.ForeignKey(TypeOfService,verbose_name=u'Тип услуги')
     plan = models.ForeignKey(Plan,verbose_name=u'Тарифный план')
+    ip_list = models.ManyToManyField(IPAddr, verbose_name=u'Ресурсы', blank=True, null= True,through='Resource',related_name='resources')
     ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', blank=True, null= True)
-    mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=17,validators=[macvalidator])
     vlan = models.ForeignKey(Vlan, verbose_name=u'Vlan', blank=True, null= True,related_name='vlan')
     vlan_list = models.ManyToManyField(Vlan, verbose_name=u'Список Vlan', blank=True, null= True,related_name='vlan_list')
     adm_status = models.CharField(u'Административный статус', max_length=1, choices=settings.ADM_STATUSES, default='0')
@@ -340,60 +339,23 @@ class Service(models.Model):
             write_off = WriteOff(abonent=self.abon, service=self, wot=wot_abon,summ=summa, comment=comment, date=datetime.datetime(y,m,1))
             write_off.save()
 
-
-        # if self.abon.is_credit == settings.PAY_BEFORE:
-        #     # Для предоплаты
-        #     for month in range((targetday.year*12)+targetday.month+1,(now.year*12)+now.month+1):
-        #         summa = self.plan.price
-        #         comment = u'Абонентская плата за %s' % calendar.month_name[month%12]
-        #         write_off = WriteOff(abonent=self.abon, service=self, wot=wot,summ=summa, comment=comment, date=datetime.datetime(month/12,month%12,1))
-        #         write_off.save()
-        # else:
-        #     # Для постоплаты
-        #     for month in range((targetday.year*12)+targetday.month+1,(now.year*12)+now.month+1):
-        #         summa = self.plan.price
-        #         comment = u'Абонентская плата за %s' % calendar.month_name[month%12-1]
-        #         write_off = WriteOff(abonent=self.abon, service=self, wot=wot,summ=summa, comment=comment, date=datetime.datetime(month/12,month%12,1))
-        #         write_off.save()
-
-
-    # def save(self, force_insert=False, force_update=False):
-    #     is_new = True if not self.pk else False
-    #     if self.mac:
-    #          self.mac.translate(':,.,-').upper().strip()
-        # Проверяем не поменялся ли тарифный план
-        # Убрано в связи с изменение механизма смены тарифного плана
-        # if self.pk != None and self.plan.pk != Service.objects.get(pk=self.pk).plan.pk:
-        #     # print Service.objects.get(pk=self.pk).pk
-        #     # print self.plan.pk
-        #     new_service = Service.objects.get(pk=self.pk)
-        #     new_service.pk = None
-        #     new_service.plan = self.plan
-        #     new_service.status = self.status
-        #     new_service.datestart = datetime.date.today() + datetime.timedelta(days=1)
-        #     new_service.save()
-        #     self.datefinish = datetime.date.today()
-        #     self.status = STATUS_ARCHIVED
-        #     if self.datestart and self.datefinish and self.datestart > self.datefinish:
-        #         self.delete()
-        #     else:
-        #         super(Service, self).save(update_fields=['datefinish','status'])
-        # else:
-        #     super(Service, self).save(force_insert=False, force_update=False)
-            # Списываем плату за установку
-            # Пока закоментирую, т.к. списывать инстал нужно при старте услуги
-            # if is_new:
-            #     from pays.models import WriteOff, WriteOffType
-            #     wot = WriteOffType.objects.get(title=u'Инсталляция')
-            #     write_off = WriteOff(abonent=self.abon, service=self, wot=wot,summ=self.plan.install_price, date=datetime.datetime.now(), comment=u'Подключение услуги [%s]' % (self.plan.title))
-            #     write_off.save()
-
     class Meta:
         verbose_name = u'Услуга'
         verbose_name_plural = u'Услуги'
 
     def __unicode__(self):
         return "[%s] %s : %s - %s" % (self.pk, self.abon.title, self.plan.title, self.get_status_display())
+
+class Resource(models.Model):
+    macvalidator = RegexValidator('[0-9a-f]{2}([-:])[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$', u'Неправильный формат MAC адреса')
+    mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=17,validators=[macvalidator])
+    ip = models.ForeignKey(IPAddr, verbose_name=u'IP адрес', unique=True)
+    service = models.ForeignKey(Service, verbose_name=u'услуга')
+    comment = models.CharField(u'Название', max_length=300)
+
+    class Meta:
+        verbose_name = u'Интерфейс'
+        verbose_name_plural = u'Интерфейсы'
 
 class ServiceSuspension(models.Model):
     service = models.ForeignKey(Service, verbose_name=u'Услуга')
