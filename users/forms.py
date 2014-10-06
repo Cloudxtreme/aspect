@@ -107,7 +107,7 @@ class ServiceEditForm(forms.ModelForm):
 
     class Meta:
         model = Service
-        exclude = {'abon', 'status', 'tos', 'datestart','datefinish', 'segment', 'plan' }
+        exclude = {'abon', 'status', 'tos', 'datestart','datefinish', 'segment', 'plan', 'ip_list', 'vlan_list' }
 
 
 class ServiceForm(forms.ModelForm):
