@@ -6,8 +6,37 @@ from django.template import RequestContext
 from devices.models import Device, DevType, DeviceStatusEntry
 from devices.forms import DeviceEditForm
 from vlans.models import IPAddr
+from django.core import serializers
+# import netsnmp
+import subprocess
 
-@login_required
+def get_iparp(request):
+    ip = request.GET['ip']
+    vlan = request.GET['vlan']
+    community = 'haser12UMBUNTU'
+    router = '10.64.1.14'
+    # # oid_str = 'iso.3.6.1.2.1.4.22.1.2.%s.%s' % (vlan,ip)
+    # oid_str = 'iso.3.6.1.2.1.4.22.1.2.%s' % (vlan)
+    # oid = netsnmp.Varbind(oid_str)
+    # result = netsnmp.snmpwalk(oid,
+    #                     Version = 2,
+    #                     DestHost="192.168.64.1",
+    #                     Community="public")
+    
+    oid = 'iso.3.6.1.2.1.4.22.1.2.%s.%s' % (vlan,ip)
+    cmd = 'snmpwalk -v 2c -c %s %s -OXsq %s' % (community, router, oid)
+    PIPE = subprocess.PIPE
+    p = subprocess.Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE,
+            stderr=subprocess.STDOUT, close_fds=True, cwd='/home/')
+    s = p.stdout.read()
+    if s.replace(oid,'').find('No')==-1:
+        vlan,ip,mac = s.replace('iso.3.6.1.2.1.4.22.1.2.','').replace('.',' ',1).split(' ',2)
+        result = '<p>Vlan %s</p> <p>IP %s</p> <p>MAC %s</p>' % (vlan,ip,mac.replace('"','').replace(' ',':',5))
+    else:
+        result = 'ARP запись не обнаружена'        
+    return HttpResponse(result)
+
+# @login_required
 def set_state(request):
     ip = request.GET['ip']
     date = request.GET['date']

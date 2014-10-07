@@ -6,12 +6,31 @@
         var showed = false;
         $("#btn_toggle").click(function () {
             $('tr.active').toggle("slow");
+            // $.get( "/devices/get_iparp/?ip=192.168.64.73&vlan=381", function( data ) {
+            //     alert( data );
+            // });
         });
     });
     </script>
 {% endblock %}
 
 {% block pages %}
+
+<!-- Small modal -->
+<div id='ip_modal' class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          <h4 class="modal-title" id="myLargeModalLabel">Результаты ARP запроса</h4>
+        </div>
+        <div class="modal-body">
+          <div id='ip_content'></div>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 
 {% if services %}
 {% load dict_extras %}
@@ -56,7 +75,15 @@
             </td>
             <td>
                 {% if service.ip.ip %}
-                    <p>{{ service.ip.ip }}</p> 
+                    <p>{{ service.ip.ip }}
+                    <a id='#btn_iparp' 
+                    onclick="$.get( '/devices/get_iparp/?ip={{ service.ip.ip }}&vlan={{ service.ip.net.vlan.number }}', 
+                    function( data ) {
+                        $('#ip_content' ).html( data );
+                        $('#ip_modal').modal('show');
+                        {# alert( data ); #}
+                    });">
+                    <span class="glyphicon glyphicon-search"></span></a></p> 
                 {% endif %} 
                 {% if service.mac %}
                     <p>{{ service.mac }}</p>
