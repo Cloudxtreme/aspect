@@ -232,12 +232,24 @@ class Detail(models.Model):
     def __unicode__(self):
         return "%s - %s" % (self.title, self.inn)
 
+class Interface(models.Model):
+    macvalidator = RegexValidator('[0-9a-f]{2}([-:])[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$', u'Неправильный формат MAC адреса')
+    mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=17,validators=[macvalidator])
+    ip = models.ForeignKey(IPAddr, verbose_name=u'IP адрес', unique=True)
+    # service = models.ForeignKey(Service, verbose_name=u'услуга')
+    comment = models.CharField(u'Название', max_length=300)
+
+    class Meta:
+        verbose_name = u'Интерфейс'
+        verbose_name_plural = u'Интерфейсы'
+
 class Service(models.Model):
     abon = models.ForeignKey(Abonent,verbose_name=u'Абонент')
     segment = models.ForeignKey(Segment,verbose_name=u'Сегмент')
     tos = models.ForeignKey(TypeOfService,verbose_name=u'Тип услуги')
     plan = models.ForeignKey(Plan,verbose_name=u'Тарифный план')
-    ip_list = models.ManyToManyField(IPAddr, verbose_name=u'Ресурсы', blank=True, null= True,through='Resource',related_name='resources')
+    # ip_list = models.ManyToManyField(IPAddr, verbose_name=u'Ресурсы', blank=True, null= True,through='Resource',related_name='resources')
+    ifaces = models.ManyToManyField(Interface, verbose_name=u'Интерфейсы', blank=True, null= True)
     ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', blank=True, null= True)
     vlan = models.ForeignKey(Vlan, verbose_name=u'Vlan', blank=True, null= True,related_name='vlan')
     vlan_list = models.ManyToManyField(Vlan, verbose_name=u'Список Vlan', blank=True, null= True,related_name='vlan_list')
@@ -345,17 +357,6 @@ class Service(models.Model):
 
     def __unicode__(self):
         return "[%s] %s : %s - %s" % (self.pk, self.abon.title, self.plan.title, self.get_status_display())
-
-class Resource(models.Model):
-    macvalidator = RegexValidator('[0-9a-f]{2}([-:])[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$', u'Неправильный формат MAC адреса')
-    mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=17,validators=[macvalidator])
-    ip = models.ForeignKey(IPAddr, verbose_name=u'IP адрес', unique=True)
-    service = models.ForeignKey(Service, verbose_name=u'услуга')
-    comment = models.CharField(u'Название', max_length=300)
-
-    class Meta:
-        verbose_name = u'Интерфейс'
-        verbose_name_plural = u'Интерфейсы'
 
 class ServiceSuspension(models.Model):
     service = models.ForeignKey(Service, verbose_name=u'Услуга')
