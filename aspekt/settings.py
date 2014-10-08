@@ -177,6 +177,8 @@ LOGIN_REDIRECT_URL = '/'
 
 # SESSION_COOKIE_AGE = 600
 
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
 EMAIL_SERVER = 'smtp.yandex.ru'
 
 EMAIL_SENDER = "albeon@ptls.ru"

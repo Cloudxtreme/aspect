@@ -22,7 +22,7 @@ def get_iparp(request):
     #                     Version = 2,
     #                     DestHost="192.168.64.1",
     #                     Community="public")
-    
+
     oid = 'iso.3.6.1.2.1.4.22.1.2.%s.%s' % (vlan,ip)
     cmd = 'snmpwalk -v 2c -c %s %s -OXsq %s' % (community, router, oid)
     PIPE = subprocess.PIPE
@@ -31,9 +31,9 @@ def get_iparp(request):
     s = p.stdout.read()
     if s.replace(oid,'').find('No')==-1:
         vlan,ip,mac = s.replace('iso.3.6.1.2.1.4.22.1.2.','').replace('.',' ',1).split(' ',2)
-        result = '<p>Vlan %s</p> <p>IP %s</p> <p>MAC %s</p>' % (vlan,ip,mac.replace('"','').replace(' ',':',5))
+        result = '<div class="alert alert-success" role="alert"><p>Vlan %s</p> <p>IP %s</p> <p>MAC %s</p></div>' % (vlan,ip,mac.replace('"','').replace(' ',':',5))
     else:
-        result = 'ARP запись не обнаружена'        
+        result = '<div class="alert alert-danger" role="alert">ARP запись не обнаружена</div>'        
     return HttpResponse(result)
 
 # @login_required

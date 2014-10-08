@@ -6,9 +6,6 @@
         var showed = false;
         $("#btn_toggle").click(function () {
             $('tr.active').toggle("slow");
-            // $.get( "/devices/get_iparp/?ip=192.168.64.73&vlan=381", function( data ) {
-            //     alert( data );
-            // });
         });
     });
     </script>
@@ -75,15 +72,16 @@
             </td>
             <td>
                 {% if service.ip.ip %}
-                    <p>{{ service.ip.ip }}
-                    <a id='#btn_iparp' 
-                    onclick="$.get( '/devices/get_iparp/?ip={{ service.ip.ip }}&vlan={{ service.ip.net.vlan.number }}', 
-                    function( data ) {
-                        $('#ip_content' ).html( data );
-                        $('#ip_modal').modal('show');
-                        {# alert( data ); #}
-                    });">
-                    <span class="glyphicon glyphicon-search"></span></a></p> 
+                    <p>
+                        {{ service.ip.ip }}
+                        <a id='#btn_iparp{{ service.ip.pk }}' 
+                        onclick="$.get( '/devices/get_iparp/?ip={{ service.ip.ip }}&vlan={{ service.ip.net.vlan.number }}', 
+                        function( data ) {
+                            $('#ip_content' ).html( data );
+                            $('#ip_modal').modal('show');
+                        });">
+                        <span class="glyphicon glyphicon-search"></span></a>
+                    </p> 
                 {% endif %} 
                 {% if service.mac %}
                     <p>{{ service.mac }}</p>
