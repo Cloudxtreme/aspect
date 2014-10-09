@@ -253,6 +253,20 @@ def service_iface_add(request, service_id):
 
 # Редактирование интерфейса услуги
 @login_required
+def service_iface_del(request, service_id, iface_id):
+    try:
+        service = Service.objects.get(pk=service_id)
+        abonent = service.abon
+        interface = Interface.objects.get(pk=iface_id)
+    except:
+        raise Http404
+
+    interface.delete()
+
+    return HttpResponseRedirect(reverse('abonent_services', args=[abonent.pk]))
+
+# Редактирование интерфейса услуги
+@login_required
 def service_iface_edit(request, service_id, iface_id):
     try:
         service = Service.objects.get(pk=service_id)
