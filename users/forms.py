@@ -1,6 +1,6 @@
 ﻿from django import forms
 from django.contrib.auth import authenticate
-from users.models import Abonent, Service, Plan, TypeOfService, Segment, Agent, Passport, Detail
+from users.models import Abonent, Service, Plan, TypeOfService, Segment, Agent, Passport, Detail, Interface
 from vlans.models import Vlan
 from users.fields import JSONWidget
 from bootstrap3_datetime.widgets import DateTimePicker
@@ -84,6 +84,17 @@ class SearchForm(forms.ModelForm):
             'contract': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
+# Основная форма для редктирования услуги
+class GenericServiceForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(GenericServiceForm, self).__init__(*args, **kwargs)
+        # adding css classes to widgets without define the fields:
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'
+
+    class Meta:
+        model = Service
+
 class ServicePlanForm(forms.Form):
     plan = forms.ModelChoiceField(
         queryset =Plan.objects.all().values_list('pk','title'),
@@ -107,11 +118,22 @@ class ServiceEditForm(forms.ModelForm):
 
     class Meta:
         model = Service
-        exclude = {'abon', 'status', 'tos', 'datestart','datefinish', 'segment', 'plan', 'ip_list', 'vlan_list' }
+        exclude = {'abon', 'status', 'tos', 'datestart','datefinish', 'segment', 'plan','location', 'ifaces'}
+        widgets = {
+            'vlan_list': forms.SelectMultiple(attrs={'class':'form-control select2-multiple','multiple' : 'multiple',}),
+        }
 
+class ServiceInterfaceForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ServiceInterfaceForm, self).__init__(*args, **kwargs)
+        # adding css classes to widgets without define the fields:
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'
+
+    class Meta:
+        model = Interface
 
 class ServiceForm(forms.ModelForm):
-
     def __init__(self, *args, **kwargs):
         super(ServiceForm, self).__init__(*args, **kwargs)
         # adding css classes to widgets without define the fields:
@@ -121,6 +143,22 @@ class ServiceForm(forms.ModelForm):
     class Meta:
         model = Service
         exclude = {'abon', 'status', 'datestart','datefinish','speed_in','speed_out', 'ip','vlan','adm_status','mac','user_device','bs_device' }
+
+class ServiceSpeedForm(GenericServiceForm):
+    class Meta(GenericServiceForm.Meta):
+        fields = {'speed_in','speed_out',}
+
+class ServiceStateForm(GenericServiceForm):
+    class Meta(GenericServiceForm.Meta):
+        fields = {'adm_status',}
+
+class ServiceVlanForm(GenericServiceForm):
+    class Meta(GenericServiceForm.Meta):
+        fields = {'vlan_list',}
+
+class ServiceEquipForm(GenericServiceForm):
+    class Meta(GenericServiceForm.Meta):
+        fields = {'user_device','bs_device',}
 
 class OrgServiceForm(forms.ModelForm):
     speed = forms.IntegerField(label=u'Скорость доступа, Кбит/с')
@@ -137,7 +175,8 @@ class OrgServiceForm(forms.ModelForm):
 
     class Meta:
         model = Service
-        exclude = {'abon', 'plan','status', 'datestart','datefinish','speed_in','speed_out', 'ip','vlan','vlan_list','adm_status','mac','user_device','bs_device' }
+        fields = {'segment','tos', 'price','price','install_price'}
+        # exclude = {'abon', 'plan','status', 'datestart','datefinish','speed_in','speed_out', 'ip','vlan','vlan_list','adm_status','mac','user_device','bs_device' }
 
 
 class LoginForm(forms.Form):

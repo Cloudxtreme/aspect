@@ -1,6 +1,14 @@
 {% extends "abonent/main.html" %}
 
 {% block script %}
+    <link href="/media/js/select2.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/media/js/select2-bootstrap.css">
+    <script src="/media/js/select2.js"></script>
+    <script>
+        $(document).ready(function() { 
+            $("select").select2(); 
+        });
+    </script>
     {{ form.media }}
 {% endblock %}
 
@@ -8,7 +16,7 @@
         <ol class="breadcrumb">
             <li><a href="{% url 'abonent_info' abonent.id %}">Абонент</a></li>
             <li><a href="{% url 'users.views.abonent_services' abonent.id %}">Услуги</a></li>
-            <li class="active">Изменение параметров услуги</li>
+            <li class="active">{{ menu_title }}</li>
         </ol>
 {% endblock %}
 

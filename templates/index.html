@@ -68,8 +68,10 @@
                     <li><a href={% url "journaling.views.report_paysbymonth" %}>Платежи по дням месяца</a></li>
                     <li><a href={% url "journaling.views.report_paysbyweek" %}>Платежи по дням недели</a></li>
                     <li><a href={% url "journaling.views.report_sumbymonth" %}>Платежи по месяцам</a></li>
+                    <li><a href={% url "journaling.views.report_debitsum" %}>Общая задолженность юр лиц</a></li>
                     <li><a href={% url "payments_all" %}>Поступившие платежи</a></li>
                     <li><a href={% url "promisedpays_all" %}>Обещанные платежи</a></li>
+                    <li><a href={% url "service_analysis" %}>Незаполненые тех параметры</a></li>
                 </ul>
             </li>
             <li class="dropdown">
@@ -80,7 +82,6 @@
                     <li>
                         <a href={% url "notes.views.notes_all" %}>Заметки <span class="badge">{{ notes_count|default:"0" }}</span></a>
                     </li>
-                    <li><a href={% url "service_analysis" %}>Технические параметры услуг</a></li>
                 </ul>
             </li>
             <li><a href={% url 'tt_all' 0 %}>TT <span class="badge">{{ open_tt|default:"0" }}</span></a></li>

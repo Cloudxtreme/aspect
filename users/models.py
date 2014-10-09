@@ -233,15 +233,18 @@ class Detail(models.Model):
         return "%s - %s" % (self.title, self.inn)
 
 class Interface(models.Model):
-    macvalidator = RegexValidator('[0-9a-f]{2}([-:])[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$', u'Неправильный формат MAC адреса')
-    mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=17,validators=[macvalidator])
+    macvalidator = RegexValidator('[0-9a-fA-F]{2}([-:])[0-9a-fA-F]{2}(\\1[0-9a-fA-F]{2}){4}$', u'Неправильный формат MAC адреса')
     ip = models.ForeignKey(IPAddr, verbose_name=u'IP адрес', unique=True)
-    # service = models.ForeignKey(Service, verbose_name=u'услуга')
-    comment = models.CharField(u'Название', max_length=300)
+    mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=17,validators=[macvalidator])
+    comment = models.CharField(u'Комментарий', max_length=300, blank=True, null= True)
 
     class Meta:
         verbose_name = u'Интерфейс'
         verbose_name_plural = u'Интерфейсы'
+        ordering = ['ip']
+
+    def __unicode__(self):
+        return "%s - %s" % (self.ip, self.mac)
 
 class Service(models.Model):
     abon = models.ForeignKey(Abonent,verbose_name=u'Абонент')
@@ -251,7 +254,7 @@ class Service(models.Model):
     # ip_list = models.ManyToManyField(IPAddr, verbose_name=u'Ресурсы', blank=True, null= True,through='Resource',related_name='resources')
     ifaces = models.ManyToManyField(Interface, verbose_name=u'Интерфейсы', blank=True, null= True)
     ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', blank=True, null= True)
-    vlan = models.ForeignKey(Vlan, verbose_name=u'Vlan', blank=True, null= True,related_name='vlan')
+    # vlan = models.ForeignKey(Vlan, verbose_name=u'Vlan', blank=True, null= True,related_name='vlan')
     vlan_list = models.ManyToManyField(Vlan, verbose_name=u'Список Vlan', blank=True, null= True,related_name='vlan_list')
     adm_status = models.CharField(u'Административный статус', max_length=1, choices=settings.ADM_STATUSES, default='0')
     speed_in = models.PositiveIntegerField(default=0, blank=True, null=True)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*- 
 # from django.shortcuts import render
 from django.shortcuts import render_to_response, render, HttpResponseRedirect
+from django.forms.formsets import formset_factory
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import login, logout
@@ -12,14 +13,18 @@ from django.core import serializers
 # from django.views.decorators.csrf import csrf_exempt, csrf_protect
 # from django.core.context_processors import csrf
 from django.template import RequestContext
-from users.forms import  ServiceForm, OrgServiceForm, SearchForm, LoginForm, PassportForm, DetailForm, ManageForm, AbonentForm, ServicePlanForm, ServiceEditForm
+from users.forms import  ServiceForm, OrgServiceForm, SearchForm, LoginForm, \
+                         PassportForm, DetailForm, ManageForm, AbonentForm, \
+                         ServicePlanForm, ServiceEditForm, ServiceInterfaceForm, \
+                         ServiceSpeedForm, ServiceStateForm, ServiceVlanForm, \
+                         ServiceEquipForm
 from journaling.forms import ServiceStatusChangesForm
 from notice.forms import AbonentFilterForm
-from users.models import Abonent, Service, TypeOfService, Plan, Passport, Detail
+from users.models import Abonent, Service, TypeOfService, Plan, Passport, Detail, Interface, Segment
 from tt.models import TroubleTicket, TroubleTicketComment
 from journaling.models import ServiceStatusChanges, AbonentStatusChanges
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from vlans.models import Network, IPAddr
+from vlans.models import Network, IPAddr, Vlan
 from vlans.forms import LocationForm
 from django.db.models import Avg, Max, Min, Sum, Q
 import datetime
@@ -72,22 +77,22 @@ def feeds_ip_by_seg(request):
         json_subcat = serializers.serialize("json", IPAddr.objects.none())
     else:
         # data = IPAddr.objects.filter(net__segment__pk=request.GET['id'])
-        data = IPAddr.objects.filter(net__segment__pk=request.GET['id']).filter(net__net_type='UN').filter(Q(service=None))|IPAddr.objects.filter(service__pk=request.GET['id'])
+        data = IPAddr.objects.filter(net__segment__pk=request.GET['id']).filter(net__net_type='UN').filter(Q(interface=None))|IPAddr.objects.filter(service__pk=request.GET['id'])
         json_subcat = serializers.serialize("json", data)
     return HttpResponse(json_subcat, mimetype="application/javascript")
 
 @login_required
 def service_analysis(request):
-    internet_services = Service.objects.filter(tos__pk=1,ip=None,status__in=['A','N'])
-    external_channel = Service.objects.filter(tos__pk=3,vlan=None,status__in=['A','N'])
+    internet_services = Service.objects.filter(tos__pk=1,ifaces=None,status__in=['A','N'])
+    external_channel = Service.objects.filter(tos__pk=3,vlan_list=None,status__in=['A','N'])
     internal_channel = Service.objects.filter(tos__pk=5)
-    internet_pptp = Service.objects.filter(tos__pk=4,mac=None)|Service.objects.filter(tos__pk=4,ip=None)
+    # internet_pptp = Service.objects.filter(tos__pk=4)|Service.objects.filter(tos__pk=4,ip=None)
 
     return render_to_response('service/analysis.html', {
                                 'internet_services': internet_services,
                                 'external_channel': external_channel,
                                 'internal_channel' : internal_channel,
-                                'internet_pptp' : internet_pptp,
+                                # 'internet_pptp' : internet_pptp,
                                 },
                                 context_instance = RequestContext(request)
                                 )  
@@ -218,9 +223,154 @@ def service_status_change(request, abonent_id, service_id):
                                 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), 
                                 'form': form }, 
                                 context_instance = RequestContext(request) )   
-
+# Добававление интерфейса услуги
 @login_required
+def service_iface_add(request, service_id):
+    try:
+        service = Service.objects.get(pk=service_id)
+        abonent = service.abon
+        # interface = Interface()
+    except:
+        raise Http404
+
+    if request.method == 'POST':
+        form = ServiceInterfaceForm(request.POST)
+        if form.is_valid():
+            iface = form.save()
+            service.ifaces.add(iface)
+            return HttpResponseRedirect(reverse('abonent_services', args=[abonent.pk]))
+    else:
+        form = ServiceInterfaceForm()
+    
+    form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk,interface=None).filter(net__net_type='UN')
+
+    return render_to_response('service/service_generic_changes.html', { 
+                                'abonent' : abonent, 
+                                'form': form, 
+                                'menu_title': 'Создание нового интерфейса', 
+                                'count_serv' : Service.objects.filter(abon__pk=abonent.pk,status__in=['A','N']).count() },
+                                 context_instance = RequestContext(request))
+
+# Редактирование интерфейса услуги
+@login_required
+def service_iface_edit(request, service_id, iface_id):
+    try:
+        service = Service.objects.get(pk=service_id)
+        abonent = service.abon
+        interface = Interface.objects.get(pk=iface_id)
+    except:
+        raise Http404
+
+    if request.method == 'POST':
+        form = ServiceInterfaceForm(request.POST,instance=interface)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('abonent_services', args=[abonent.pk]))
+    else:
+        form = ServiceInterfaceForm(instance=interface)
+        form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk,interface=None).filter(net__net_type='UN')|IPAddr.objects.filter(interface=interface)
+
+    return render_to_response('service/service_generic_changes.html', { 
+                                'abonent' : abonent, 
+                                'form': form, 
+                                'menu_title': 'Изменение параметров интерфейса', 
+                                'count_serv' : Service.objects.filter(abon__pk=abonent.pk,status__in=['A','N']).count() },
+                                 context_instance = RequestContext(request))
+
+# Редактирование скорости услуги
+@login_required
+def service_state_edit(request, abonent_id, service_id):
+    try:
+        abonent = Abonent.objects.get(pk=abonent_id)
+        service = Service.objects.get(pk=service_id)
+    except:
+        raise Http404
+
+    if request.method == 'POST':
+        form = ServiceStateForm(request.POST,instance=service)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
+    else:
+        form = ServiceStateForm(instance=service)
+    return render_to_response('service/service_generic_changes.html', { 
+                                'abonent' : abonent, 
+                                'form': form, 
+                                'menu_title': 'Принудительная установка статуса', 
+                                'count_serv' : Service.objects.filter(abon__pk=abonent_id,status__in=['A','N']).count() },
+                                 context_instance = RequestContext(request))
+
+# Редактирование оборудования
+@login_required
+def service_equip_edit(request, abonent_id, service_id):
+    try:
+        abonent = Abonent.objects.get(pk=abonent_id)
+        service = Service.objects.get(pk=service_id)
+    except:
+        raise Http404
+
+    if request.method == 'POST':
+        form = ServiceEquipForm(request.POST,instance=service)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
+    else:
+        form = ServiceEquipForm(instance=service)
+    return render_to_response('service/service_generic_changes.html', { 
+                                'abonent' : abonent, 
+                                'form': form, 
+                                'menu_title': 'Редактирование оборудования', 
+                                'count_serv' : Service.objects.filter(abon__pk=abonent_id,status__in=['A','N']).count() },
+                                 context_instance = RequestContext(request))
+
+# Редактирование скорости услуги
+@login_required
+def service_speed_edit(request, abonent_id, service_id):
+    try:
+        abonent = Abonent.objects.get(pk=abonent_id)
+        service = Service.objects.get(pk=service_id)
+    except:
+        raise Http404
+
+    if request.method == 'POST':
+        form = ServiceSpeedForm(request.POST,instance=service)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
+    else:
+        form = ServiceSpeedForm(instance=service)
+    return render_to_response('service/service_generic_changes.html', { 
+                                'abonent' : abonent, 
+                                'form': form, 
+                                'menu_title': 'Ручной контроль скорости', 
+                                'count_serv' : Service.objects.filter(abon__pk=abonent_id,status__in=['A','N']).count() },
+                                 context_instance = RequestContext(request))
+
+# Редактирование списка vlan услуги
+@login_required
+def service_vlan_edit(request, abonent_id, service_id):
+    try:
+        abonent = Abonent.objects.get(pk=abonent_id)
+        service = Service.objects.get(pk=service_id)
+    except:
+        raise Http404
+
+    if request.method == 'POST':
+        form = ServiceVlanForm(request.POST,instance=service)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
+    else:
+        form = ServiceVlanForm(instance=service)
+    return render_to_response('service/service_generic_changes.html', { 
+                                'abonent' : abonent, 
+                                'form': form, 
+                                'menu_title': 'Редактирование спсика Vlan', 
+                                'count_serv' : Service.objects.filter(abon__pk=abonent_id,status__in=['A','N']).count() },
+                                 context_instance = RequestContext(request))
+
 # Редактирование местоположения услуги
+@login_required
 def service_location_edit(request, abonent_id, service_id):
     try:
         abonent = Abonent.objects.get(pk=abonent_id)
@@ -238,9 +388,10 @@ def service_location_edit(request, abonent_id, service_id):
     else:
         form = LocationForm(instance=service.location)
 
-    return render_to_response('service/service_location_changes.html', { 
+    return render_to_response('service/service_generic_changes.html', { 
                                 'abonent' : abonent, 
                                 'form': form, 
+                                'menu_title': 'Изменение местоположения', 
                                 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() },
                                  context_instance = RequestContext(request))
 
@@ -256,7 +407,7 @@ def service_plan_edit(request, abonent_id, service_id):
     if request.method == 'POST':
         form = ServicePlanForm(request.POST)
         if form.is_valid():
-            form.save(commit=False)
+            service = form.save(commit=False)
             service.save()
             return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
     else:
@@ -270,6 +421,7 @@ def service_plan_edit(request, abonent_id, service_id):
                                 context_instance = RequestContext(request)
                                 ) 
 @login_required
+# Редактирование технических параметров
 def service_edit(request, abonent_id, service_id):
     try:
         abonent = Abonent.objects.get(pk = abonent_id)
@@ -280,15 +432,15 @@ def service_edit(request, abonent_id, service_id):
     if request.method == 'POST':
         form = ServiceEditForm(request.POST, instance=service)
         if form.is_valid():
-            form.save(commit=False)
-            service.save()
+            form.save(commit=True)
             return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
     else:
         form = ServiceEditForm(instance=service)
-        form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk).filter(net__net_type='UN').filter(Q(service=None))|IPAddr.objects.filter(service__pk=service.pk)
+        form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk).filter(net__net_type='UN').filter(Q(interface=None))|IPAddr.objects.filter(service__pk=service.pk)
 
-    return render_to_response('service/service_manage.html', {
+    return render_to_response('service/service_generic_changes.html', {
                                 'form': form,
+                                'menu_title': 'Изменение параметров услуги', 
                                 'abonent' : abonent,
                                 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), },
                                 context_instance = RequestContext(request)

@@ -56,7 +56,7 @@ class Device(models.Model):
         verbose_name_plural = u'Устройства'
 
     def __unicode__(self):
-        return "%s - %s - %s - %s" % (self.pk, self.devtype, self.title, self.ip)
+        return "%s - %s - %s" % (self.devtype, self.title, self.ip)
 
 class Iface(models.Model):
     title = models.CharField(u'Название', max_length=50)

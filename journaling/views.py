@@ -2,7 +2,7 @@ from django.shortcuts import render, render_to_response
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 from django.db.models import Count, Sum
-from users.models import Service, Plan
+from users.models import Service, Plan, Abonent
 from pays.models import Payment
 
 @login_required	
@@ -14,6 +14,11 @@ def report_plans(request):
 def report_paysbymonth(request):
 	data = Payment.objects.filter(valid=True,top__stat=True).extra({'weekday': "dayofmonth(date)"}).values('weekday').order_by('weekday').annotate(Count('id'))
 	return render_to_response('report_paysbymonth.html', { 'data' : data }, context_instance = RequestContext(request))
+
+@login_required
+def report_debitsum(request):
+	data = Abonent.objects.filter(balance__lt=0,utype='U').aggregate(Sum('balance'))
+	return render_to_response('report_debitsum.html', { 'data' : data }, context_instance = RequestContext(request))
 
 @login_required
 def report_paysbyweek(request):

@@ -34,6 +34,7 @@ urlpatterns = patterns('',
     url(r'^reports/paysbymonth/$', 'journaling.views.report_paysbymonth'),
     url(r'^reports/paysbyweek/$', 'journaling.views.report_paysbyweek'),
     url(r'^reports/sumbymonth/$', 'journaling.views.report_sumbymonth'),
+    url(r'^reports/debitsum/$', 'journaling.views.report_debitsum'),
 )
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

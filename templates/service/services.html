@@ -35,11 +35,12 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>Адрес</th>
+            <th class="col-md-3">Адрес</th>
             <th>Начало</th>
             <th>Тариф</th>
             <th>Скорость</th>
-            <th>Параметры</th>
+            <th class="col-md-2">Параметры</th>
+            <th>Оборудование</th>
             <th>Статус</th>
           </tr>
         </thead>
@@ -47,7 +48,7 @@
         {% for service in services %}
         <tr id="tr-{{ service.pk }}" {% ifequal service.status 'D' %} class="active" style=" display:none" {% endifequal %}>
             <td>[{{ service.pk }}]</td>
-            <td class="col-md-3">
+            <td>
                 {{ service.location.address }}
                 <a href="{% url 'users.views.service_location_edit' abonent.id service.id %}">
                 <span class="glyphicon glyphicon-edit"></span></a>
@@ -61,35 +62,47 @@
                 <p><small>{{ service.tos }}</small></p>
             </td>
             <td>
-            {% if service.speed_in > 0 %}
-                {{ service.speed_in }} Кбит/с
-                <p><small>Установлено вручную</small></p>
-            {% else %}
-                {% if service.plan.speed_in %} 
-                    {{ service.plan.speed_in }} Кбит/с
+                {% if service.speed_in > 0 %}
+                    {{ service.speed_in }} Кбит/с
+                    <p><small>Установлено вручную</small></p>
+                {% else %}
+                    {% if service.plan.speed_in %} 
+                        {{ service.plan.speed_in }} Кбит/с
+                    {% endif %}
                 {% endif %}
-            {% endif %}
+                <a href="{% url 'users.views.service_speed_edit' abonent.id service.id %}">
+                <span class="glyphicon glyphicon-cog"></span></a>
             </td>
             <td>
-                {% if service.ip.ip %}
+                {% for iface in service.ifaces.all %}
                     <p>
-                        {{ service.ip.ip }}
-                        <a id='#btn_iparp{{ service.ip.pk }}' 
-                        onclick="$.get( '/devices/get_iparp/?ip={{ service.ip.ip }}&vlan={{ service.ip.net.vlan.number }}', 
+                        {{ iface.ip.ip }}
+                        <a id='#btn_iparp{{ iface.ip.pk }}' 
+                        onclick="$.get( '/devices/get_iparp/?ip={{ iface.ip.ip }}&vlan={{ iface.ip.net.vlan.number }}', 
                         function( data ) {
                             $('#ip_content' ).html( data );
                             $('#ip_modal').modal('show');
                         });">
                         <span class="glyphicon glyphicon-search"></span></a>
-                    </p> 
-                {% endif %} 
-                {% if service.mac %}
-                    <p>{{ service.mac }}</p>
-                {% endif %} 
-                {% if service.vlan %}
-                    <p>vlan{{ service.vlan.number }}</p>
-                {% endif %} 
-                <a href="{% url 'users.views.service_edit' abonent.id service.id %}">
+                    <a href="{% url 'users.views.service_iface_edit' service.id iface.id %}">
+                    <span class="glyphicon glyphicon-edit"></span></a>
+                    </p>
+                {% endfor %}
+                <p>
+                    <a href="{% url 'users.views.service_iface_add' service.id %}">Добавить
+                    <span class="glyphicon glyphicon-plus"></span></a>
+                </p>
+                {% for vlan in service.vlan_list.all %}
+                    vlan{{ vlan.number }}
+                {% endfor %} 
+                <a href="{% url 'users.views.service_vlan_edit' abonent.id service.id %}">
+                <span class="glyphicon glyphicon-cog"></span></a>
+            </td>
+            <td>
+                {% if service.user_device %}
+                    {{ service.user_device }}
+                {% endif %}
+                <a href="{% url 'users.views.service_equip_edit' abonent.id service.id %}">
                 <span class="glyphicon glyphicon-cog"></span></a>
             </td>
             <td>
@@ -97,7 +110,10 @@
                     {{ service.get_status_display }}
                 {% else %}
                     {{ service.get_adm_status_display}}
+                    <p><small>Установлено вручную</small></p>
                 {% endifequal %}
+                <a href="{% url 'users.views.service_state_edit' abonent.id service.id %}">
+                <span class="glyphicon glyphicon-cog"></span></a>
                 <a href="{% url 'users.views.service_history' abonent.id service.id %}">
                 <span class="glyphicon glyphicon-list"></span></a>
             </td>
