@@ -3,20 +3,19 @@
 {% block main %}
 <div class="page-header">
     <h2 class="sub-header">Список Email уведомлений</h2>
-    <div class="btn-group">
-        <a href="{% url 'mass_notice_add' %}" role="button" class="btn btn-primary btn-xm">
-        Создать рассылку <span class="glyphicon glyphicon-envelope"></span></a>
-    </div>
 </div>
+
+<p><a href="{% url 'mass_notice_add' %}"> <span class="glyphicon glyphicon-envelope"> Создать новую рассылку</span></a></p>
+<p><a href="{% url 'notices_exec' %}"><span class="glyphicon glyphicon-repeat"> Отправить все сообщения в очереди</span></a></p>
+</br>
 {% if notice_list %}
 {% load dict_extras %}
     <div class="table-responsive">
-        <table class="table table-striped h6">
+        <table class="table h6">
         <thead>
           <tr>
-            <th>#</th>
             <th>Дата</th>
-            <th>Отправлен</th>
+            <th>Статус</th>
             <th>Получатель</th>
             <th>Тема</th>
             <th>Содержание</th>
@@ -25,11 +24,10 @@
         </thead>
         <tbody>
         {% for notice in notice_list %}
-        <tr>
-            <td>{{ notice.pk }}</td>
+        <tr {% if not notice.sent %}class="active"{% endif %}>
             <td>{{ notice.date }}</td>
             <td>
-                {{ notice.sent|yesno:"Отправлен,Неотправлен" }}
+                {{ notice.sent|yesno:"Отправлен,В очереди" }}
             </td>
             <td>{% if notice.abonent %}
                     <a href="{% url 'abonent_info' notice.abonent.id %}">{{ notice.abonent }}</a>
@@ -42,7 +40,7 @@
             <td>
                 {% if not notice.sent %}
                 <div class="btn-group">
-                    <a href="{% url 'notice_email_del' 0 notice.id %}" role="button" class="btn btn-danger btn-xm" data-toggle="tooltip" data-placement="left" title="Удалить">
+                    <a href="{% url 'notice_email_del' 0 notice.id %}">
                     <span class="glyphicon glyphicon-remove"></span></a>
                 </div>
                 {% endif %}

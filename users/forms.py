@@ -11,6 +11,8 @@ from django.forms.extras.widgets import SelectDateWidget
 #         model = Contact
 # #        exclude = ('contact')JSONWidget
 
+
+
 class AbonentForm(forms.ModelForm):
     class Meta:
         model = Abonent

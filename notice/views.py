@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*- 
 from django.shortcuts import render, render_to_response, HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from django.http import Http404
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
-from notice.models import EmailMessage
-from notice.forms import AbonentFilterForm, GroupEmailForm
+from notice.models import EmailMessage, AbonentEvent, TemplateMessage
+from notice.forms import AbonentFilterForm, AbonentEventForm, TemplateMessageForm, GroupEmailForm
 from users.models import Abonent, Service
 from datetime import datetime
 from django.conf import settings
@@ -12,10 +13,92 @@ from django.db.models import Q
 from django.db.models import Max
 
 @login_required
+def template_del(request,template_id):
+    try:
+        TemplateMessage.objects.get(pk = template_id).delete()
+    except:
+        raise Http404
+
+    return HttpResponseRedirect(reverse('templates_all'))    
+
+@login_required
+def abonentevent_del(request,abonentevent_id):
+    try:
+        AbonentEvent.objects.get(pk = abonentevent_id).delete()
+    except:
+        raise Http404
+
+    return HttpResponseRedirect(reverse('abonentevents_all'))  
+
+@login_required
+def templates_all(request):
+    templates_list = TemplateMessage.objects.all().order_by('pk')
+
+    return render_to_response('notice/templates_all.html', { 
+                                'templates_list': templates_list, 
+                                }, context_instance = RequestContext(request)
+                                ) 
+
+@login_required
+def abonentevents_all(request):
+    abonentevents_list = AbonentEvent.objects.all().order_by('pk')
+
+    return render_to_response('notice/abonentevents_all.html', { 
+                                'abonentevents_list': abonentevents_list, 
+                                }, context_instance = RequestContext(request)
+                                ) 
+
+@login_required
+def template_edit(request, template_id):
+    try:
+        template = TemplateMessage.objects.get(pk = template_id)
+        header = 'Редактирование нового шаблона'    
+    except:
+        template = TemplateMessage()
+        header = 'Создание нового шаблона'    
+
+    if request.method == 'POST':
+        form = TemplateMessageForm(request.POST, instance=template)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('templates_all'))
+    else:
+        form = TemplateMessageForm(instance=template)
+
+    return render_to_response('generic/generic_edit.html', {
+                                'header' : header,
+                                'form': form,},
+                                context_instance = RequestContext(request)
+                                ) 
+
+@login_required
+def abonentevent_edit(request, abonentevent_id):
+    try:
+        abonent_event = AbonentEvent.objects.get(pk = abonentevent_id)
+        header = 'Редактирование события'    
+    except:
+        abonent_event = AbonentEvent()
+        header = 'Создание нового события'        
+
+    if request.method == 'POST':
+        form = AbonentEventForm(request.POST, instance=abonent_event)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('abonentevents_all'))
+    else:
+        form = AbonentEventForm(instance=abonent_event)
+
+    return render_to_response('generic/generic_edit.html', {
+                                'header' : header,
+                                'form': form,},
+                                context_instance = RequestContext(request)
+                                ) 
+
+@login_required
 def notice_email_del(request,  abonent_id, notice_id):
     EmailMessage.objects.filter(pk=notice_id).delete()
     if abonent_id == '0':
-        return HttpResponseRedirect(reverse('email_all', args=[0]))
+        return HttpResponseRedirect(reverse('email_all'))
     else:
         return HttpResponseRedirect(reverse('for_abonent', args=[abonent_id]))
 
@@ -45,9 +128,9 @@ def write_groupemail(request):
                                           subject=subject,
                                           content=filtered_content,
                                           date=date,
-                                          group_id=1 + (EmailMessage.objects.all().aggregate(Max('group_id'))['group_id__max'] or 0) )]
+                             )]
             EmailMessage.objects.bulk_create(eList)
-            return HttpResponseRedirect(reverse('email_group',))
+            return HttpResponseRedirect(reverse('email_all',))
     else:
         form = GroupEmailForm()
     
@@ -68,17 +151,6 @@ def mass_notice_add(request):
             balance_lt=form.cleaned_data['balance_lt']
             balance_gt=form.cleaned_data['balance_gt']
             abonent_list = Abonent.obj.filter_list(status=status,utype=utype,is_credit=is_credit,balance_lt=balance_lt,balance_gt=balance_gt)
-            # abonent_list = Abonent.objects.all()
-            # if status:
-            #     abonent_list = abonent_list.filter(status__in=status)
-            # if utype:
-            #     abonent_list = abonent_list.filter(utype__in=utype)
-            # if is_credit:
-            #     abonent_list = abonent_list.filter(is_credit__in=is_credit)
-            # if balance_lt or balance_lt==0:
-            #     abonent_list = abonent_list.filter(balance__lte=balance_lt)
-            # if balance_gt or balance_gt==0:
-            #     abonent_list = abonent_list.filter(balance__gte=balance_gt)
     else:
         abonent_list = [] 
         form = AbonentFilterForm()
@@ -90,20 +162,17 @@ def mass_notice_add(request):
                                 }, context_instance = RequestContext(request))  
 
 @login_required
-def email_all(request,group_id):
-    if group_id == '0': 
-        notice_list = EmailMessage.objects.order_by('-pk')
-    else: 
-        notice_list = EmailMessage.objects.filter(group_id=group_id).order_by('-pk')
-    return render_to_response('email_all.html', { 
-                                'notice_list': notice_list, 
-                                }, context_instance = RequestContext(request))
+def notices_exec(request):
+    for item in EmailMessage.objects.filter(date__lte=datetime.now(), sent=False):
+        item.sendit()
+        
+    return HttpResponseRedirect(reverse('email_all'))
 
 @login_required
-def email_group(request):
-    notice_list = EmailMessage.objects.exclude(group_id=0).order_by('-pk')
+def email_all(request):
+    notice_list = EmailMessage.objects.order_by('-pk')
 
-    return render_to_response('email_all.html', { 
+    return render_to_response('notice/email_all.html', { 
                                 'notice_list': notice_list, 
                                 }, context_instance = RequestContext(request))
 
@@ -112,7 +181,7 @@ def for_abonent(request, abonent_id):
     try:
         abonent = Abonent.objects.get(pk=abonent_id)
     except:
-        abonent = None
+        raise Http404
 
     notice_list = EmailMessage.objects.filter(abonent__pk=abonent_id).order_by('-pk')
     return render_to_response('abonent/for_abonent.html', { 

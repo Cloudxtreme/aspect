@@ -5,7 +5,7 @@ from users.models import Abonent, Service
 # import users
 from django.contrib.auth.models import User
 from datetime import datetime
-from notice.models import EmailMessage
+from notice.models import AbonentEvent
 # from django.utils import timezone
 
 PAYS_PREFIX = u''
@@ -104,6 +104,14 @@ class WriteOff(models.Model):
             Abonent.objects.filter(pk=self.abonent.pk).update(balance=F('balance') - self.summ)
             abonent = Abonent.objects.get(pk=self.abonent.pk)
             abonent.check_status(reason='Списание средств')
+            try:
+                abonentevent = AbonentEvent.objects.get(pk=2) #pk=2 Списание средств
+            except Exception, e:
+                pass
+            else:
+                extra_keys = { 'summa' : self.summ }
+                abonentevent.generate_messages([self.abonent],extra_keys)
+
             # Уведомление о списании средств со счета
             # if abonent.notice_email and self.summ > 0:
             #     email = EmailMessage(abonent=abonent, destination = abonent.notice_email, subject = 'Списание средств', content = u'С вашего счета списано: %s руб. Теперь на вашем счету %s руб.' % (self.summ, abonent.balance) )
@@ -163,6 +171,14 @@ class Payment(models.Model):
             Abonent.objects.filter(pk=self.abon.pk).update(balance=F('balance') + self.sum)
             abonent = Abonent.objects.get(pk=self.abon.pk)
             abonent.check_status(reason='Зачисление средств')
+            try:
+                abonentevent = AbonentEvent.objects.get(pk=1) #pk=1 Пополнение счета
+            except Exception, e:
+                pass
+            else:
+                extra_keys = { 'summa' : self.sum }
+                abonentevent.generate_messages([self.abon],extra_keys)
+             
             # Здесь формируем уведомление о платеже
             # if abonent.notice_email and self.sum > 0:
             #     email = EmailMessage(abonent=abonent, destination = abonent.notice_email, subject = 'Зачисление средств', content = u' На ваш счет зачислено: %s руб. Теперь на вашем счету %s руб.' % (self.sum, abonent.balance) )

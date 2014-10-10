@@ -53,16 +53,13 @@ def ips(request, parent_id):
 	return render_to_response('ip.html', { 'net_list' : net_list, 'parent_nets' : parent_nets }, context_instance = RequestContext(request))
 
 @login_required
-def vlan_edit(request, vlan_id=0):
-    if vlan_id != '0' :
-        new = False
-        try:
-            vlan = Vlan.objects.get(pk = vlan_id)
-        except:
-            vlan = Vlan()
-    else:
-        new = True
+def vlan_edit(request, vlan_id):
+    try:
+        vlan = Vlan.objects.get(pk = vlan_id)
+        header = 'Редактирование Vlan'
+    except:
         vlan = Vlan()
+        header = 'Создание нового Vlan'
 
     if request.method == 'POST':
         form = VlanEditForm(request.POST, instance=vlan)
@@ -73,8 +70,8 @@ def vlan_edit(request, vlan_id=0):
     else:
         form = VlanEditForm(instance=vlan)
 
-    return render_to_response('resources/vlan_edit.html', {
-                                'new': new,
+    return render_to_response('generic/generic_edit.html', {
+                                'header' : header,
                                 'form': form,},
                                 context_instance = RequestContext(request)
                                 ) 

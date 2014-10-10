@@ -1,0 +1,42 @@
+{% extends "index.html" %}
+{% block main %} 
+<div class="page-header">
+  <h2 class="sub-header">Список шаблонов сообщений</h2>
+</div>
+<p><a href="{% url 'template_edit' 0 %}"><span class="glyphicon glyphicon-plus"> Создать новый шаблон</span></a></p>
+</br>
+{% if templates_list %}
+<div>
+  <div class="table-responsive">
+    <table class="table table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Название</th>
+        <th>Тема</th>
+        <th class='col-md-6'>Текст</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for template in templates_list %}
+    <tr>
+      <td>{{ template.title }}</td>
+      <td>{{ template.subject }}</td>
+      <td>{{ template.content }}</td>
+      <td> 
+        {# <div class="btn-group pull-right"> #}
+          <a href="{% url 'template_edit' template.pk %}" {# class="btn btn-primary" role="button" #}>
+          <span class="glyphicon glyphicon-edit"></span></a>
+          <a href="{% url 'template_del' template.pk %}" {# class="btn btn-danger" role="button" #}>
+          <span class="glyphicon glyphicon-remove"></span></a>
+        {# </div> #}
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

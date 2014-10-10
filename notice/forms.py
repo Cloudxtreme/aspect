@@ -5,6 +5,27 @@ from bootstrap3_datetime.widgets import DateTimePicker
 from users.models import Abonent, TypeOfService, Plan
 from django.conf import settings
 from datetime import datetime
+from notice.models import EmailMessage,TemplateMessage,AbonentEvent
+
+class TemplateMessageForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(TemplateMessageForm, self).__init__(*args, **kwargs)
+        # adding css classes to widgets without define the fields:
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'
+
+    class Meta:
+        model = TemplateMessage
+
+class AbonentEventForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(AbonentEventForm, self).__init__(*args, **kwargs)
+        # adding css classes to widgets without define the fields:
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'
+
+    class Meta:
+        model = AbonentEvent
 
 class AbonentFilterForm(forms.Form):
     def __init__(self, *args, **kwargs):

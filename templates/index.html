@@ -56,8 +56,9 @@
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
                     <li><a href={% url "users.views.abonent_search" %}>Поиск абонентов</a></li>
                     <li><a href={% url "users.views.abonent_add" 0 %}>Добавить абонента</a></li>
-                    <li><a href={% url "email_all" 0 %}>Уведомления</a></li>
-                    <li><a href={% url "email_group" %}>Email уведомления</a></li>
+                    <li><a href={% url "email_all" %}>Email уведомления</a></li>
+                    <li><a href={% url "templates_all" %}>Шаблоны уведомлений</a></li>
+                    <li><a href={% url "abonentevents_all" %}>События для уведомлений</a></li>
                     <li><a href={% url "add_quickpayment" %}>Внести платеж</a></li>
                 </ul>
             </li>
@@ -75,7 +76,7 @@
                 </ul>
             </li>
             <li class="dropdown">
-                <a href='#' class="dropdown-toggle" data-toggle="dropdown" id="dropdownNotice">Уведомления 
+                <a href='#' class="dropdown-toggle" data-toggle="dropdown" id="dropdownNotice">Сообщения 
                     <span class="badge">{% if notes_count %}!{% endif %}</span><b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="dropdownNotice">
@@ -120,7 +121,7 @@
         {% block main %}
         {% endblock %}
         <div class="footer pull-right">
-        <p>User control system version 1.1.0 &copy; Albeon Ltd. 2014</p>
+        <p>User control system version 1.1.2 &copy; Albeon Ltd. 2014</p>
     </div>
     </div>
 

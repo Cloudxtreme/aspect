@@ -7,7 +7,7 @@ from smtplib import SMTP_SSL as SMTP       # this invokes the secure SMTP protoc
 from email.MIMEText import MIMEText
 from tinymce.models import HTMLField
 from django.conf import settings
-# from users.models import Abonent
+from users.models import Detail
 import sys
 import os
 import re
@@ -24,104 +24,70 @@ import re
 
 # subject="Sent from Python"
 
-class GroupEmailMessage(models.Model):
-    abonent_list = models.ManyToManyField('users.Abonent', verbose_name=u'Абоненты', blank=True, null=True)
-    subject = models.CharField(u'Тема', max_length=70)
+class TemplateMessage(models.Model):
+    title = models.CharField(u'Название', max_length=300)
+    subject = models.CharField(u'Тема', max_length=300)
     content = HTMLField(u'Сообщение')
-    date = models.DateTimeField(default=datetime.now, verbose_name=u'Дата рассылки')
-    sent = models.BooleanField(u'Отправлено', default=False) 
+    
+    class Meta:
+        verbose_name = u'Шаблон'
+        verbose_name_plural = u'Шаблоны'
 
-    def create_messages(self):
+    def __unicode__(self):
+        return u'%s' % (self.title)
+
+class AbonentEvent(models.Model):
+    title = models.CharField(u'Название', max_length=300, editable=False)
+    template_fiz = models.ForeignKey(TemplateMessage, verbose_name=u'Шаблон сообщения для физ. лиц', related_name='template_fiz', blank=True, null=True)
+    template_ur = models.ForeignKey(TemplateMessage, verbose_name=u'Шаблон сообщения для организаций', related_name='template_ur', blank=True, null=True)
+
+    def generate_messages(self,abonent_list,extra_keys):
         eList = []
-        for abonent in self.abonent_list:
+        for abonent in abonent_list:
            if  abonent.notice_email:
+                # Определяем какой шаблон выбирать
+                if abonent.utype == settings.U_TYPE_UR:
+                    if not self.template_ur:
+                        break
+                    template = self.template_ur
+                    filtered_content = template.content.replace('[title]','%s' % Detail.objects.get(abonent=abonent).title)
+                    # filtered_content = template.content
+                else:
+                    if not self.template_fiz:
+                        break
+                    template = self.template_fiz
+                    filtered_content = template.content
+               
                 # здесь подставновка значения поля вместо его имени!
-                filtered_content = self.content
                 for field in abonent.__dict__.keys():
                     filtered_content=filtered_content.replace('[%s]' % field, '%s' % abonent.__dict__[field] )
+                # а здесь дополнительные ключи, например [summa] сумма платежа
+                for value in extra_keys.keys():
+                    filtered_content = filtered_content.replace('[%s]' % value, '%s' % extra_keys[value])
+
                 # формируем список сообщений
                 eList += [EmailMessage(abonent = abonent,
                                        destination = abonent.notice_email,
-                                       subject=self.subject,
+                                       subject=template.subject,
                                        content=filtered_content,
-                                       date=self.date,
-                                       group=self,
-                                       group_id=1 + (EmailMessage.objects.all().aggregate(Max('group_id'))['group_id__max'] or 0) )]
+                                       date=datetime.now(),
+                         )]
         EmailMessage.objects.bulk_create(eList)
 
     class Meta:
-        verbose_name = u'Групповое сообщение'
-        verbose_name_plural = u'Групповые сообщения'
+        verbose_name = u'Пользовательское событие'
+        verbose_name_plural = u'Пользовательские События'
 
     def __unicode__(self):
-        return u"[%s] %s - %s" % ( self.pk, self.date.ctime(), self.subject )    
-
-# class GroupEmailMessage(models.Model):
-#     PERIOD = (
-#         ('0', 'Не повторять'),
-#         ('1', 'Ежедневно'),
-#         ('2', 'Еженедельно'),
-#         ('3', 'Ежемесячно'),
-#     )
-#     #new_service.datestart = datetime.date.today() + datetime.timedelta(days=1)
-#     subject = models.CharField(u'Тема', max_length=70)
-#     content = models.CharField(u'Сообщение', max_length=500)    
-#     date = models.DateTimeField(default=datetime.now, verbose_name=u'Дата рассылки')
-#     permited = models.BooleanField(u'Разрешено к отправке', default=False)
-#     done = models.BooleanField(u'Выполнена', default=False)
-#     periodic = models.CharField(u'Повторять', max_length=1, choices=PERIOD)
-#     balance_lt
-#     balance_gt
-#     utype
-#     is_credit
-#     status
-
-#     def create_messages(self):
-#         status = form.cleaned_data['status']
-#         utype = form.cleaned_data['utype']
-#         is_credit=form.cleaned_data['is_credit']
-#         balance_lt=form.cleaned_data['balance_lt']
-#         balance_gt=form.cleaned_data['balance_gt']
-#         abonent_list = Abonent.objects.all()
-#         if status:
-#             abonent_list = abonent_list.filter(status__in=status)
-#         if utype:
-#             abonent_list = abonent_list.filter(utype__in=utype)
-#         if is_credit:
-#             abonent_list = abonent_list.filter(is_credit__in=is_credit)
-#         if balance_lt or balance_lt==0:
-#             abonent_list = abonent_list.filter(balance__lte=balance_lt)
-#         if balance_gt or balance_gt==0:
-#             abonent_list = abonent_list.filter(balance__gte=balance_gt)
-
-#         for item in abonent_list:
-#                 abonent = Abonent.objects.get(pk=item)
-#                 # здесь подставновка значения поля вместо его имени!
-#                 filtered_content = self.content
-#                 for field in abonent.__dict__.keys():
-#                     filtered_content=filtered_content.replace('[%s]' % field, '%s' % abonent.__dict__[field] )
-
-#                 if  abonent.notice_email:
-#                     eList += [EmailMessage(abonent = abonent,
-#                                            destination = abonent.notice_email,
-#                                            subject=self.subject,
-#                                            content=filtered_content,
-#                                            date=self.date,
-#                                            group=self,
-#                                            group_id=1 + (EmailMessage.objects.all().aggregate(Max('group_id'))['group_id__max'] or 0) )]
-#         EmailMessage.objects.bulk_create(eList)
-
+        return u'%s' % (self.title,)    
 
 class EmailMessage(models.Model):
     abonent = models.ForeignKey('users.Abonent', verbose_name=u'Абонент', blank=True, null=True)
     destination = models.CharField(u'Получатель', max_length=70)
     subject = models.CharField(u'Тема', max_length=70)
-    # content = models.TextField(u'Сообщение')
     content = HTMLField(u'Сообщение')
     date = models.DateTimeField(default=datetime.now, verbose_name=u'Дата рассылки')
     sent = models.BooleanField(u'Отправлено', default=False)
-    # group = models.ForeignKey(GroupEmailMessage, verbose_name=u'Групповая рассылка', blank=True, null=True)
-    group_id = models.IntegerField(u'Номер групповой рассылки', default=0, blank=True, null=True) # Оставлено для совместимости
 
     def sendit(self):
         text_subtype = 'plain' # typical values for text_subtype are plain, html, xml
