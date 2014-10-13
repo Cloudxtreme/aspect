@@ -56,10 +56,6 @@
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
                     <li><a href={% url "users.views.abonent_search" %}>Поиск абонентов</a></li>
                     <li><a href={% url "users.views.abonent_add" 0 %}>Добавить абонента</a></li>
-                    <li><a href={% url "email_all" %}>Список Email-уведомлений</a></li>
-                    <li><a href={% url "templates_all" %}>Шаблоны уведомлений</a></li>
-                    <li><a href={% url "abonentevents_all" %}>События для уведомлений</a></li>
-                    <li><a href={% url "create_invoice" %}>Отправить счет</a></li>
                     <li><a href={% url "add_quickpayment" %}>Внести платеж</a></li>
                 </ul>
             </li>
@@ -76,11 +72,23 @@
                     <li><a href={% url "service_analysis" %}>Незаполненые тех параметры</a></li>
                 </ul>
             </li>
+
             <li class="dropdown">
-                <a href='#' class="dropdown-toggle" data-toggle="dropdown" id="dropdownNotice">Сообщения 
+                <a href='#' class="dropdown-toggle" data-toggle="dropdown" id="dropdownNotice">Уведомления <b class="caret"></b></a>
+                <ul class="dropdown-menu" aria-labelledby="dropdownNotice">
+                     <li><a href={% url "email_all" %}>Список Email-уведомлений</a></li>
+                    <li><a href={% url "templates_all" %}>Шаблоны уведомлений</a></li>
+                    <li><a href={% url "abonentevents_all" %}>События для уведомлений</a></li>
+                    <li><a href={% url "create_invoice" %}>Отправить счет</a></li>   
+                </ul>
+            </li>
+
+
+            <li class="dropdown">
+                <a href='#' class="dropdown-toggle" data-toggle="dropdown" id="dropdownNotes">Сообщения 
                     <span class="badge">{% if notes_count %}!{% endif %}</span><b class="caret"></b>
                 </a>
-                <ul class="dropdown-menu" aria-labelledby="dropdownNotice">
+                <ul class="dropdown-menu" aria-labelledby="dropdownNotes">
                     <li>
                         <a href={% url "notes.views.notes_all" %}>Заметки <span class="badge">{{ notes_count|default:"0" }}</span></a>
                     </li>
@@ -122,7 +130,7 @@
         {% block main %}
         {% endblock %}
         <div class="footer pull-right">
-        <p>User control system version 1.1.3 &copy; Albeon Ltd. 2014</p>
+        <p>User control system version 1.1.4 &copy; Albeon Ltd. 2014</p>
         <a href={% url 'show_changelog' %}>История изменений</a>
     </div>
     </div>
