@@ -22,7 +22,7 @@
     <tr>
       <td>{{ template.title }}</td>
       <td>{{ template.subject }}</td>
-      <td>{{ template.content }}</td>
+      <td>{{ template.content|safe }}</td>
       <td> 
           <p class='pull-right'><a href="{% url 'template_edit' template.pk %}">Изменить&nbsp
           <span class="glyphicon glyphicon-edit"></span></a></p>

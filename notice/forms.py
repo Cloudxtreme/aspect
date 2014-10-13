@@ -27,6 +27,10 @@ class EmailMessageForm(forms.ModelForm):
     class Meta:
         model = EmailMessage
 
+class InvoiceMessageForm(EmailMessageForm):
+    class Meta(EmailMessageForm.Meta):
+        fields = ['abonent','attach',]
+
 class AbonentEventForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(AbonentEventForm, self).__init__(*args, **kwargs)

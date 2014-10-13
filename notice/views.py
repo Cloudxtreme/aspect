@@ -5,12 +5,34 @@ from django.http import Http404
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 from notice.models import EmailMessage, AbonentEvent, TemplateMessage
-from notice.forms import AbonentFilterForm, AbonentEventForm, TemplateMessageForm, GroupEmailForm, EmailMessageForm
+from notice.forms import AbonentFilterForm, AbonentEventForm, TemplateMessageForm, GroupEmailForm, EmailMessageForm, InvoiceMessageForm
 from users.models import Abonent, Service
 from datetime import datetime
 from django.conf import settings
 from django.db.models import Q
 from django.db.models import Max
+
+@login_required
+def create_invoice(request):
+    message = ''
+    if request.method == 'POST':
+        form = InvoiceMessageForm(request.POST, request.FILES)
+        if form.is_valid():
+            email = form.save(commit=False)
+            abonent_event = AbonentEvent.objects.get(pk=5) # Прикреплен файл
+            email.subject = abonent_event.template_ur.subject
+            email.content = abonent_event.template_ur.content
+            email.destination = email.abonent.notice_email
+            email.save()
+            # return HttpResponseRedirect(reverse('payments', args=[abonent_id]))./m
+            message  = "Счет создан" 
+            form = InvoiceMessageForm()
+        else:
+            message = "Ошибки в форме"
+    else:
+        form = InvoiceMessageForm()
+    header = 'Отправка счета клиенту'
+    return render(request, 'generic/generic_edit.html', {'form': form, 'message' : message, 'header' : header })
 
 @login_required
 def template_del(request,template_id):
@@ -182,6 +204,16 @@ def mass_notice_add(request):
                                 'form': form, 
                                 'messageform' : messageform,
                                 }, context_instance = RequestContext(request))  
+
+@login_required
+def send_message(request,message_id):
+    try:
+        email = EmailMessage.objects.get(pk=message_id)
+    except:
+        raise Http404
+    else:
+        email.sendit()
+    return HttpResponseRedirect(reverse('email_all'))
 
 @login_required
 def notices_exec(request):

@@ -1,9 +1,24 @@
 {% extends "index.html" %}
+
+{% block script %}
+    <link href="/media/js/select2.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/media/js/select2-bootstrap.css">
+    <script src="/media/js/select2.js"></script>
+    <script>
+        $(document).ready(function() { $("select").select2(); });
+    </script>
+    {{ form.media }}
+{% endblock %}
+
 {% block main %} 
+
+{% if message %}
+    <div class="alert alert-{% if form.errors %}danger{% else %}success{% endif %}" role="alert">{{ message }}</div>
+{% endif %}
 
 <h2>{{ header }}</h2>
 <hr>
-<form method="post" class="form-horizontal" role="form">{% csrf_token %}
+<form method="post" class="form-horizontal" role="form" enctype="multipart/form-data">{% csrf_token %}
     {% for field in form %}
         <div class="form-group">
             <label class="col-sm-3 control-label">

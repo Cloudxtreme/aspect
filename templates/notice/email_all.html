@@ -14,7 +14,7 @@
         <table class="table h6">
         <thead>
           <tr>
-            <th>Дата</th>
+            <th class='col-md-1'>Дата</th>
             <th>Статус</th>
             <th>Получатель</th>
             <th>Тема</th>
@@ -36,9 +36,16 @@
                 {% endif%}
             </td>
             <td>{{ notice.subject }}</td>
-            <td>{{ notice.content }}</td>
+            <td>
+                {{ notice.content|safe }}
+                {% if notice.attach %}
+                    <a href="{{ notice.attach.url }}"><span class="glyphicon glyphicon-paperclip"></span></a>
+                {% endif %}
+            </td>
             <td>
                 {% if not notice.sent %}
+                    <p class='pull-right'><a href="{% url 'send_message' notice.id %}">Отправить&nbsp
+                    <span class="glyphicon glyphicon-share-alt"></span></a></p>
                     <p class='pull-right'><a href="{% url 'emailmessage_edit' notice.id %}">Изменить&nbsp
                     <span class="glyphicon glyphicon-edit"></span></a></p>
                     <p class='pull-right'><a href="{% url 'notice_email_del' 0 notice.id %}">Удалить&nbsp

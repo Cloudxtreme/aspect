@@ -99,7 +99,8 @@ def add_quickpayment(request):
 			message = "Ошибки в форме"
 	else:
 		form = QuickPaymentForm()
-	return render(request, 'add_quickpayment.html', {'form': form, 'message' : message })
+        header = 'Данные платежа'
+	return render(request, 'generic/generic_edit.html', {'form': form, 'message' : message,'header' : header })
 
 @login_required
 def add_payment(request, abonent_id):

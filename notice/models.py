@@ -43,7 +43,7 @@ class TemplateMessage(models.Model):
         return u'%s' % (self.title)
 
 class AbonentEvent(models.Model):
-    title = models.CharField(u'Название', max_length=300, editable=False)
+    title = models.CharField(u'Название', max_length=300, editable=True)
     template_fiz = models.ForeignKey(TemplateMessage, verbose_name=u'Шаблон сообщения для физ. лиц', related_name='template_fiz', blank=True, null=True)
     template_ur = models.ForeignKey(TemplateMessage, verbose_name=u'Шаблон сообщения для организаций', related_name='template_ur', blank=True, null=True)
 

@@ -15,7 +15,7 @@ class NoteModelForm(forms.ModelForm):
         model = Note
         exclude = ['author','read','kind']
         widgets = {
-            'descr': forms.Textarea(),
+            # 'descr': forms.Textarea(),
         }
     
     def __init__(self, *args, **kwargs):

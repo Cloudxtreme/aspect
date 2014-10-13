@@ -160,6 +160,10 @@ TEMPLATE_DIRS = (
 # SERIALIZATION_MODULES = {
 #     'json': 'wadofstuff.django.serializers.json'
 # }
+FILE_UPLOAD_HANDLERS = (
+    "django.core.files.uploadhandler.MemoryFileUploadHandler",
+    "django.core.files.uploadhandler.TemporaryFileUploadHandler"
+)
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
