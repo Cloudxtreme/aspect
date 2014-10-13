@@ -1,0 +1,27 @@
+{% extends "index.html" %}
+
+{% block main %} 
+<div class="page-header">
+    <h2 class="sub-header">{{ header }}</h2>
+    <a href={% url 'note_add' %}>Добавить новую&nbsp<span class="glyphicon glyphicon-plus"></span></a>
+</div>
+
+{% if note_list %}
+    <div class="col-md-6">
+    {% for note in note_list %}
+        <div class="panel {{ note.marks }}">
+            <div class="panel-heading">
+                <h3 class="panel-title">{{ note.title }} <small>{{ note.date }}</small>
+                <a href={% url 'note_del' note.id %}><span class="glyphicon glyphicon-remove-circle pull-right"></span></a>
+                {% if not note.read %}<a href={% url 'note_read' note.id %}><span class="glyphicon glyphicon-ok-circle pull-right"></span></a>{% endif %}
+                </h3>
+            </div>
+            <div class="panel-body">
+                {{ note.descr|safe }}
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+{% endif %}
+
+{% endblock %}

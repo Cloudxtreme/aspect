@@ -5,7 +5,7 @@ from django.http import Http404
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 from notice.models import EmailMessage, AbonentEvent, TemplateMessage
-from notice.forms import AbonentFilterForm, AbonentEventForm, TemplateMessageForm, GroupEmailForm
+from notice.forms import AbonentFilterForm, AbonentEventForm, TemplateMessageForm, GroupEmailForm, EmailMessageForm
 from users.models import Abonent, Service
 from datetime import datetime
 from django.conf import settings
@@ -52,7 +52,7 @@ def abonentevents_all(request):
 def template_edit(request, template_id):
     try:
         template = TemplateMessage.objects.get(pk = template_id)
-        header = 'Редактирование нового шаблона'    
+        header = 'Редактирование шаблона'    
     except:
         template = TemplateMessage()
         header = 'Создание нового шаблона'    
@@ -87,6 +87,28 @@ def abonentevent_edit(request, abonentevent_id):
             return HttpResponseRedirect(reverse('abonentevents_all'))
     else:
         form = AbonentEventForm(instance=abonent_event)
+
+    return render_to_response('generic/generic_edit.html', {
+                                'header' : header,
+                                'form': form,},
+                                context_instance = RequestContext(request)
+                                ) 
+
+@login_required
+def emailmessage_edit(request, emailmessage_id):
+    try:
+        template = EmailMessage.objects.get(pk = emailmessage_id)
+        header = 'Редактирование уведомления'    
+    except:
+        raise Http404    
+
+    if request.method == 'POST':
+        form = EmailMessageForm(request.POST, instance=template)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('email_all'))
+    else:
+        form = EmailMessageForm(instance=template)
 
     return render_to_response('generic/generic_edit.html', {
                                 'header' : header,
@@ -165,7 +187,7 @@ def mass_notice_add(request):
 def notices_exec(request):
     for item in EmailMessage.objects.filter(date__lte=datetime.now(), sent=False):
         item.sendit()
-        
+
     return HttpResponseRedirect(reverse('email_all'))
 
 @login_required

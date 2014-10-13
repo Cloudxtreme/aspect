@@ -1,10 +1,22 @@
 from django import forms
 from notes.models import Note
 
-class NoteModelForm( forms.ModelForm ):
-    descr = forms.CharField( widget=forms.Textarea )
+# class AdminNoteModelForm(forms.ModelForm):
+    
+#     class Meta:
+#         model = Note
+#         widgets = {
+#             'descr': forms.Textarea(),
+#         }
+
+class NoteModelForm(forms.ModelForm):
+    
     class Meta:
         model = Note
+        exclude = ['author','read','kind']
+        widgets = {
+            'descr': forms.Textarea(),
+        }
     
     def __init__(self, *args, **kwargs):
         super(NoteModelForm, self).__init__(*args, **kwargs)

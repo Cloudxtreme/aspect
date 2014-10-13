@@ -5,6 +5,12 @@ from datetime import datetime
 from smtplib import SMTP_SSL as SMTP       # this invokes the secure SMTP protocol (port 465, uses SSL)
 # from smtplib import SMTP                  # use this for standard SMTP protocol   (port 25, no encryption)
 from email.MIMEText import MIMEText
+from email.MIMEBase import MIMEBase
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.utils import make_msgid
+from email.utils import formatdate
+from email import Encoders
 from tinymce.models import HTMLField
 from django.conf import settings
 from users.models import Detail
@@ -88,13 +94,26 @@ class EmailMessage(models.Model):
     content = HTMLField(u'Сообщение')
     date = models.DateTimeField(default=datetime.now, verbose_name=u'Дата рассылки')
     sent = models.BooleanField(u'Отправлено', default=False)
+    attach = models.FileField(upload_to='invoices',blank=True, null=True)
 
     def sendit(self):
-        text_subtype = 'plain' # typical values for text_subtype are plain, html, xml
+        text_subtype = 'html' # typical values for text_subtype are plain, html, xml
         try:
-            msg = MIMEText(self.content, text_subtype, 'utf-8')
+            # msg = MIMEText(self.content, text_subtype, 'utf-8')
+            msg = MIMEMultipart()
             msg['Subject'] = self.subject
             msg['From']    = settings.EMAIL_SENDER # some SMTP servers will do this automatically, not all
+            msg['Message-Id'] = make_msgid()
+            msg['Date'] = formatdate(localtime=True)
+            msg.attach(MIMEText(self.content, text_subtype, 'utf-8'))
+
+            if self.attach:
+                filename = self.attach.file.name
+                part = MIMEBase('application', "octet-stream")
+                part.set_payload(open(filename,"rb").read())
+                Encoders.encode_base64(part)
+                part.add_header('Content-Disposition','attachment; filename="%s"' % os.path.basename(filename))
+                msg.attach(part)
 
             conn = SMTP(settings.EMAIL_SERVER)
             conn.set_debuglevel(False)

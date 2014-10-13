@@ -7,4 +7,5 @@ urlpatterns = patterns('',
     url(r'^(?P<note_id>\d+)/del/$','notes.views.note_del', name='note_del'),
     url(r'^(?P<note_id>\d+)/read/$','notes.views.note_read', name='note_read'),
     url(r'^all/$', 'notes.views.notes_all', name='notes_all'),
+    url(r'^changelog/$', 'notes.views.show_changelog', name='show_changelog'),
 )

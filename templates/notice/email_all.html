@@ -5,8 +5,8 @@
     <h2 class="sub-header">Список Email уведомлений</h2>
 </div>
 
-<p><a href="{% url 'mass_notice_add' %}"> <span class="glyphicon glyphicon-envelope"> Создать новую рассылку</span></a></p>
-<p><a href="{% url 'notices_exec' %}"><span class="glyphicon glyphicon-repeat"> Отправить все сообщения в очереди</span></a></p>
+<p><a href="{% url 'mass_notice_add' %}">Создать новую рассылку&nbsp<span class="glyphicon glyphicon-envelope"></span></a></p>
+<p><a href="{% url 'notices_exec' %}">Отправить все сообщения в очереди&nbsp<span class="glyphicon glyphicon-share"></span></a></p>
 </br>
 {% if notice_list %}
 {% load dict_extras %}
@@ -19,7 +19,7 @@
             <th>Получатель</th>
             <th>Тема</th>
             <th>Содержание</th>
-            <th>
+            <th class='col-md-1'>
           </tr>
         </thead>
         <tbody>
@@ -39,10 +39,10 @@
             <td>{{ notice.content }}</td>
             <td>
                 {% if not notice.sent %}
-                <div class="btn-group">
-                    <a href="{% url 'notice_email_del' 0 notice.id %}">
-                    <span class="glyphicon glyphicon-remove"></span></a>
-                </div>
+                    <p class='pull-right'><a href="{% url 'emailmessage_edit' notice.id %}">Изменить&nbsp
+                    <span class="glyphicon glyphicon-edit"></span></a></p>
+                    <p class='pull-right'><a href="{% url 'notice_email_del' 0 notice.id %}">Удалить&nbsp
+                    <span class="glyphicon glyphicon-remove"></span></a></p>
                 {% endif %}
             </td>
         </tr>

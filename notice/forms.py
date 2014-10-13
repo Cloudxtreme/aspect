@@ -17,6 +17,16 @@ class TemplateMessageForm(forms.ModelForm):
     class Meta:
         model = TemplateMessage
 
+class EmailMessageForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(EmailMessageForm, self).__init__(*args, **kwargs)
+        # adding css classes to widgets without define the fields:
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'
+
+    class Meta:
+        model = EmailMessage
+
 class AbonentEventForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(AbonentEventForm, self).__init__(*args, **kwargs)
