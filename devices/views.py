@@ -75,13 +75,13 @@ def devices_all(request):
 @login_required
 def device_edit(request, device_id=0):
     if device_id != '0' :
-        new = False
+        header = 'Редактирование устройства'
         try:
             device = Device.objects.get(pk = device_id)
         except:
             device = Device()
     else:
-        new = True
+        header = 'Добавление нового Устройства'
         device = Device()
 
     if request.method == 'POST':
@@ -93,8 +93,9 @@ def device_edit(request, device_id=0):
     else:
         form = DeviceEditForm(instance=device)
 
-    return render_to_response('devices/device_edit.html', {
-                                'new': new,
+    template = 'generic/generic_edit.html'
+    return render_to_response(template, {
+                                'header' : header,
                                 'form': form,},
                                 context_instance = RequestContext(request)
                                 ) 

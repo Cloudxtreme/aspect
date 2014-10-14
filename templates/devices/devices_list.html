@@ -2,53 +2,43 @@
 {% block main %} 
 <div class="page-header">
     <h2 class="sub-header">Управление оборудованием</h2>
-  <a href="{% url 'device_edit' 0 %}" role="button" class="btn btn-primary btn-xm ">Добавить устройство
+  <a href="{% url 'device_edit' 0 %}">Добавить новое устройство
   <span class="glyphicon glyphicon-plus-sign"></span></a>
 </div>
 {% if devices_list %}
-<div class="col-md-10">
-  <div class="table-responsive">
-    <table class="table table-striped table-condensed">
-    <thead>
-      <tr>
-        <th>IP</th>
-        <th>Vlan</th>
-        <th>Название</th>
-        <th>Тип</th>
-        <th>Абонент</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for device in devices_list %}
+<table class="table table-striped table-condensed">
+  <thead>
     <tr>
-      <td>{{ device.ip }}</td>
-      <td><span class="badge">vlan {{ device.mgmt_vlan.number }}</span></td>
-      <td>{{ device.title }}</td>
-      <td>{{ device.devtype }}</td>
-      <td>
-        {% for service in device.user_device.all %}
-            <a href="{% url 'abonent_info' service.abon.id %}">{{ service.abon }}</a>
-        {% endfor %}
-      </td>
-      <td> 
-        <div class="btn-group pull-right">
-          <a href="{% url 'device_edit' device.pk %}" class="btn btn-primary" role="button">
-          <span class="glyphicon glyphicon-cog"></span></a>
-          <a href="#" class="btn btn-danger" role="button">
-          <span class="glyphicon glyphicon-remove"></span></a>
-        </div>
-      </td>
+      <th>IP</th>
+      <th>Vlan</th>
+      <th>Название</th>
+      <th>Тип</th>
+      <th>Абонент</th>
+      <th class='col-md-1'></th>
     </tr>
-    {% endfor %}
-    </tbody>
-    </table>
-  </div>
-</div>
-{% else %}
-<div class="page-header">
-  <h2 class="sub-header">Оборудование не найдено</h2>
-</div>
+  </thead>
+  <tbody>
+  {% for device in devices_list %}
+  <tr>
+    <td>{{ device.ip }}</td>
+    <td><span class="badge">vlan {{ device.mgmt_vlan.number }}</span></td>
+    <td>{{ device.title }}</td>
+    <td>{{ device.devtype }}</td>
+    <td>
+      {% for service in device.user_device.all %}
+          <a href="{% url 'abonent_info' service.abon.id %}">{{ service.abon }}</a>
+      {% endfor %}
+    </td>
+    <td> 
+        <p class='pull-right'><a href="{% url 'device_edit' device.pk %}">Изменить
+        <span class="glyphicon glyphicon-cog"></span></a></p>
+        <p class='pull-right'><a href="#">Удалить
+        <span class="glyphicon glyphicon-remove"></span></a></p>
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
 {% endif %}
 
 {% endblock %}
