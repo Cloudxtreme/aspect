@@ -238,7 +238,7 @@ def for_abonent(request, abonent_id):
         raise Http404
 
     notice_list = EmailMessage.objects.filter(abonent__pk=abonent_id).order_by('-pk')
-    return render_to_response('abonent/for_abonent.html', { 
+    return render_to_response('abonent/abonent_notices.html', { 
                                 'notice_list': notice_list, 
                                 'abonent' : abonent,
                                 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), 

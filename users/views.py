@@ -195,6 +195,7 @@ def abonent_search(request):
 
     return render_to_response('asearch.html', {'form': form, 'abonents' : abonents, 'abonent_list_count' : len(abonent_list) }, context_instance = RequestContext(request) )
 
+# Изменение статуса услуги
 @login_required
 def service_status_change(request, abonent_id, service_id):
     try:
@@ -216,6 +217,13 @@ def service_status_change(request, abonent_id, service_id):
     else:
         form = ServiceStatusChangesForm() 
         # form.fields['plan'].queryset=Plan.objects.filter(tos__pk=tos_id)
+        status_list = {settings.STATUS_ACTIVE:[settings.STATUSES[2],settings.STATUSES[4]],
+        settings.STATUS_OUT_OF_BALANCE:[settings.STATUSES[2],settings.STATUSES[4]],
+        settings.STATUS_PAUSED:[settings.STATUSES[1],settings.STATUSES[4]],
+        settings.STATUS_ARCHIVED:[settings.STATUSES[0]],
+        settings.STATUS_NEW:[settings.STATUSES[1],settings.STATUSES[4]],}[service.status]
+
+        form.fields['newstatus'].choices = status_list
 
     return render_to_response('service/service_status_changes.html', {
                                 'abonent' : abonent, 
@@ -307,6 +315,7 @@ def service_state_edit(request, abonent_id, service_id):
             return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
     else:
         form = ServiceStateForm(instance=service)
+
     return render_to_response('service/service_generic_changes.html', { 
                                 'abonent' : abonent, 
                                 'form': form, 

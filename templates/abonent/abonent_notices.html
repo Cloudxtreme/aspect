@@ -1,0 +1,41 @@
+{% extends "abonent/main.html" %}
+
+{% block pages %}
+
+{% if notice_list %}
+{% load dict_extras %}
+<div class="table-responsive">
+    <table class="table table-striped h6">
+        <thead>
+          <tr>
+            <th>Дата</th>
+            <th class='col-md-1'>Статус</th>
+            <th>Тема</th>
+            <th>Содержание</th>
+            <th class='col-md-1'>
+          </tr>
+        </thead>
+        <tbody>
+        {% for notice in notice_list %}
+        <tr>
+            <td>{{ notice.date }}</td>
+            <td>
+                {{ notice.sent|yesno:"Отправлен,В очереди" }}
+            </td>
+            <td>{{ notice.subject }}</td>
+            <td>{{ notice.content|safe }}</td>
+            <td>
+                {% if not notice.sent %}
+                    <p class='pull-right'><a href="{% url 'send_message' notice.id %}">Отправить<span class="glyphicon glyphicon-share-alt"></span></a></p>
+                    <p class='pull-right'><a href="{% url 'emailmessage_edit' notice.id %}">Изменить<span class="glyphicon glyphicon-edit"></span></a></p>
+                    <p class='pull-right'><a href="{% url 'notice_email_del' 0 notice.id %}">Удалить<span class="glyphicon glyphicon-remove"></span></a></p>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+    
+{% endblock %}
