@@ -234,7 +234,7 @@ class Detail(models.Model):
 
 class Interface(models.Model):
     macvalidator = RegexValidator('[0-9a-fA-F]{2}([-:])[0-9a-fA-F]{2}(\\1[0-9a-fA-F]{2}){4}$', u'Неправильный формат MAC адреса')
-    ip = models.ForeignKey(IPAddr, verbose_name=u'IP адрес', unique=True)
+    ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', unique=True)
     mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=17,validators=[macvalidator])
     comment = models.CharField(u'Комментарий', max_length=300, blank=True, null= True)
 
@@ -251,10 +251,9 @@ class Service(models.Model):
     segment = models.ForeignKey(Segment,verbose_name=u'Сегмент')
     tos = models.ForeignKey(TypeOfService,verbose_name=u'Тип услуги')
     plan = models.ForeignKey(Plan,verbose_name=u'Тарифный план')
-    # ip_list = models.ManyToManyField(IPAddr, verbose_name=u'Ресурсы', blank=True, null= True,through='Resource',related_name='resources')
     ifaces = models.ManyToManyField(Interface, verbose_name=u'Интерфейсы', blank=True, null= True)
+    # Deprecated field
     ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', blank=True, null= True)
-    # vlan = models.ForeignKey(Vlan, verbose_name=u'Vlan', blank=True, null= True,related_name='vlan')
     vlan_list = models.ManyToManyField(Vlan, verbose_name=u'Список Vlan', blank=True, null= True,related_name='vlan_list')
     adm_status = models.CharField(u'Административный статус', max_length=1, choices=settings.ADM_STATUSES, default='0')
     speed_in = models.PositiveIntegerField(default=0, blank=True, null=True)

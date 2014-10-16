@@ -9,7 +9,11 @@
             $.getJSON("/ajax/get_ip/",{id:+$(this).attr('val')}, function(j) {
                 var options = '';
                 for (var i = 0; i < j.length; i++) {
-                    options += '<li class="list-group-item">' + j[i].fields['ip'] +'' + '</li>';
+                    if (j[i]['abon_pk']==0) {url=''}
+                    else {url = '/abonent/' + j[i]['abon_pk'] + '/services/'};
+                    options += '<a href="' + url + '" class="list-group-item">';
+                    options += '<h4 class="list-group-item-heading">' + j[i]['ip'] + '</h4>';
+                    options += '<p class="list-group-item-text">' + j[i]['service_desc'] + '</p></a>';
                     }
     	                $(lstgroup).html(options);
     	                $(spin).hide();
