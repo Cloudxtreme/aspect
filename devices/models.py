@@ -36,11 +36,18 @@ def calcnet(net, mask):
         return (net,mask1),(net1,mask1)
     return ((net,mask1),(net1,mask1), calcnet(net,mask1),calcnet(net1,mask1))
 
+class SubInterface(models.Model):
+    title = models.CharField(u'Название', max_length=50)
+    ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', unique=True)
+
+    class Meta:
+        verbose_name = u'Интерфейс'
+        verbose_name_plural = u'Интерфейсы'
+        ordering = ['ip']
+
 class Device(models.Model):
     title = models.CharField(u'Название', max_length=30)
-    ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', 
-        blank=True, null= True)
-    ip_list = models.ManyToManyField(IPAddr, through='Iface', related_name='ip_list', blank=True, null=True)
+    sub_ifaces = models.ManyToManyField(SubInterface, verbose_name=u'Интерфейсы',blank=True, null=True)
     mgmt_vlan = models.ForeignKey(Vlan, related_name=u'mgmt_vlan',
         verbose_name=u'VLAN управления', blank=True, null= True)
     devtype = models.ForeignKey(DevType, verbose_name=u'Модель')
@@ -56,16 +63,7 @@ class Device(models.Model):
         verbose_name_plural = u'Устройства'
 
     def __unicode__(self):
-        return "%s - %s - %s" % (self.devtype, self.title, self.ip)
-
-class Iface(models.Model):
-    title = models.CharField(u'Название', max_length=50)
-    device = models.ForeignKey(Device, verbose_name=u'Устройство')
-    ip = models.ForeignKey(IPAddr, verbose_name=u'IP адрес', unique=True)
-
-    class Meta:
-        verbose_name = u'Интерфейс'
-        verbose_name_plural = u'Интерфейсы'
+        return "%s - %s" % (self.devtype, self.title)
 
 class DeviceStatusEntry(models.Model):
     device = models.ForeignKey(Device, verbose_name=u'Устройство')

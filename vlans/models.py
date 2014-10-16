@@ -117,9 +117,12 @@ class Network(models.Model):
             if self.net_type != NETWORK_DISTRIB and ip2dec(item.ip) in range(ip2dec(self.ip),ip2dec(self.ip)+pow(2,32-self.mask)-1):
                 raise ValidationError('Существует подсеть с меньшей маской')
         for item in Network.objects.filter(mask__lt = self.mask):
-            if item.net_type == NETWORK_DISTRIB:
+            if item.net_type == NETWORK_DISTRIB and ip2dec(self.ip) in range(item.decip, item.decip + pow(2,32-item.mask)-1):
+            # ip2dec(item.ip) in range(ip2dec(self.ip),ip2dec(self.ip)+pow(2,32-self.mask)-1):
                 self.parent = item
-            elif ip2dec(self.ip) in range(ip2dec(item.ip),ip2dec(item.ip)+pow(2,32-item.mask)-1):
+            elif item.net_type != NETWORK_DISTRIB and \
+            (ip2dec(self.ip) in range(item.decip,item.decip+pow(2,32-item.mask)-1) or \
+                ip2dec(self.ip)+pow(2,32-self.mask)-1 in range(item.decip,item.decip+pow(2,32-item.mask)-1)):
                 raise ValidationError('Существует подсеть с большей маской')
 
     def save(self, force_insert=False, force_update=False):

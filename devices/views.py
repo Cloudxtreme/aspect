@@ -69,7 +69,7 @@ def set_state(request):
 
 @login_required
 def devices_all(request):
-    devices_list = Device.objects.all().order_by('ip')
+    devices_list = Device.objects.all().order_by('sub_ifaces')
     return render_to_response('devices/devices_list.html', { 'devices_list': devices_list }, context_instance = RequestContext(request))
 
 @login_required
