@@ -28,9 +28,11 @@ from vlans.models import Network, IPAddr, Vlan
 from vlans.forms import LocationForm
 from django.db.models import Avg, Max, Min, Sum, Q
 import datetime
+import MySQLdb
 from django.conf import settings
 from pays.models import Payment
 from notes.models import Note
+from vlans.models import Location
 
 @login_required 
 def aquicksearch(request):
@@ -644,6 +646,61 @@ def abonent_tts(request, abonent_id):
                                                         'tts' : tts, 
                                                  'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() }, 
                               context_instance = RequestContext(request))
+
+def import_abonent_from1C(request):
+    db = MySQLdb.connect(host="10.255.0.10", user="d.sitnikov", 
+                             passwd="Aa12345", db="radius", charset='utf8')
+
+    cursor = db.cursor()
+    sql = """SELECT s.tarif, s.FIO, s.SubscriberID, s.State, s.AddressOfService, s.PasportS, s.PasportN, s.PasportWhon, s.PasportWhen, s.Address FROM Subscribers AS s, Tarifs as t WHERE s.tarif=t.tarifid AND s.SubscriberID LIKE '50______' AND s.tarif > 1 AND s.FIO!='<b>Фамилия Имя отчество</b>';"""
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    for rec in data:
+        plan_id, title, contract, state, address, pass_ser, pass_num, pass_who, pass_when, pass_addr = rec
+        abonent, created = Abonent.objects.get_or_create(contract=contract, defaults={
+                          'title' : title,
+                          'contract' :contract,
+                          'status': 'A' if state else 'N',
+                          'utype' :'F',
+                          'is_credit' : 'R',
+                        })
+        created_abon = None
+        if created:
+            # print u'Создан абонент #%s - %s' % (abonent.contract,abonent.title)
+            created_abon = abonent
+            try:
+                plan = Plan.objects.get(pk=plan_id+1000)
+            except:
+                pass
+
+            tos = TypeOfService.objects.get(pk=4) # Интернет PPTP id=4
+            segment = Segment.objects.get(pk=1) # Основной сегмент
+            location = Location(bs_type='C',address=address)
+            location.save()
+            # Создаем услугу
+            service = Service(
+                    abon=abonent,
+                    tos=tos,
+                    segment=segment,
+                    location=location,
+                    plan=plan,
+                    status='A' if state else 'N',
+                    )
+            service.save()
+            # Создаем паспортные данные
+            passport = Passport(
+                            abonent=abonent,
+                            series = pass_ser,
+                            number = pass_num,
+                            date = pass_when,
+                            issued_by = pass_who,
+                            address = pass_addr
+                            )
+            passport.save()
+
+    db.close()
+    url = reverse('abonent_info', args=[created_abon.pk]) if created_abon else settings.LOGIN_REDIRECT_URL
+    return HttpResponseRedirect(url)
 
 def log_in(request):
     if request.method == 'POST':

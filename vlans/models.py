@@ -39,8 +39,6 @@ class Vlan(models.Model):
 
 class Location(models.Model):
     address = models.CharField(u'Адрес', blank=True, null= True, max_length=100)
-    bs_type = models.CharField(u'Тип БС', max_length = 2, 
-                               choices=TYPE_OF_OBJECTS)
     lat = models.FloatField(u'Широта', blank=True, null=True)
     lon = models.FloatField(u'Долгота', blank=True, null=True)
     bs_type = models.CharField(u'Тип', max_length = 2, 
