@@ -11,3 +11,4 @@ class DeviceEditForm(forms.ModelForm):
 
     class Meta:
         model = Device
+        exclude = ['interfaces','last_available']

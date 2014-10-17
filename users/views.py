@@ -250,7 +250,7 @@ def service_iface_add(request, service_id):
     else:
         form = ServiceInterfaceForm()
     
-    form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk,interface=None).filter(net__net_type='UN')
+    form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk,interface=None).filter(net__net_type='UN').filter(net__vlan__in=service.vlan_list.all)
 
     return render_to_response('service/service_generic_changes.html', { 
                                 'abonent' : abonent, 
@@ -290,7 +290,7 @@ def service_iface_edit(request, service_id, iface_id):
             return HttpResponseRedirect(reverse('abonent_services', args=[abonent.pk]))
     else:
         form = ServiceInterfaceForm(instance=interface)
-        form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk,interface=None).filter(net__net_type='UN')|IPAddr.objects.filter(interface=interface)
+        form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk,interface=None).filter(net__net_type='UN').filter(net__vlan__in=service.vlan_list.all)|IPAddr.objects.filter(interface=interface)
 
     return render_to_response('service/service_generic_changes.html', { 
                                 'abonent' : abonent, 
@@ -443,31 +443,32 @@ def service_plan_edit(request, abonent_id, service_id):
                                 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), },
                                 context_instance = RequestContext(request)
                                 ) 
-@login_required
-# Редактирование технических параметров
-def service_edit(request, abonent_id, service_id):
-    try:
-        abonent = Abonent.objects.get(pk = abonent_id)
-        service = Service.objects.get(pk = service_id)
-    except:
-        raise Http404
+# @login_required
+# Редактирование технических параметров 
+# Deprecated
+# def service_edit(request, abonent_id, service_id):
+#     try:
+#         abonent = Abonent.objects.get(pk = abonent_id)
+#         service = Service.objects.get(pk = service_id)
+#     except:
+#         raise Http404
 
-    if request.method == 'POST':
-        form = ServiceEditForm(request.POST, instance=service)
-        if form.is_valid():
-            form.save(commit=True)
-            return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
-    else:
-        form = ServiceEditForm(instance=service)
-        form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk).filter(net__net_type='UN').filter(Q(interface=None))|IPAddr.objects.filter(service__pk=service.pk)
+#     if request.method == 'POST':
+#         form = ServiceEditForm(request.POST, instance=service)
+#         if form.is_valid():
+#             form.save(commit=True)
+#             return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
+#     else:
+#         form = ServiceEditForm(instance=service)
+#         form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk).filter(net__net_type='UN').filter(Q(interface=None))|IPAddr.objects.filter(service__pk=service.pk)
 
-    return render_to_response('service/service_generic_changes.html', {
-                                'form': form,
-                                'menu_title': 'Изменение параметров услуги', 
-                                'abonent' : abonent,
-                                'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), },
-                                context_instance = RequestContext(request)
-                                ) 
+#     return render_to_response('service/service_generic_changes.html', {
+#                                 'form': form,
+#                                 'menu_title': 'Изменение параметров услуги', 
+#                                 'abonent' : abonent,
+#                                 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), },
+#                                 context_instance = RequestContext(request)
+#                                 ) 
 
 @login_required
 def service_add(request, abonent_id):
@@ -509,7 +510,7 @@ def service_add(request, abonent_id):
             # Создаем уведомление о новой услуге для всех инженеров
             for user in Group.objects.get(name='Инженеры').user_set.all():
                 url_abonent = reverse('abonent_info', args=[abonent.pk])
-                url_service = reverse('service_edit', args=[abonent.pk,service.pk])
+                url_service = reverse('service_iface_add', args=[abonent.pk,service.pk])
                 new_note = Note(
                     title = u'Добавлена новая услуга',
                     descr = u'У абонента <a href=%s>%s</a> добавлена новая услуга <a href=%s>[%s]</a>. Заполните технические параметры' % (url_abonent,abonent.title,url_service,service.pk)  ,

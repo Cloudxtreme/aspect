@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*- 
 from django.shortcuts import render_to_response, HttpResponse, HttpResponseRedirect
+from django.http import Http404
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
 from devices.models import Device, DevType, DeviceStatusEntry
 from devices.forms import DeviceEditForm
+from users.forms import ServiceInterfaceForm
+from users.models import Interface
 from vlans.models import IPAddr
+from vlans.forms import LocationForm
 from django.core import serializers
 # import netsnmp
 import subprocess
@@ -69,20 +73,17 @@ def set_state(request):
 
 @login_required
 def devices_all(request):
-    devices_list = Device.objects.all().order_by('sub_ifaces')
+    devices_list = Device.objects.all()
     return render_to_response('devices/devices_list.html', { 'devices_list': devices_list }, context_instance = RequestContext(request))
 
 @login_required
-def device_edit(request, device_id=0):
-    if device_id != '0' :
+def device_edit(request, device_id):
+    try:
+        device = Device.objects.get(pk = device_id)
         header = 'Редактирование устройства'
-        try:
-            device = Device.objects.get(pk = device_id)
-        except:
-            device = Device()
-    else:
-        header = 'Добавление нового Устройства'
+    except:
         device = Device()
+        header = 'Добавление нового устройства'
 
     if request.method == 'POST':
         form = DeviceEditForm(request.POST, instance=device)
@@ -93,9 +94,101 @@ def device_edit(request, device_id=0):
     else:
         form = DeviceEditForm(instance=device)
 
-    template = 'generic/generic_edit.html'
-    return render_to_response(template, {
+    return render_to_response('generic/generic_edit.html', {
                                 'header' : header,
                                 'form': form,},
                                 context_instance = RequestContext(request)
                                 ) 
+
+# Добававление интерфейса устройства
+@login_required
+def device_iface_add(request, device_id):
+    try:
+        device = Device.objects.get(pk=device_id)
+        header = 'Создание нового интерфейса'
+    except:
+        raise Http404
+
+    if request.method == 'POST':
+        form = ServiceInterfaceForm(request.POST)
+        if form.is_valid():
+            iface = form.save(commit=False)
+            iface.for_device = True
+            iface.save()
+            device.interfaces.add(iface)
+            return HttpResponseRedirect(reverse('devices_all'))
+    else:
+        form = ServiceInterfaceForm()
+    
+    if device.is_rooter: 
+        net_type = ['UN','EN']
+        form.fields['ip'].queryset=IPAddr.objects.filter(interface=None).filter(net__net_type__in=net_type)
+    else:
+        net_type = ['EN']
+        form.fields['ip'].queryset=IPAddr.objects.filter(interface=None).filter(net__net_type__in=net_type).filter(net__vlan=device.mgmt_vlan)
+
+    return render_to_response('generic/generic_edit.html', { 
+                                'header' : header,
+                                'form': form, },
+                                 context_instance = RequestContext(request))
+
+# Удаление интерфейса
+@login_required
+def device_iface_del(request, iface_id):
+    try:
+        interface = Interface.objects.get(pk=iface_id)
+    except:
+        raise Http404
+
+    interface.delete()
+
+    return HttpResponseRedirect(reverse('devices_all'))
+
+# Редактирование интерфейса
+@login_required
+def device_iface_edit(request, device_id, iface_id):
+    try:
+        device = Device.objects.get(pk=device_id)
+        interface = Interface.objects.get(pk=iface_id)
+        header = 'Редактирование интерфейса'
+    except:
+        raise Http404
+
+    if request.method == 'POST':
+        form = ServiceInterfaceForm(request.POST,instance=interface)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('devices_all'))
+    else:
+        form = ServiceInterfaceForm(instance=interface)
+        net_type = ['UN','EN'] if device.is_rooter else ['EN']
+        form.fields['ip'].queryset=IPAddr.objects.filter(interface=None).filter(net__net_type__in=net_type)|IPAddr.objects.filter(interface=interface)
+
+    return render_to_response('generic/generic_edit.html', { 
+                                'header' : header,
+                                'form': form, },
+                                 context_instance = RequestContext(request))
+
+# Редактирование местоположения оборудования
+@login_required
+def device_location_edit(request, device_id):
+    try:
+        device = Device.objects.get(pk=device_id)
+        header = 'Изменение местоположения'
+    except:
+        raise Http404
+
+    if request.method == 'POST':
+        form = LocationForm(request.POST,instance=device.location)
+        if form.is_valid():
+            location = form.save()
+            device.location = location
+            device.save()
+            return HttpResponseRedirect(reverse('devices_all'))
+    else:
+        form = LocationForm(instance=device.location)
+
+    return render_to_response('generic/generic_edit.html', { 
+                                'header' : header,
+                                'form': form, },
+                                 context_instance = RequestContext(request))

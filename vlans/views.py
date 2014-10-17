@@ -35,15 +35,20 @@ def get_ip(request):
             }
 
             try:
-                service = ipaddr.interface.service_set.all()[0]
-                service_desc = u'%s - %s' % (service.abon, service.location)
-                abon_pk  = service.abon.pk
+                if ipaddr.interface.for_device:
+                    device = ipaddr.interface.device_set.all()[0]
+                    desc = u'%s  %s' % (device.devtype, device.location)
+                    url = reverse('devices_all')
+                else:
+                    service = ipaddr.interface.service_set.all()[0]
+                    desc = u'%s  %s' % (service.abon, service.location)
+                    url = reverse('abonent_info', args=[service.abon.pk])
             except:
-                service_desc = u''
-                abon_pk = 0
+                desc = u''
+                url = '#'
 
-            text['service_desc'] = service_desc
-            text['abon_pk'] = abon_pk
+            text['desc'] = desc
+            text['url'] = url
 
             data.append(text)
 

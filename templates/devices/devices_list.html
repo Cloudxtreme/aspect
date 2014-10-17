@@ -6,28 +6,49 @@
   <span class="glyphicon glyphicon-plus-sign"></span></a>
 </div>
 {% if devices_list %}
-<table class="table table-striped table-condensed">
+<table class="table h6 table-condensed table-striped">
   <thead>
     <tr>
-      <th>IP</th>
+      <th>Местонахождение</th>
       <th>Vlan</th>
-      <th>Название</th>
       <th>Тип</th>
+      <th>Комментарий</th>
       <th>Абонент</th>
+      <th>Интерфейсы</th>
       <th class='col-md-1'></th>
     </tr>
   </thead>
   <tbody>
   {% for device in devices_list %}
   <tr>
-    <td>{{ device.ip }}</td>
+    <td>                
+      {{ device.location.address }}
+      <a href="{% url 'device_location_edit' device.id %}">
+      <span class="glyphicon glyphicon-edit"></span></a>
+      <p><small>{{ device.location.comment }}</small></p>
+    </td>
     <td><span class="badge">vlan {{ device.mgmt_vlan.number }}</span></td>
-    <td>{{ device.title }}</td>
     <td>{{ device.devtype }}</td>
+    <td>{{ device.title }}</td>
     <td>
       {% for service in device.user_device.all %}
           <a href="{% url 'abonent_info' service.abon.id %}">{{ service.abon }}</a>
       {% endfor %}
+    </td>
+    <td>
+        {% for iface in device.interfaces.all %}
+          <p>
+            {{ iface.ip.ip }}
+            <a href="{% url 'device_iface_edit' device.id iface.id %}">
+            <span class="glyphicon glyphicon-edit"></span></a>
+            <a href="{% url 'device_iface_del' iface.id %}">
+            <span class="glyphicon glyphicon-remove"></span></a>
+          </p>
+        {% endfor %}
+        <p>
+          <a href="{% url 'device_iface_add' device.id %}">Добавить
+          <span class="glyphicon glyphicon-plus"></span></a>
+        </p>
     </td>
     <td> 
         <p class='pull-right'><a href="{% url 'device_edit' device.pk %}">Изменить

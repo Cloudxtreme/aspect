@@ -237,6 +237,7 @@ class Interface(models.Model):
     ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', unique=True)
     mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=17,validators=[macvalidator])
     comment = models.CharField(u'Комментарий', max_length=300, blank=True, null= True)
+    for_device = models.BooleanField(u'Для оборудования',default=False,editable=False)
 
     class Meta:
         verbose_name = u'Интерфейс'
@@ -253,7 +254,7 @@ class Service(models.Model):
     plan = models.ForeignKey(Plan,verbose_name=u'Тарифный план')
     ifaces = models.ManyToManyField(Interface, verbose_name=u'Интерфейсы', blank=True, null= True)
     # Deprecated field
-    ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', blank=True, null= True)
+    # ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', blank=True, null= True)
     vlan_list = models.ManyToManyField(Vlan, verbose_name=u'Список Vlan', blank=True, null= True,related_name='vlan_list')
     adm_status = models.CharField(u'Административный статус', max_length=1, choices=settings.ADM_STATUSES, default='0')
     speed_in = models.PositiveIntegerField(default=0, blank=True, null=True)
