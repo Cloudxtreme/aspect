@@ -6,7 +6,11 @@
 </div>
 
 <p><a href="{% url 'mass_notice_add' %}">Создать новую рассылку&nbsp<span class="glyphicon glyphicon-envelope"></span></a></p>
-<p><a href="{% url 'notices_exec' %}">Отправить все сообщения в очереди&nbsp<span class="glyphicon glyphicon-share"></span></a></p>
+<p>
+    {% if count != 0 %}
+    <a href="{% url 'notices_exec' %}">Отправить все ({{ count }}) сообщения в очереди&nbsp<span class="glyphicon glyphicon-share"></span></a>
+    {% endif %}
+</p>
 </br>
 {% if notice_list %}
 {% load dict_extras %}

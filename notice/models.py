@@ -131,6 +131,7 @@ class EmailMessage(models.Model):
     class Meta:
         verbose_name = u'EMail Сообщение'
         verbose_name_plural = u'EMail Сообщения'
+        ordering = ['sent','-pk']
 
     def __unicode__(self):
         return u"%s [%s]" % ( self.date.ctime(), self.destination )

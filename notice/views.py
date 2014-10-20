@@ -224,10 +224,13 @@ def notices_exec(request):
 
 @login_required
 def email_all(request):
-    notice_list = EmailMessage.objects.order_by('-pk')
+    notice_list = EmailMessage.objects.all()
+    count = EmailMessage.objects.filter(sent=False).count()
+    print count
 
     return render_to_response('notice/email_all.html', { 
                                 'notice_list': notice_list, 
+                                'count' : count,
                                 }, context_instance = RequestContext(request))
 
 @login_required
