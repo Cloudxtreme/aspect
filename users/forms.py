@@ -34,7 +34,7 @@ class ManageForm(forms.ModelForm):
             'notice_mobile': forms.TextInput(attrs={'class': 'form-control', 'disabled':'disabled', 'placeholder': 'Телефон' }),
             'is_credit': forms.Select(attrs={'class': 'form-control', 'disabled':'disabled'}),
             'status': forms.Select(attrs={'class': 'form-control', 'disabled':'disabled'}),
-            'tag': forms.SelectMultiple(attrs={'class' : 'form-control select2-multiple','multiple' : 'multiple', 'disabled':'disabled',}),
+            'tag': forms.SelectMultiple(attrs={'class' : 'form-control multiple select2-multiple',}),
             'vip': forms.CheckboxInput(attrs={'disabled':'disabled'}),
         }
 

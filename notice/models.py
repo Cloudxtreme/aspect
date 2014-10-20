@@ -64,12 +64,12 @@ class AbonentEvent(models.Model):
                     template = self.template_fiz
                     filtered_content = template.content
                
-                # здесь подставновка значения поля вместо его имени!
-                for field in abonent.__dict__.keys():
-                    filtered_content=filtered_content.replace('[%s]' % field, '%s' % abonent.__dict__[field] )
                 # а здесь дополнительные ключи, например [summa] сумма платежа
                 for value in extra_keys.keys():
                     filtered_content = filtered_content.replace('[%s]' % value, '%s' % extra_keys[value])
+                # здесь подставновка значения поля вместо его имени!
+                for field in abonent.__dict__.keys():
+                    filtered_content=filtered_content.replace('[%s]' % field, '%s' % abonent.__dict__[field] )
 
                 # формируем список сообщений
                 eList += [EmailMessage(abonent = abonent,

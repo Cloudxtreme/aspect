@@ -176,7 +176,7 @@ class Payment(models.Model):
             except Exception, e:
                 pass
             else:
-                extra_keys = { 'summa' : self.sum }
+                extra_keys = { 'summa' : self.sum, 'balance' : round(abonent.balance,2) }
                 abonentevent.generate_messages([self.abon],extra_keys)
              
             # Здесь формируем уведомление о платеже

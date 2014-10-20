@@ -1,11 +1,10 @@
 {% extends "abonent/main.html" %}
 
 {% block script %}
-    <script type="text/javascript" src="/media/js/jquery-1.10.1.js"></script>
-    <script type="text/javascript" src="/media/js/alert.js"></script>
     <link href="/media/js/select2.css" rel="stylesheet"/>
+    <script src="/media/js/select2.js"></script> 
     <link rel="stylesheet" href="/media/js/select2-bootstrap.css">
-    <script src="/media/js/select2.js"></script>    
+      
     <script type="text/javascript">
         function unlock() {
             $("#id_notice_email").attr('disabled', false);
@@ -20,9 +19,15 @@
            }
     </script>
     <script>
-        $(document).ready(function() { 
-            $("#id_tag").select2();
-        });
+          $(function(){
+            $('#id_tag').select2({
+                // createSearchChoice: function() { return null; },
+            })
+            //  .on("change", function(e) {
+            // // mostly used event, fired to the original element when the value changes
+            // alert("change val=" + e.val);
+            // })
+          });
     </script>
     {% endblock %}
 
