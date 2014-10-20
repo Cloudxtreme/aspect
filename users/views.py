@@ -261,7 +261,7 @@ def service_iface_add(request, service_id):
                                 'count_serv' : Service.objects.filter(abon__pk=abonent.pk,status__in=['A','N']).count() },
                                  context_instance = RequestContext(request))
 
-# Редактирование интерфейса услуги
+# Удаление интерфейса услуги
 @login_required
 def service_iface_del(request, service_id, iface_id):
     try:
@@ -301,7 +301,7 @@ def service_iface_edit(request, service_id, iface_id):
                                 'count_serv' : Service.objects.filter(abon__pk=abonent.pk,status__in=['A','N']).count() },
                                  context_instance = RequestContext(request))
 
-# Редактирование скорости услуги
+# Редактирование статуса услуги
 @login_required
 def service_state_edit(request, abonent_id, service_id):
     try:

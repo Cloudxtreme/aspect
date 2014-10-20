@@ -27,7 +27,7 @@
         <tr>
             <td>{{forloop.counter}}</td>
             <td><a href="{% url 'abonent_info' service.abon.id %}">{{ service.abon }}</a></td>
-            <td><a href="{% url 'service_edit' service.abon.id service.id %}">{{ service }}</a></td>
+            <td><a href="{% url 'service_iface_add' service.id %}">{{ service }}</a></td>
             <td>{{ service.location }}</td>
         </tr>
     {% endfor %}
@@ -59,7 +59,7 @@
         <tr>
             <td>{{forloop.counter}}</td>
             <td><a href="{% url 'abonent_info' service.abon.id %}">{{ service.abon }}</a></td>
-            <td><a href="{% url 'service_edit' service.abon.id service.id %}">{{ service }}</a></td>
+            <td><a href="{% url 'service_iface_add' service.id %}">{{ service }}</a></td>
             <td>{{ service.user_device }}</a></td>
         </tr>
     {% endfor %}
