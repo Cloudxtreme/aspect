@@ -4,14 +4,12 @@ from users.models import Abonent, Service, Plan, TypeOfService, Segment, Agent, 
 from vlans.models import Vlan
 from users.fields import JSONWidget
 from bootstrap3_datetime.widgets import DateTimePicker
-from django.forms.extras.widgets import SelectDateWidget
+# from django.forms.extras.widgets import SelectDateWidget
 
 # class ContactForm(forms.ModelForm):
 #     class Meta:
 #         model = Contact
 # #        exclude = ('contact')JSONWidget
-
-
 
 class AbonentForm(forms.ModelForm):
     class Meta:
@@ -34,7 +32,7 @@ class ManageForm(forms.ModelForm):
             'notice_mobile': forms.TextInput(attrs={'class': 'form-control', 'disabled':'disabled', 'placeholder': 'Телефон' }),
             'is_credit': forms.Select(attrs={'class': 'form-control', 'disabled':'disabled'}),
             'status': forms.Select(attrs={'class': 'form-control', 'disabled':'disabled'}),
-            'tag': forms.SelectMultiple(attrs={'class' : 'form-control multiple select2-multiple',}),
+            'tag': forms.SelectMultiple(attrs={'class' : 'form-control multiple select2-multiple','disabled':'disabled'}),
             'vip': forms.CheckboxInput(attrs={'disabled':'disabled'}),
         }
 

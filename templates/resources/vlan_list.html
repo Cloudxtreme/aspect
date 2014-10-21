@@ -1,10 +1,33 @@
 {% extends "index.html" %}
+
+{% block script %}
+<script type="text/javascript">
+  function jump(h){
+    var top = document.getElementById(h).offsetTop;
+    window.scrollTo(0, top);
+  }
+</script>
+{% endblock %}
+
 {% block main %} 
 <div class="page-header">
   <h2 class="sub-header">Управление Vlan'ами</h2>
   <a href="{% url 'vlan_edit' 0 %}">Добавить Vlan
   <span class="glyphicon glyphicon-plus-sign"></span></a>
 </div>
+<div class="row">
+  <div class="col-lg-3">
+    <div class="input-group">
+      <input name="search" type="text" maxlength="4" id="search" type="text" class="form-control" 
+      placeholder='номер vlan' onPaste=""  autocomplete="off"
+      onkeydown="if (event.keyCode == 13) jump(document.getElementById('search').value)"/>
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="button" onclick="jump(document.getElementById('search').value)">Перейти</button>
+      </span>
+    </div><!-- /input-group -->
+  </div><!-- /.col-lg-6 -->
+</div><!-- /.row -->
+<br>
 {% if vlan_list %}
 <table class="table table-striped table-condensed">
 <thead>
