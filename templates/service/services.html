@@ -50,14 +50,14 @@
             <td>[{{ service.pk }}]</td>
             <td>
                 {{ service.location.address }}
-                <a href="{% url 'users.views.service_location_edit' abonent.id service.id %}">
+                <a href="{% url 'users.views.service_location_edit' abonent.id service.id %}" data-toggle="tooltip" data-placement="left" title="Редактировать местоположение">
                 <span class="glyphicon glyphicon-edit"></span></a>
                 <p><small>{{ service.location.comment }}</small></p>
             </td>
             <td>{{ service.datestart }}</td>
             <td>
                 {{ service.plan.title }} - {{ service.plan.price }} руб/мес 
-                <a href="{% url 'users.views.service_plan_edit' abonent.id service.id %}">
+                <a href="{% url 'users.views.service_plan_edit' abonent.id service.id %}" data-toggle="tooltip" data-placement="left" title="Сменить тарифный план">
                 <span class="glyphicon glyphicon-edit"></span></a>
                 <p><small>{{ service.tos }}</small></p>
             </td>
@@ -70,7 +70,7 @@
                         {{ service.plan.speed_in }} Кбит/с
                     {% endif %}
                 {% endif %}
-                <a href="{% url 'users.views.service_speed_edit' abonent.id service.id %}">
+                <a href="{% url 'users.views.service_speed_edit' abonent.id service.id %}" data-toggle="tooltip" data-placement="left" title="Изменить скорость доступа">
                 <span class="glyphicon glyphicon-cog"></span></a>
             </td>
             <td>
@@ -82,11 +82,11 @@
                         function( data ) {
                             $('#ip_content' ).html( data );
                             $('#ip_modal').modal('show');
-                        });">
+                        });" data-toggle="tooltip" data-placement="left" title="ARP запрос">
                         <span class="glyphicon glyphicon-search"></span></a>
-                    <a href="{% url 'users.views.service_iface_edit' service.id iface.id %}">
+                    <a href="{% url 'users.views.service_iface_edit' service.id iface.id %}" data-toggle="tooltip" data-placement="left" title="Изменить IP-адрес">
                     <span class="glyphicon glyphicon-edit"></span></a>
-                    <a href="{% url 'users.views.service_iface_del' service.id iface.id %}">
+                    <a href="{% url 'users.views.service_iface_del' service.id iface.id %}" data-toggle="tooltip" data-placement="left" title="Удалить IP-адрес">
                     <span class="glyphicon glyphicon-remove"></span></a>
                     </p>
                 {% endfor %}
@@ -97,7 +97,7 @@
                 {% for vlan in service.vlan_list.all %}
                     vlan{{ vlan.number }}
                 {% endfor %} 
-                <a href="{% url 'users.views.service_vlan_edit' abonent.id service.id %}">
+                <a href="{% url 'users.views.service_vlan_edit' abonent.id service.id %}" data-toggle="tooltip" data-placement="left" title="Изменить список vlan'ов">
                 <span class="glyphicon glyphicon-cog"></span></a>
             </td>
             <td>
@@ -114,9 +114,9 @@
                     {{ service.get_adm_status_display}}
                     <p><small>Установлено вручную</small></p>
                 {% endifequal %}
-                <a href="{% url 'users.views.service_state_edit' abonent.id service.id %}">
+                <a href="{% url 'users.views.service_state_edit' abonent.id service.id %}" data-toggle="tooltip" data-placement="left" title="Установить административный статус">
                 <span class="glyphicon glyphicon-cog"></span></a>
-                <a href="{% url 'users.views.service_history' abonent.id service.id %}">
+                <a href="{% url 'users.views.service_history' abonent.id service.id %}" data-toggle="tooltip" data-placement="left" title="История смены статусов">
                 <span class="glyphicon glyphicon-list"></span></a>
             </td>
         </tr>
