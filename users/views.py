@@ -17,7 +17,7 @@ from users.forms import  ServiceForm, OrgServiceForm, SearchForm, LoginForm, \
                          PassportForm, DetailForm, ManageForm, AbonentForm, \
                          ServicePlanForm, ServiceEditForm, ServiceInterfaceForm, \
                          ServiceSpeedForm, ServiceStateForm, ServiceVlanForm, \
-                         ServiceEquipForm
+                         ServiceEquipForm, SmartSearchForm
 from journaling.forms import ServiceStatusChangesForm
 from notice.forms import AbonentFilterForm
 from users.models import Abonent, Service, TypeOfService, Plan, Passport, Detail, Interface, Segment
@@ -134,6 +134,20 @@ def abonent_add(request,abonent_id=0):
                                 'abonent' : abonent},
                                 context_instance = RequestContext(request)
                                 )  
+@login_required
+def smart_search(request):
+    # abonent_list = []
+    if request.method == 'POST': 
+        form = SmartSearchForm(request.POST) 
+        if form.is_valid():
+            string = form.cleaned_data['string']
+            print string
+    else:
+        form = SmartSearchForm() 
+    
+    return render_to_response('smart_search.html', { 'form': form }, context_instance = RequestContext(request))
+
+
 
 @login_required
 def abonent_search(request):
@@ -512,7 +526,7 @@ def service_add(request, abonent_id):
             # Создаем уведомление о новой услуге для всех инженеров
             for user in Group.objects.get(name='Инженеры').user_set.all():
                 url_abonent = reverse('abonent_info', args=[abonent.pk])
-                url_service = reverse('service_iface_add', args=[abonent.pk,service.pk])
+                url_service = reverse('service_iface_add', args=[service.pk])
                 new_note = Note(
                     title = u'Добавлена новая услуга',
                     descr = u'У абонента <a href=%s>%s</a> добавлена новая услуга <a href=%s>[%s]</a>. Заполните технические параметры' % (url_abonent,abonent.title,url_service,service.pk)  ,

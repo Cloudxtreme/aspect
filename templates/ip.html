@@ -41,10 +41,14 @@
 	  <div class="panel panel-default">
 	    <div class="panel-heading">
 	      <h4 class="panel-title">
-	        <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{net.pk}}">
-	          {{ net.ip }}/{{ net.mask }} - {{ net.vlan.description }} <span class="badge pull-right">vlan {{ net.vlan.number }}</span>
+	        {% if net.mask != 32 %}<a data-toggle="collapse"  data-parent="#accordion" href="#collapse{{net.pk}}">
+	          {{ net.ip }}/{{ net.mask }} - {{ net.vlan.description }} 
+              <span class="badge pull-right">vlan {{ net.vlan.number }}</span>
 	        </a>&nbsp;
 			<img id="spinner{{net.pk}}" style="display:none;" src="/media/images/spinner2.gif" alt="Loading"/>
+            {% else %} 
+                {{ net.ip }} создать сеть
+            {% endif %}
 	      </h4>
 	    </div>
 	    <div id="collapse{{net.pk}}" class="panel-collapse collapse" val="{{net.pk}}">

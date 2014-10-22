@@ -64,6 +64,9 @@ class DetailForm(forms.ModelForm):
             'bank': forms.Select(attrs={'class': 'form-control','disabled':'disabled'}),
         }
 
+class SmartSearchForm(forms.Form):
+    string = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control', 'autocomplete' : 'off', 'placeholder' : 'Поисковый запрос'}), label = u'Поисковый запрос')
+
 class SearchForm(forms.ModelForm):
     tos = forms.ModelChoiceField(queryset=TypeOfService.objects.all(), widget=forms.Select(attrs={'class':'form-control'}), label = u'Тип услуги' )
     plan = forms.ModelChoiceField(queryset=Plan.objects.all(), widget=forms.Select(attrs={'class':'form-control'}), label = u'Тарифный план')
