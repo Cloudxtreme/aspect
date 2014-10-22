@@ -33,6 +33,7 @@ from django.conf import settings
 from pays.models import Payment
 from notes.models import Note
 from vlans.models import Location
+from contacts.models import Contact
 
 @login_required 
 def aquicksearch(request):
@@ -136,18 +137,40 @@ def abonent_add(request,abonent_id=0):
                                 )  
 @login_required
 def smart_search(request):
-    # abonent_list = []
+    abonent_list = []
     if request.method == 'POST': 
         form = SmartSearchForm(request.POST) 
         if form.is_valid():
             string = form.cleaned_data['string']
-            print string
+            request.session['string'] = string
+            abonent_list = Abonent.objects.filter(contract__icontains=string)|\
+            Abonent.objects.filter(title__icontains=string)|\
+            Abonent.objects.filter(detail__title__icontains=string)|\
+            Abonent.objects.filter(service__in=Service.objects.filter(location__address__icontains=string))
+    elif request.GET.get('page'): 
+        string = request.session['string']           
+        abonent_list = Abonent.objects.filter(contract__icontains=string)|\
+        Abonent.objects.filter(title__icontains=string)|\
+        Abonent.objects.filter(detail__title__icontains=string)|\
+        Abonent.objects.filter(service__in=Service.objects.filter(location__address__icontains=string))
+        form = SmartSearchForm()
+        form.string = string
     else:
-        form = SmartSearchForm() 
-    
-    return render_to_response('smart_search.html', { 'form': form }, context_instance = RequestContext(request))
+        form = SmartSearchForm()
 
+    paginator = Paginator(abonent_list.distinct(), 10)
+    # paginator = Paginator(abonent_list, 10)
+    page = request.GET.get('page')
+    try:
+        abonents = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        abonents = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        abonents = paginator.page(paginator.num_pages)
 
+    return render_to_response('smart_search.html', { 'abonents' : abonents, 'form': form, 'abonent_list_count' : len(abonent_list.distinct()) }, context_instance = RequestContext(request))
 
 @login_required
 def abonent_search(request):
