@@ -137,7 +137,7 @@ def abonent_add(request,abonent_id=0):
                                 )  
 @login_required
 def smart_search(request):
-    abonent_list = []
+    abonent_list = Abonent.objects.none()
     if request.method == 'POST': 
         form = SmartSearchForm(request.POST) 
         if form.is_valid():
@@ -146,20 +146,25 @@ def smart_search(request):
             abonent_list = Abonent.objects.filter(contract__icontains=string)|\
             Abonent.objects.filter(title__icontains=string)|\
             Abonent.objects.filter(detail__title__icontains=string)|\
-            Abonent.objects.filter(service__in=Service.objects.filter(location__address__icontains=string))
+            Abonent.objects.filter(service__in=Service.objects.filter(location__address__icontains=string))|\
+            Abonent.objects.filter(contact__in=Contact.objects.filter(first_name__icontains=string))|\
+            Abonent.objects.filter(contact__in=Contact.objects.filter(surname__icontains=string))|\
+            Abonent.objects.filter(contact__in=Contact.objects.filter(mobile__icontains=string))
     elif request.GET.get('page'): 
         string = request.session['string']           
         abonent_list = Abonent.objects.filter(contract__icontains=string)|\
         Abonent.objects.filter(title__icontains=string)|\
         Abonent.objects.filter(detail__title__icontains=string)|\
-        Abonent.objects.filter(service__in=Service.objects.filter(location__address__icontains=string))
+        Abonent.objects.filter(service__in=Service.objects.filter(location__address__icontains=string))|\
+        Abonent.objects.filter(contact__in=Contact.objects.filter(first_name__icontains=string))|\
+        Abonent.objects.filter(contact__in=Contact.objects.filter(surname__icontains=string))|\
+        Abonent.objects.filter(contact__in=Contact.objects.filter(mobile__icontains=string))
         form = SmartSearchForm()
         form.string = string
     else:
         form = SmartSearchForm()
 
     paginator = Paginator(abonent_list.distinct(), 10)
-    # paginator = Paginator(abonent_list, 10)
     page = request.GET.get('page')
     try:
         abonents = paginator.page(page)
