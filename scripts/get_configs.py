@@ -21,7 +21,7 @@ for device in Device.objects.filter(devtype__in=ubnt_dev):
     p = subprocess.Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE,
         stderr=subprocess.STDOUT, close_fds=True, cwd='/home/')
     # Выполняем копирование
-    cmd = """sshpass -p 'yfxfkj' scp hflbcn@%s:/tmp/system.cfg /tmp/configs/%s/%s.cfg""" % (ip,ip,datetime.date.today())
+    cmd = """sshpass -p 'yfxfkj' scp -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null hflbcn@%s:/tmp/system.cfg /tmp/configs/%s/%s.cfg""" % (ip,ip,datetime.date.today())
     PIPE = subprocess.PIPE
     p = subprocess.Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE,
         stderr=subprocess.STDOUT, close_fds=True, cwd='/home/')
