@@ -26,7 +26,7 @@ for device in Device.objects.filter(devtype__in=ubnt_dev):
     p = subprocess.Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE,
         stderr=subprocess.STDOUT, close_fds=True, cwd='/home/')
     # s = p.stdout.read()
-    path = '/home/diamond/configs/%s/%s.cfg' % (ip,datetime.date.today())
+    path = '/tmp/configs/%s/%s.cfg' % (ip,datetime.date.today())
     try:
         myfile = open(path)
         config = Config()
