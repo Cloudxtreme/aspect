@@ -1,7 +1,7 @@
 from django.contrib import admin
 from users.models import TypeOfService, Plan, Service, Segment, Abonent, \
                          Agent, Bank, Detail, Passport, ServiceSuspension, Tag, \
-                         Interface
+                         Interface, Pipe
 # from django.contrib.admin.models import LogEntry
 
 class ServiceInline(admin.TabularInline):
@@ -40,6 +40,7 @@ admin.site.register(TypeOfService)
 admin.site.register(Interface)
 admin.site.register(Plan)
 admin.site.register(Tag)
+admin.site.register(Pipe)
 admin.site.register(Agent)
 admin.site.register(Service)
 admin.site.register(Segment)

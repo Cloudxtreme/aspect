@@ -245,7 +245,15 @@ class Interface(models.Model):
         ordering = ['ip']
 
     def __unicode__(self):
-        return "%s - %s" % (self.ip, self.mac)
+        return u"%s - %s" % (self.ip, self.mac)
+
+class Pipe(models.Model):
+    speed_in = models.PositiveIntegerField(default=0, blank=True, null=True)
+    speed_out = models.PositiveIntegerField(default=0, blank=True, null=True)
+
+    def __unicode__(self):
+        return u"%s Кбит/с - %s Кбит/с" % (self.speed_in, self.speed_out)
+
 
 class Service(models.Model):
     abon = models.ForeignKey(Abonent,verbose_name=u'Абонент')
@@ -257,9 +265,8 @@ class Service(models.Model):
     # ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', blank=True, null= True)
     vlan_list = models.ManyToManyField(Vlan, verbose_name=u'Список Vlan', blank=True, null= True,related_name='vlan_list')
     adm_status = models.CharField(u'Административный статус', max_length=1, choices=settings.ADM_STATUSES, default='0')
-    speed_in = models.PositiveIntegerField(default=0, blank=True, null=True)
-    speed_out = models.PositiveIntegerField(default=0, blank=True, null=True)
     status = models.CharField(u'Статус', max_length=1, choices=settings.STATUSES, default=settings.STATUS_NEW)
+    pipe = models.ForeignKey(Pipe, blank=True, null=True, verbose_name=u'Pipe')
     location = models.ForeignKey(Location, blank=True, null=True, verbose_name=u'Местонахождение')
     datestart = models.DateField(auto_now=False, auto_now_add=False, default=datetime.datetime.now(), verbose_name=u'Дата начала')
     datefinish = models.DateField(auto_now=False, auto_now_add=False, blank=True, null= True, verbose_name=u'Дата окончания')

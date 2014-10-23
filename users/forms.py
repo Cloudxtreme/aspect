@@ -1,6 +1,6 @@
 ﻿from django import forms
 from django.contrib.auth import authenticate
-from users.models import Abonent, Service, Plan, TypeOfService, Segment, Agent, Passport, Detail, Interface
+from users.models import Abonent, Service, Plan, TypeOfService, Segment, Agent, Passport, Detail, Interface, Pipe
 from vlans.models import Vlan
 from users.fields import JSONWidget
 from bootstrap3_datetime.widgets import DateTimePicker
@@ -145,11 +145,23 @@ class ServiceForm(forms.ModelForm):
 
     class Meta:
         model = Service
-        exclude = {'abon', 'status', 'datestart','datefinish','speed_in','speed_out', 'ip','vlan','adm_status','mac','user_device','bs_device' }
+        exclude = {'abon', 'status', 'datestart','datefinish','pipe', 'ip','vlan','adm_status','mac','user_device','bs_device' }
+
+
+class PipeEditForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(PipeEditForm, self).__init__(*args, **kwargs)
+        # adding css classes to widgets without define the fields:
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'
+
+    class Meta:
+        model = Pipe
 
 class ServiceSpeedForm(GenericServiceForm):
     class Meta(GenericServiceForm.Meta):
-        fields = {'speed_in','speed_out',}
+        pass
+        fields = {'pipe',}
 
 class ServiceStateForm(GenericServiceForm):
     class Meta(GenericServiceForm.Meta):
