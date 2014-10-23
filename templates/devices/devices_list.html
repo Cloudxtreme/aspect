@@ -45,13 +45,18 @@
         <a id='#btn_iparp{{ iface.ip.pk }}' 
         onclick="var data = '{% for iface in device.interfaces.all %} <p>{{iface.ip.ip}}</p> {% endfor %}';
         $('#ip_content').html( data ); 
-        $('#modal').modal('show');" data-toggle="tooltip" data-placement="left" title="Просмотреть">Интерфейсы
+        $('#modal').modal('show');" data-toggle="tooltip" data-placement="left" title="Просмотреть">Просмотреть
         <span class="glyphicon glyphicon-search"></span></a>
       {% else %}
         {% for iface in device.interfaces.all %}
           {{ iface.ip.ip }}
           <a href={% url 'device_iface_edit' device.id iface.id %} data-toggle="tooltip" data-placement="left" title="Изменить"><span class="glyphicon glyphicon-edit"></span></a>
+
+          <a href={% url 'device_iface_del' iface.id %} data-toggle="tooltip" data-placement="left" title="Удалить"><span class="glyphicon glyphicon-remove"></span></a>
         {% endfor %}
+        {% if device.interfaces.all.count == 0 %}
+          <a href={% url 'device_iface_add' device.id %} data-toggle="tooltip" data-placement="left" title="Добавить">Добавить <span class="glyphicon glyphicon-plus"></span></a>
+        {% endif %}
       {% endif %}
     </td>
     <td>                
