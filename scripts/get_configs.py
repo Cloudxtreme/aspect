@@ -13,26 +13,26 @@ from devices.models import Device, DevType, Config
 from django.core.files import File
 ubnt_dev = DevType.objects.filter(vendor='Ubiquiti')
 
+
+def run_command(command):
+    p = subprocess.Popen(command, shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            close_fds=True)
+    return p.communicate()
+
 for device in Device.objects.filter(devtype__in=ubnt_dev):
     ip = device.interfaces.all()[0].ip.ip
     # Создаем каталог
-    cmd = 'mkdir /tmp/configs/%s' %(ip)    
-    PIPE = subprocess.PIPE
-    p = subprocess.Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE,
-        stderr=subprocess.STDOUT, close_fds=True, cwd='/home/')
+    cmd = 'mkdir -p /tmp/configs/%s/%s' %(ip,datetime.date.today())    
+    run_command(cmd)
     # Выполняем копирование
-    cmd = """sshpass -p 'yfxfkj' scp -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null hflbcn@%s:/tmp/system.cfg /tmp/configs/%s/%s.cfg""" % (ip,ip,datetime.date.today())
-    PIPE = subprocess.PIPE
-    p = subprocess.Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE,
-        stderr=subprocess.STDOUT, close_fds=True, cwd='/home/')
-    # s = p.stdout.read()
-    path = '/tmp/configs/%s/%s.cfg' % (ip,datetime.date.today())
-    try:
-        myfile = open(path)
-        config = Config()
-        config.device = device
-        config.attach.save('system.cfg',File(myfile))
-        config.save()
-    except:
-        pass
-        # print 'File not found %s' % device
+    path = '/tmp/configs/%s/%s/system.cfg' % (ip,datetime.date.today())
+    cmd = """sshpass -p 'yfxfkj' scp -o ConnectTimeout=1 -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null hflbcn@%s:/tmp/system.cfg %s""" % (ip,path)
+    if run_command(cmd):
+        if os.path.exists(path):
+            myfile = open(path)
+            config = Config()
+            config.device = device
+            config.attach.save('system.cfg',File(myfile))
+            config.save()
