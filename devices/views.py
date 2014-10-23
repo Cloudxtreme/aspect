@@ -11,7 +11,7 @@ from users.models import Interface
 from vlans.models import IPAddr
 from vlans.forms import LocationForm
 from django.core import serializers
-# import netsnmp
+import MySQLdb
 import subprocess
 
 def get_iparp(request):
@@ -192,3 +192,22 @@ def device_location_edit(request, device_id):
                                 'header' : header,
                                 'form': form, },
                                  context_instance = RequestContext(request))
+
+def syslog_list(request):
+    log_list = []
+    db = MySQLdb.connect(host="192.168.64.6", user="syslog", \
+                         passwd="yfpfgbcm", db="syslog", charset='utf8')
+    cursor = db.cursor()
+    sql = """SELECT * FROM logs;"""
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    
+    for rec in data:
+        host, facility, priority, level, tag, date, program, msg, seq = rec
+        entry = {'host':host, 'msg':msg, 'seq' :seq, 'facility':facility, 'priority':priority, 'level':level, 'tag':tag, 'date':date, 'program':program }
+        log_list.append(entry)
+
+    db.close()
+
+    return render_to_response('resources/syslog_list.html', { 'log_list': log_list },
+                                 context_instance = RequestContext(request))    

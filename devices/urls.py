@@ -11,4 +11,5 @@ urlpatterns = patterns('',
     url(r'^all/$', 'devices.views.devices_all', name='devices_all'),
     url(r'^set_state/$', 'devices.views.set_state'),
     url(r'^get_iparp/$', 'devices.views.get_iparp'),
+    url(r'^syslog_list/$', 'devices.views.syslog_list', name='syslog_list'),
 )

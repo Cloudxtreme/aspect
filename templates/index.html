@@ -102,6 +102,7 @@
                     <li><a href={% url "ips" 0 %}>IP Адреса</a></li>
                     <li><a href={% url "vlans.views.vlans_all" %}>VLANs</a></li>
                     <li><a href={% url "devices.views.devices_all" %}>Оборудование</a></li>
+                    <li><a href={% url "syslog_list" %}>Syslog</a></li>
                 </ul>
             </li>
     {% if user.is_authenticated %}            

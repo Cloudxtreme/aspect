@@ -67,7 +67,7 @@ class Device(models.Model):
         verbose_name_plural = u'Устройства'
 
     def __unicode__(self):
-        return u"%s - %s" % (self.devtype, self.location)
+        return u"%s - %s - %s" % (self.devtype, self.location, self.comment)
 
 class DeviceStatusEntry(models.Model):
     device = models.ForeignKey(Device, verbose_name=u'Устройство')
@@ -81,4 +81,17 @@ class DeviceStatusEntry(models.Model):
 
     def __unicode__(self):
         state = 'up' if self.state_up else 'down'
-        return "[%s] %s - is now %s " % (self.date, self.device, state)
+        return u"[%s] %s - is now %s " % (self.date, self.device, state)
+
+class Config(models.Model):
+    device = models.ForeignKey(Device,verbose_name=u'Устройство')
+    attach = models.FileField(u'Приложение', upload_to='configs')
+    date = models.DateTimeField(auto_now=True, auto_now_add=True)
+
+    class Meta:
+        verbose_name = u'Конфиг'
+        verbose_name_plural = u'Конфиги'
+        ordering = ['-date']
+
+    def __unicode__(self):
+        return u"[%s] - %s" % (self.date, self.device,)
