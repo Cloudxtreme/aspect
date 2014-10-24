@@ -50,7 +50,7 @@ class Pipe(models.Model):
         ordering = ['speed_in','speed_out']
 
     def __unicode__(self):
-        return u"%s Кбит/с - %s Кбит/с" % (self.speed_in, self.speed_out)
+        return u"%s/%s Кбит/с" % (self.speed_in, self.speed_out)
 
 class Plan(models.Model):
     title = models.CharField(max_length=200)

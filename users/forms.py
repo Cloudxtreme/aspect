@@ -196,7 +196,7 @@ class OrgServiceForm(forms.ModelForm):
 
     class Meta:
         model = Service
-        fields = {'segment','tos', 'price','price','install_price'}
+        fields = {'segment','tos',}
         # exclude = {'abon', 'plan','status', 'datestart','datefinish','speed_in','speed_out', 'ip','vlan','vlan_list','adm_status','mac','user_device','bs_device' }
 
 

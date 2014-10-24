@@ -12,4 +12,5 @@ urlpatterns = patterns('',
     url(r'^set_state/$', 'devices.views.set_state'),
     url(r'^get_iparp/$', 'devices.views.get_iparp'),
     url(r'^syslog_list/$', 'devices.views.syslog_list', name='syslog_list'),
+    url(r'^syslog_host/(?P<iface_id>\d+)/$', 'devices.views.syslog_host', name='syslog_host'),
 )

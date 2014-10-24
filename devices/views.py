@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*- 
 from django.shortcuts import render_to_response, HttpResponse, HttpResponseRedirect
 from django.http import Http404
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
@@ -76,7 +77,19 @@ def set_state(request):
 @login_required
 def devices_all(request):
     devices_list = Device.objects.all()
-    return render_to_response('devices/devices_list.html', { 'devices_list': devices_list }, context_instance = RequestContext(request))
+
+    paginator = Paginator(devices_list.distinct(), 50)
+    page = request.GET.get('page')
+    try:
+        devices = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        devices = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        devices = paginator.page(paginator.num_pages)
+
+    return render_to_response('devices/devices_list.html', { 'devices': devices }, context_instance = RequestContext(request))
 
 @login_required
 def device_edit(request, device_id):
@@ -195,6 +208,22 @@ def device_location_edit(request, device_id):
                                 'form': form, },
                                  context_instance = RequestContext(request))
 
+def syslog_host(request,iface_id):
+    log_list = []
+    db = MySQLdb.connect(host="192.168.64.6", user="syslog", \
+                         passwd="yfpfgbcm", db="syslog", charset='utf8')
+    cursor = db.cursor()
+    sql = """SELECT * from logs WHERE host='%s' order by `seq` desc limit 150;""" % (Interface.objects.get(pk=iface_id).ip.ip)
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    for rec in data:
+        host, facility, priority, level, tag, date, program, msg, seq = rec
+        entry = {'host':host, 'msg':msg, 'seq' :seq, 'facility':facility, 'priority':priority, 'level':level, 'tag':tag, 'date':date, 'program':program }
+        log_list.append(entry)
+    db.close()
+
+    return render_to_response('resources/syslog_list.html', { 'log_list': log_list, },
+                                 context_instance = RequestContext(request))    
 def syslog_list(request):
     log_list = []
     db = MySQLdb.connect(host="192.168.64.6", user="syslog", \
@@ -206,8 +235,13 @@ def syslog_list(request):
             datestart = form.cleaned_data['datestart']
             datefinish = form.cleaned_data['datefinish']
             datefinish = datefinish + timedelta(days=1)
-            host, mask = form.cleaned_data['host'].split('/')
-            sql = """SELECT * from logs WHERE datetime >'%s' AND datetime <='%s' order by `seq`;""" % (datestart,datefinish)
+            host = form.cleaned_data['host']
+            if host:
+                ip = host.ip.ip
+                sql = """SELECT * from logs WHERE host='%s'AND datetime >'%s' AND datetime <='%s' order by `seq`;""" % (ip,datestart,datefinish)
+                print sql
+            else:
+                sql = """SELECT * from logs WHERE datetime >'%s' AND datetime <='%s' order by `seq`;""" % (datestart,datefinish)
     else:
         form = SyslogFilterForm()
         sql = """SELECT * from logs order by `seq` desc limit 150;"""

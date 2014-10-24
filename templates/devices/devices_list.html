@@ -2,10 +2,22 @@
 {% block main %} 
 <div class="page-header">
     <h2 class="sub-header">Управление оборудованием</h2>
-  <a href="{% url 'device_edit' 0 %}">Добавить новое устройство
-  <span class="glyphicon glyphicon-plus-sign"></span></a>
+    <a href="{% url 'device_edit' 0 %}">Добавить новое устройство
+    <span class="glyphicon glyphicon-plus-sign"></span></a>
 </div>
 
+<ul class="pagination pagination-lg">
+      {% if devices.has_previous %}
+         <li class="previous"><a href="?page={{ devices.previous_page_number }}&q={{previous_request}}">&laquo;</a><li>
+
+      {% endif %}
+          <li class="active"><a href="#" >{{ devices.number }} из {{ devices.paginator.num_pages }}</a></li>
+      {% if devices.has_next %}
+
+          <li class="next"><a href="?page={{ devices.next_page_number }}&q={{previous_request}}">&raquo;</a></li>
+      {% endif %}
+      </ul>
+      
 <!-- Small modal -->
 <div id='modal' class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xs">
@@ -22,12 +34,12 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-{% if devices_list %}
+{% if devices %}
 <table class="table h6 table-condensed table-striped">
   <thead>
     <tr>
       <th>Тип</th>
-      <th>IP</th>
+      <th class='col-md-2'>IP</th>
       <th>Местонахождение</th>
       <th>Комментарий</th>
       <th>Абонент</th>
@@ -36,7 +48,7 @@
     </tr>
   </thead>
   <tbody>
-  {% for device in devices_list %}
+  {% for device in devices %}
   <tr>
     <td>{{ device.devtype }}</td>
     <td>
@@ -49,10 +61,11 @@
         <span class="glyphicon glyphicon-search"></span></a>
       {% else %}
         {% for iface in device.interfaces.all %}
-          {{ iface.ip.ip }}
+          <p>{{ iface.ip.ip }} 
           <a href={% url 'device_iface_edit' device.id iface.id %} data-toggle="tooltip" data-placement="left" title="Изменить"><span class="glyphicon glyphicon-edit"></span></a>
 
-          <a href={% url 'device_iface_del' iface.id %} data-toggle="tooltip" data-placement="left" title="Удалить"><span class="glyphicon glyphicon-remove"></span></a>
+          <a href={% url 'device_iface_del' iface.id %} data-toggle="tooltip" data-placement="left" title="Удалить"><span class="glyphicon glyphicon-remove"></span></a></p>
+          <p><a href={% url 'syslog_host' iface.pk %}>Syslog</a></p>
         {% endfor %}
         {% if device.interfaces.all.count == 0 %}
           <a href={% url 'device_iface_add' device.id %} data-toggle="tooltip" data-placement="left" title="Добавить">Добавить <span class="glyphicon glyphicon-plus"></span></a>
