@@ -206,8 +206,8 @@ def syslog_list(request):
             datestart = form.cleaned_data['datestart']
             datefinish = form.cleaned_data['datefinish']
             datefinish = datefinish + timedelta(days=1)
-            host = form.cleaned_data['host']
-            sql = """SELECT * from logs WHERE datetime>'%s' AND datetime<='%s' order by `seq`;""" % (datestart,datefinish)
+            host, mask = form.cleaned_data['host'].split('/')
+            sql = """SELECT * from logs WHERE datetime >'%s' AND datetime <='%s' order by `seq`;""" % (datestart,datefinish)
     else:
         form = SyslogFilterForm()
         sql = """SELECT * from logs order by `seq` desc limit 150;"""

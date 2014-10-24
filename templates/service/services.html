@@ -61,8 +61,8 @@
                 <p><small>{{ service.tos }}</small></p>
             </td>
             <td>
-                {% if service.pipe %}
-                    {{ service.pipe.speed_in }} Кбит/с
+                {% if service.speed %}
+                    {{ service.speed.speed_in }} Кбит/с
                     <p><small>Установлено вручную</small></p>
                 {% else %}
                     {% if service.plan.speed_in %} 

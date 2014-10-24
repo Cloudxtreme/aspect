@@ -161,7 +161,7 @@ class PipeEditForm(forms.ModelForm):
 class ServiceSpeedForm(GenericServiceForm):
     class Meta(GenericServiceForm.Meta):
         pass
-        fields = {'pipe',}
+        fields = {'speed',}
 
 class ServiceStateForm(GenericServiceForm):
     class Meta(GenericServiceForm.Meta):
@@ -176,7 +176,13 @@ class ServiceEquipForm(GenericServiceForm):
         fields = {'user_device','bs_device',}
 
 class OrgServiceForm(forms.ModelForm):
-    speed = forms.IntegerField(label=u'Скорость доступа, Кбит/с')
+    # speed = forms.IntegerField(label=u'Скорость доступа, Кбит/с')
+    speed = forms.ModelChoiceField(
+        queryset =Pipe.objects.all(),
+        label=u'Скорость доступа, Кбит/с', 
+        widget=forms.Select(attrs={'class' : 'form-control'}),
+     )
+
     price = forms.FloatField(label=u'Абон. плата, руб.')
     install_price = forms.FloatField(label=u'Стоимость подключения, руб.')
 

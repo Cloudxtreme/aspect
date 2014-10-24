@@ -537,11 +537,10 @@ def service_add(request, abonent_id):
                 speed = form.cleaned_data['speed']
                 price = form.cleaned_data['price']
                 install_price = form.cleaned_data['install_price']
-                title = u'%s Кбит/с' % (speed)
+                title = u'%s' % (speed)
                 plan = Plan(title = title,
                             tos = service.tos,
-                            speed_in = speed,
-                            speed_out = speed,
+                            speed = speed,
                             comment = 'Автоматически созданный тарифный план',
                             utype = abonent.utype,
                             price = price,

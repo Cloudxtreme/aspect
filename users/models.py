@@ -40,12 +40,25 @@ class Tag(models.Model):
     def __unicode__(self):
         return u"%s" % (self.title)
 
+class Pipe(models.Model):
+    speed_in = models.PositiveIntegerField(default=0, blank=True, null=True)
+    speed_out = models.PositiveIntegerField(default=0, blank=True, null=True)
+
+    class Meta:
+        verbose_name = u'Тип услуги'
+        verbose_name_plural = u'Типы услуг'
+        ordering = ['speed_in','speed_out']
+
+    def __unicode__(self):
+        return u"%s Кбит/с - %s Кбит/с" % (self.speed_in, self.speed_out)
+
 class Plan(models.Model):
     title = models.CharField(max_length=200)
     tos = models.ForeignKey(TypeOfService,verbose_name=u'Группа тарифа')
     segment = models.ManyToManyField(Segment,verbose_name=u'Сегмент')
-    speed_in = models.PositiveIntegerField(blank=True, null=True)
-    speed_out = models.PositiveIntegerField(blank=True, null=True)
+    speed = models.ForeignKey(Pipe, verbose_name=u'Скорость')
+    # speed_in = models.PositiveIntegerField(blank=True, null=True)
+    # speed_out = models.PositiveIntegerField(blank=True, null=True)
     comment = models.CharField(max_length=200,blank=True, null=True)
     utype = models.CharField(u'Тип абонента', max_length=1, choices=settings.U_TYPE)
     price = models.FloatField(u'Абон. плата')
@@ -247,13 +260,6 @@ class Interface(models.Model):
     def __unicode__(self):
         return u"%s" % (self.ip)
 
-class Pipe(models.Model):
-    speed_in = models.PositiveIntegerField(default=0, blank=True, null=True)
-    speed_out = models.PositiveIntegerField(default=0, blank=True, null=True)
-
-    def __unicode__(self):
-        return u"%s Кбит/с - %s Кбит/с" % (self.speed_in, self.speed_out)
-
 class Service(models.Model):
     abon = models.ForeignKey(Abonent,verbose_name=u'Абонент')
     segment = models.ForeignKey(Segment,verbose_name=u'Сегмент')
@@ -265,7 +271,7 @@ class Service(models.Model):
     vlan_list = models.ManyToManyField(Vlan, verbose_name=u'Список Vlan', blank=True, null= True,related_name='vlan_list')
     adm_status = models.CharField(u'Административный статус', max_length=1, choices=settings.ADM_STATUSES, default='0')
     status = models.CharField(u'Статус', max_length=1, choices=settings.STATUSES, default=settings.STATUS_NEW)
-    pipe = models.ForeignKey(Pipe, blank=True, null=True, verbose_name=u'Pipe')
+    speed = models.ForeignKey(Pipe, blank=True, null=True, verbose_name=u'Скорость')
     location = models.ForeignKey(Location, blank=True, null=True, verbose_name=u'Местонахождение')
     datestart = models.DateField(auto_now=False, auto_now_add=False, default=datetime.datetime.now(), verbose_name=u'Дата начала')
     datefinish = models.DateField(auto_now=False, auto_now_add=False, blank=True, null= True, verbose_name=u'Дата окончания')
