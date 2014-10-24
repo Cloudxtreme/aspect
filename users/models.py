@@ -245,7 +245,7 @@ class Interface(models.Model):
         ordering = ['ip']
 
     def __unicode__(self):
-        return u"%s - %s" % (self.ip, self.mac)
+        return u"%s" % (self.ip)
 
 class Pipe(models.Model):
     speed_in = models.PositiveIntegerField(default=0, blank=True, null=True)
@@ -253,7 +253,6 @@ class Pipe(models.Model):
 
     def __unicode__(self):
         return u"%s Кбит/с - %s Кбит/с" % (self.speed_in, self.speed_out)
-
 
 class Service(models.Model):
     abon = models.ForeignKey(Abonent,verbose_name=u'Абонент')

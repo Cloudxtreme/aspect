@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
 from devices.models import Device, DevType, DeviceStatusEntry
-from devices.forms import DeviceEditForm
+from devices.forms import DeviceEditForm, SyslogFilterForm
 from users.forms import ServiceInterfaceForm
 from users.models import Interface
 from vlans.models import IPAddr
@@ -13,6 +13,8 @@ from vlans.forms import LocationForm
 from django.core import serializers
 import MySQLdb
 import subprocess
+import datetime
+from datetime import timedelta
 
 def get_iparp(request):
     ip = request.GET['ip']
@@ -120,7 +122,7 @@ def device_iface_add(request, device_id):
     else:
         form = ServiceInterfaceForm()
     
-    if device.is_rooter: 
+    if device.router: 
         net_type = ['UN','EN']
         form.fields['ip'].queryset=IPAddr.objects.filter(interface=None).filter(net__net_type__in=net_type)
     else:
@@ -161,7 +163,7 @@ def device_iface_edit(request, device_id, iface_id):
             return HttpResponseRedirect(reverse('devices_all'))
     else:
         form = ServiceInterfaceForm(instance=interface)
-        net_type = ['UN','EN'] if device.is_rooter else ['EN']
+        net_type = ['UN','EN'] if device.router else ['EN']
         form.fields['ip'].queryset=IPAddr.objects.filter(interface=None).filter(net__net_type__in=net_type)|IPAddr.objects.filter(interface=interface)
 
     return render_to_response('generic/generic_edit.html', { 
@@ -198,7 +200,18 @@ def syslog_list(request):
     db = MySQLdb.connect(host="192.168.64.6", user="syslog", \
                          passwd="yfpfgbcm", db="syslog", charset='utf8')
     cursor = db.cursor()
-    sql = """SELECT * FROM logs;"""
+    if request.method == 'POST':
+        form = SyslogFilterForm(request.POST)
+        if form.is_valid():
+            datestart = form.cleaned_data['datestart']
+            datefinish = form.cleaned_data['datefinish']
+            datefinish = datefinish + timedelta(days=1)
+            host = form.cleaned_data['host']
+            sql = """SELECT * from logs WHERE datetime>'%s' AND datetime<='%s' order by `seq`;""" % (datestart,datefinish)
+    else:
+        form = SyslogFilterForm()
+        sql = """SELECT * from logs order by `seq` desc limit 150;"""
+    
     cursor.execute(sql)
     data = cursor.fetchall()
     
@@ -209,5 +222,5 @@ def syslog_list(request):
 
     db.close()
 
-    return render_to_response('resources/syslog_list.html', { 'log_list': log_list },
+    return render_to_response('resources/syslog_list.html', { 'log_list': log_list, 'form': form, },
                                  context_instance = RequestContext(request))    

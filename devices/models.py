@@ -37,23 +37,23 @@ def calcnet(net, mask):
         return (net,mask1),(net1,mask1)
     return ((net,mask1),(net1,mask1), calcnet(net,mask1),calcnet(net1,mask1))
 
-class SubInterface(models.Model):
-    title = models.CharField(u'Название', max_length=50)
-    ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', unique=True)
+# class SubInterface(models.Model):
+#     title = models.CharField(u'Название', max_length=50)
+#     ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', unique=True)
 
-    class Meta:
-        verbose_name = u'Интерфейс'
-        verbose_name_plural = u'Интерфейсы'
-        ordering = ['ip']
+#     class Meta:
+#         verbose_name = u'Интерфейс'
+#         verbose_name_plural = u'Интерфейсы'
+#         ordering = ['ip']
 
 class Device(models.Model):
-    comment = HTMLField(u'Комментарий', blank=True, null= True)
     interfaces = models.ManyToManyField('users.Interface', verbose_name=u'Интерфейсы',blank=True, null=True)
+    devtype = models.ForeignKey(DevType, verbose_name=u'Модель')
     mgmt_vlan = models.ForeignKey(Vlan, related_name=u'mgmt_vlan',
         verbose_name=u'VLAN управления', blank=True, null= True)
-    devtype = models.ForeignKey(DevType, verbose_name=u'Модель')
+    comment = HTMLField(u'Комментарий', blank=True, null= True)
     location = models.ForeignKey(Location, blank=True, null=True, verbose_name=u'Местонахождение')
-    is_rooter = models.BooleanField(u'Роутер?',default=False)
+    router = models.BooleanField(u'Роутер?',default=False)
     mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=20)
     sn = models.CharField(u'Серийный номер', blank=True, 
                                  null=True, max_length=20)
@@ -67,7 +67,15 @@ class Device(models.Model):
         verbose_name_plural = u'Устройства'
 
     def __unicode__(self):
-        return u"%s - %s - %s" % (self.devtype, self.location, self.comment)
+
+        if self.interfaces.count() == 0:
+            label = u'Без IP-Адреса'
+        elif self.interfaces.count() == 1:
+            label = '%s' % self.interfaces.all()[0].ip
+        else:
+            label = u'Роутер'
+            
+        return u"%s - %s" % (self.devtype, label)
 
 class DeviceStatusEntry(models.Model):
     device = models.ForeignKey(Device, verbose_name=u'Устройство')

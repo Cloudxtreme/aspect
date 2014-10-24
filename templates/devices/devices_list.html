@@ -41,7 +41,7 @@
     <td>{{ device.devtype }}</td>
     <td>
     {# Интерфейсы для маршрутизаторов не выводим #}
-      {% if device.is_rooter %}
+      {% if device.router %}
         <a id='#btn_iparp{{ iface.ip.pk }}' 
         onclick="var data = '{% for iface in device.interfaces.all %} <p>{{iface.ip.ip}}</p> {% endfor %}';
         $('#ip_content').html( data ); 
