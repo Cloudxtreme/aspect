@@ -4,6 +4,8 @@ from django.conf import settings
 
 urlpatterns = patterns('',
     url(r'^(?P<device_id>\d+)/edit/$','devices.views.device_edit', name='device_edit'),
+    url(r'^app/(?P<app_id>\d+)/edit/$','devices.views.app_edit', name='app_edit'),
+    url(r'^all/$', 'devices.views.apps_all', name='apps_all'),
     url(r'^(?P<device_id>\d+)/interface/add/$','devices.views.device_iface_add', name='device_iface_add'),
     url(r'^(?P<device_id>\d+)/location/edit/$','devices.views.device_location_edit', name='device_location_edit'),
     url(r'^(?P<device_id>\d+)/interface/(?P<iface_id>\d+)/edit/$','devices.views.device_iface_edit', name='device_iface_edit'),

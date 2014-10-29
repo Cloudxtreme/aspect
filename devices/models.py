@@ -2,6 +2,28 @@
 from django.db import models
 from vlans.models import IPAddr, Vlan, Location
 from tinymce.models import HTMLField
+from django.contrib.auth.models import User
+
+class Application(models.Model):
+    TYPE_OF_APP = (
+        ('R', 'Регламентные работы'),
+        ('E', 'Аварийно-восстановительные'),
+        ('M', 'Модернизация'),
+        ('T', 'Тестирование'),
+    )
+    type_app = models.CharField(u'Тип работ', max_length = 4, choices=TYPE_OF_APP)
+    ipaddr = models.CharField(u'IP устройства', max_length=100)
+    description = HTMLField(u'Описание')
+    author = models.ForeignKey(User, verbose_name=u'Автор')
+    date = models.DateTimeField(auto_now=False, auto_now_add=False)
+
+    class Meta:
+        verbose_name = u'Заявка'
+        verbose_name_plural = u'Заявки'
+
+    def __unicode__(self):
+        return "%s - %s - %s" % (self.date, self.ipaddr, self.author)    
+
 
 class DevType(models.Model):
     TYPE_OF_SUPPLY = (

@@ -5,8 +5,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
-from devices.models import Device, DevType, DeviceStatusEntry
-from devices.forms import DeviceEditForm, SyslogFilterForm
+from devices.models import Device, DevType, DeviceStatusEntry, Application
+from devices.forms import DeviceEditForm, SyslogFilterForm, AppEditForm
 from users.forms import ServiceInterfaceForm
 from users.models import Interface
 from vlans.models import IPAddr
@@ -258,3 +258,46 @@ def syslog_list(request):
 
     return render_to_response('resources/syslog_list.html', { 'log_list': log_list, 'form': form, },
                                  context_instance = RequestContext(request))    
+
+
+@login_required
+def apps_all(request):
+    app_list = Application.objects.all()
+
+    # paginator = Paginator(devices_list.distinct(), 50)
+    # page = request.GET.get('page')
+    # try:
+    #     devices = paginator.page(page)
+    # except PageNotAnInteger:
+    #     # If page is not an integer, deliver first page.
+    #     devices = paginator.page(1)
+    # except EmptyPage:
+    #     # If page is out of range (e.g. 9999), deliver last page of results.
+    #     devices = paginator.page(paginator.num_pages)
+
+    return render_to_response('devices/applications_list.html', { 'app_list': app_list }, context_instance = RequestContext(request))
+
+@login_required
+def app_edit(request, app_id):
+    try:
+        app = Application.objects.get(pk = app_id)
+        header = 'Редактирование заявки'
+    except:
+        app = Application()
+        header = 'Создание новой заявки'
+
+    if request.method == 'POST':
+        form = AppEditForm(request.POST, instance=app)
+        if form.is_valid():
+            newapp = form.save(commit=False)
+            newapp.author = request.user
+            newapp.save()
+            return HttpResponseRedirect(reverse('apps_all'))
+    else:
+        form = AppEditForm(instance=app)
+
+    return render_to_response('generic/generic_edit.html', {
+                                'header' : header,
+                                'form': form,},
+                                context_instance = RequestContext(request)
+                                ) 

@@ -32,15 +32,23 @@ def importosmp1cdb():
         except:
             pass
         else:
-            payList += [Payment(abon=p_ab,
+            payment = Payment(abon=p_ab,
                         top = p_ps,
                         sum = p_sum,
                         date = full_time,
                         num = p_id,
                         valid = True,
-                        )]
+                        )
+            payment.save()
+            # payList += [Payment(abon=p_ab,
+            #             top = p_ps,
+            #             sum = p_sum,
+            #             date = full_time,
+            #             num = p_id,
+            #             valid = True,
+            #             )]
     # print payList
-    Payment.objects.bulk_create(payList)
+    # Payment.objects.bulk_create(payList)
 
 def importuntlcdb():
     sql = """SELECT u.Order_IDP, u.summ, u.time_create, s.SubscriberID, u.canceled FROM Subscribers AS s, Uniteller_reestr as u WHERE s.SubscriberID=u.SubscriberID AND s.SubscriberID LIKE '50______' AND u.paid = 1 AND u.canceled = 0 AND u.time_create >= '%s'""" % (datetime.now() - timedelta(hours=24)).date()
@@ -55,15 +63,23 @@ def importuntlcdb():
         except:
             pass
         else:
-            payList += [Payment(abon=p_ab,
+            payment = Payment(abon=p_ab,
                             top=p_ps,
                             sum=p_sum,
                             date=p_date,
                             num=p_id,
                             valid=not p_canceled,
-                            )]
+                            )
+            payment.save()
+            # payList += [Payment(abon=p_ab,
+            #                 top=p_ps,
+            #                 sum=p_sum,
+            #                 date=p_date,
+            #                 num=p_id,
+            #                 valid=not p_canceled,
+            #                 )]
     # print payList
-    Payment.objects.bulk_create(payList)
+    # Payment.objects.bulk_create(payList)
 
 importuntlcdb()
 importosmp1cdb()
