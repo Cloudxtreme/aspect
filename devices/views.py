@@ -262,7 +262,7 @@ def syslog_list(request):
 
 @login_required
 def apps_all(request):
-    app_list = Application.objects.all()
+    app_list = Application.objects.all().order_by('-date')
 
     # paginator = Paginator(devices_list.distinct(), 50)
     # page = request.GET.get('page')
