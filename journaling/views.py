@@ -7,7 +7,7 @@ from pays.models import Payment
 
 @login_required	
 def report_plans(request):
-	data = Service.objects.values('plan__speed_in').filter(plan__tos__id=1).order_by('plan__speed_in').annotate(Count('plan__speed_in'))
+	data = Service.objects.values('plan__speed__speed_in').filter(plan__tos__id=1).order_by('plan__speed__speed_in').annotate(Count('plan__speed__speed_in'))
 	return render_to_response('report_plans.html', { 'data' : data, 'service_count' : Service.objects.all().count }, context_instance = RequestContext(request))
 
 @login_required	

@@ -8,7 +8,7 @@
        var data = google.visualization.arrayToDataTable([
           ['Скорость', 'Количество', { role: 'style' }],
           {% for item in data %} 
-          ['{{ item.plan__speed_in }} Кбит/с', {{ item.plan__speed_in__count }}, 'silver' ],
+          ['{{ item.plan__speed__speed_in }} Кбит/с', {{ item.plan__speed__speed_in__count }}, 'silver' ],
           {% endfor%}
         ]);
 
