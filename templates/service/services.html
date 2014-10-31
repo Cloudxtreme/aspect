@@ -34,12 +34,12 @@
         <thead>
           <tr>
             <th>#</th>
-            <th class="col-md-3">Адрес</th>
-            <th>Начало</th>
+            <th class="col-md-2">Адрес</th>
+            <th class="col-md-1">Начало</th>
             <th>Тариф</th>
-            <th>Скорость</th>
+            <th class="col-md-1">Скорость</th>
             <th class="col-md-2">Параметры</th>
-            <th>Оборудование</th>
+            <th class="col-md-1">Оборудование</th>
             <th>Статус</th>
           </tr>
         </thead>
@@ -49,11 +49,12 @@
             <td>[{{ service.pk }}]</td>
             <td>
                 {{ service.location.address }}
+                <p><small>{{ service.location.geolocation }}</small></p>
                 <a href="{% url 'users.views.service_location_edit' abonent.id service.id %}" data-toggle="tooltip" data-placement="left" title="Редактировать местоположение">
                 <span class="glyphicon glyphicon-edit"></span></a>
                 <p><small>{{ service.location.comment }}</small></p>
             </td>
-            <td>{{ service.datestart }}</td>
+            <td>{{ service.datestart|date:'Y-M-d' }}</td>
             <td>
                 {{ service.plan.title }} - {{ service.plan.price }} руб/мес 
                 <a href="{% url 'users.views.service_plan_edit' abonent.id service.id %}" data-toggle="tooltip" data-placement="left" title="Сменить тарифный план">
@@ -65,9 +66,8 @@
                     {{ service.speed.speed_in }} Кбит/с
                     <p><small>Установлено вручную</small></p>
                 {% else %}
-                    {% if service.plan.speed_in %} 
-                        {{ service.plan.speed_in }} Кбит/с
-                    {% endif %}
+                    {{ service.plan.speed.speed_in }} Кбит/с
+                    <p><small>По тарифу</small></p>
                 {% endif %}
                 <a href="{% url 'users.views.service_speed_edit' abonent.id service.id %}" data-toggle="tooltip" data-placement="left" title="Изменить скорость доступа">
                 <span class="glyphicon glyphicon-cog"></span></a>
@@ -90,7 +90,7 @@
                     </p>
                 {% endfor %}
                 <p>
-                    <a href="{% url 'users.views.service_iface_add' service.id %}">Добавить
+                    <a href="{% url 'users.views.service_iface_add' service.id %}">Добавить IP
                     <span class="glyphicon glyphicon-plus"></span></a>
                 </p>
                 {% for vlan in service.vlan_list.all %}

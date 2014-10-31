@@ -136,6 +136,9 @@ class Abonent(models.Model):
     objects = models.Manager()
     obj = AbonentFilterManager()
 
+    def get_activesrv_count(self):
+        return self.service_set.exclude(status=settings.STATUS_ARCHIVED).count()
+
     def set_changes(self,comment,old_status):
             # Процедура смены статусов всех услуг абонента
             if old_status != self.status:
@@ -277,6 +280,7 @@ class Service(models.Model):
     datefinish = models.DateField(auto_now=False, auto_now_add=False, blank=True, null= True, verbose_name=u'Дата окончания')
     user_device = models.ForeignKey(Device, related_name='user_device',verbose_name=u'Абонентское устройство', blank=True, null= True)
     bs_device = models.ForeignKey(Device, related_name='bs_device', verbose_name=u'Абонентская БС', blank=True, null= True)
+    # objects = models.Manager()
 
     def set_changestatus_in_plan(self, new_status, date=datetime.datetime.now()):
         ssc = ServiceStatusChanges(

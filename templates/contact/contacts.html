@@ -31,7 +31,7 @@
             <th>Факс</th>
             <th>Email</th>
             <th>Адрес</th>
-            <th></th>
+            <th class='col-md-1'></th>
           </tr>
         </thead>
         <tbody>
@@ -47,12 +47,11 @@
             <td>{{ contact.email }}</td>
             <td><small>{{ contact.address }}</small></td>
             <td>
-                <div class="btn-group">
-                    <a href="{% url 'contact_edit' abonent.id contact.id %}" role="button" class="btn btn-primary btn-xm" data-toggle="tooltip" data-placement="left" title="Редактировать">
-                    <span class="glyphicon glyphicon-cog"></span></a>
-                    <a href="{% url 'contact_del' abonent.id contact.id %}" role="button" class="btn btn-danger btn-xm" data-toggle="tooltip" data-placement="left" title="Удалить">
-                    <span class="glyphicon glyphicon-remove"></span></a>
-                </div>
+                <p class='pull-right'><a href="{% url 'contact_edit' abonent.id contact.id %}">Изменить
+                <span class="glyphicon glyphicon-cog"></span></a></p>
+
+                <p class='pull-right'><a href="{% url 'contact_del' abonent.id contact.id %}">Удалить
+                <span class="glyphicon glyphicon-remove"></span></a></p>
             </td>
         </tr>
         {% endfor %}

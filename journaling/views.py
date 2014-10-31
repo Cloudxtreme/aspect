@@ -13,7 +13,7 @@ def report_plans(request):
 @login_required	
 def report_paysbymonth(request):
 	data = Payment.objects.filter(valid=True,top__stat=True).extra({'weekday': "dayofmonth(date)"}).values('weekday').order_by('weekday').annotate(Count('id'))
-	return render_to_response('report_paysbymonth.html', { 'data' : data }, context_instance = RequestContext(request))
+	return render_to_response('report_pays.html', { 'data' : data }, context_instance = RequestContext(request))
 
 @login_required
 def report_debitsum(request):
@@ -23,7 +23,7 @@ def report_debitsum(request):
 @login_required
 def report_paysbyweek(request):
 	data = Payment.objects.filter(valid=True,top__stat=True).extra({'weekday': "dayofweek(date)" }).values('weekday').order_by('weekday').annotate(Count('id'))
-	return render_to_response('report_paysbyweek.html', { 'data' : data }, context_instance = RequestContext(request))
+	return render_to_response('report_pays.html', { 'data' : data }, context_instance = RequestContext(request))
 
 @login_required
 def report_sumbymonth(request):

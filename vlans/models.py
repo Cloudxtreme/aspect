@@ -2,6 +2,7 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
+from vlans.fields import LocationField
 
 # Create your models here.
 
@@ -39,11 +40,18 @@ class Vlan(models.Model):
 
 class Location(models.Model):
     address = models.CharField(u'Адрес', blank=True, null= True, max_length=100)
-    lat = models.FloatField(u'Широта', blank=True, null=True)
-    lon = models.FloatField(u'Долгота', blank=True, null=True)
+    # lat = models.FloatField(u'Широта', blank=True, null=True)
+    # lon = models.FloatField(u'Долгота', blank=True, null=True)
     bs_type = models.CharField(u'Тип', max_length = 2, 
                                choices=TYPE_OF_OBJECTS)
     comment  = models.CharField(u'Комментарий', max_length=300, blank=True, null=True, default='')
+    geolocation = LocationField(u'Карта', max_length=100, blank=True, null=True)
+    # geolocation = models.CharField(u'Карта', max_length=100, blank=True, null=True) # Заглушка для South
+   
+    @property
+    def get_geolocation(self):
+        if self.geolocation:
+            return self.geolocation.split(',')
 
     class Meta:
         verbose_name = u'Местонахождение'
@@ -64,22 +72,6 @@ class Node(models.Model):
 
     def __unicode__(self):
         return "%s - %s - %s" % (self.pk, self.title, self.bs_type)
-
-
-# class DevType(models.Model):
-#     vendor = models.CharField(max_length=50)
-#     model = models.CharField(max_length=50)
-#     description = models.CharField(max_length=200, blank=True, null=True)
-#     supply = models.CharField(u'Питание', max_length = 4, 
-#                               choices=TYPE_OF_SUPPLY)
-#     ports = models.IntegerField(u'Количество портов')
-
-#     class Meta:
-#         verbose_name = _('DevType')
-#         verbose_name_plural = _('DevTypes')
-
-#     def __unicode__(self):
-#         return "%s - %s" % (self.vendor, self.model)
 
 def dec2ip(ip):
      return '.'.join([str((ip >> 8 * i) & 255) for i in range(3, -1, -1)])
@@ -167,33 +159,3 @@ class IPAddr(models.Model):
 
     def __unicode__(self):
         return "%s/%s" % (self.ip, self.net.mask)
-
-# class Device(models.Model):
-#     # TYPE_OF_CHECK = (
-#     #     ('NC','Не проверять'),
-#     #     ('PC','ICMP Проверка'),
-#     #     ('SC','SNMP Проверка'),
-#     # )
-#     title = models.CharField(u'Название', max_length=30)
-#     ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', 
-#         blank=True, null= True)
-#     mgmt_vlan = models.ForeignKey(Vlan, related_name='mgmt_vlan',
-#         verbose_name=u'VLAN управления', blank=True, null= True)
-#     devtype = models.ForeignKey(DevType, verbose_name=u'Модель')
-#     is_rooter = models.BooleanField(u'Роутер?')
-#     mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=20)
-#     sn = models.CharField(u'Серийный номер', blank=True, 
-#                                  null=True, max_length=20)
-#     # node = models.ForeignKey(Node, verbose_name=u'Местонахождение')
-#     # check_type = models.CharField(u'Тип проверки', max_length = 2, 
-#         # choices=TYPE_OF_CHECK)
-#     # snmp_community = models.CharField(max_length = 20, blank=True, null= True)
-#     last_available = models.DateTimeField(auto_now=False, auto_now_add=False, 
-#         blank=True, null=True, verbose_name=u'Последний ответ')
-
-#     class Meta:
-#         verbose_name = u'Устройство'
-#         verbose_name_plural = u'Устройства'
-
-#     def __unicode__(self):
-#         return "%s - %s - %s" % (self.pk, self.title, self.ip)

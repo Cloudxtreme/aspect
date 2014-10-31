@@ -84,23 +84,29 @@ def promisedpays(request, abonent_id):
 
 @login_required
 def add_quickpayment(request):
-	message = ''
-	if request.method == 'POST':
-		form = QuickPaymentForm(request.POST)
-		if form.is_valid():
-			payment = form.save(commit=False)
-			payment.top = PaymentSystem.objects.get(pk=3)
-			payment.user = request.user
-			payment.save()
-			# return HttpResponseRedirect(reverse('payments', args=[abonent_id]))
-			message  = "Платеж на сумму %s руб для %s зачислен" % (payment.sum, payment.abon)
-			form = QuickPaymentForm()
-		else:
-			message = "Ошибки в форме"
-	else:
-		form = QuickPaymentForm()
+    message = ''
+    if request.method == 'POST':
+        form = QuickPaymentForm(request.POST)
+        if form.is_valid():
+            payment = form.save(commit=False)
+            payment.top = PaymentSystem.objects.get(pk=3)
+            payment.user = request.user
+            payment.save()
+            message  = "Платеж на сумму %s руб для %s зачислен" % (payment.sum, payment.abon)
+            form = QuickPaymentForm()
+        else:
+            message = "Ошибки в форме"
+    else:
+        form = QuickPaymentForm()
         header = 'Данные платежа'
-	return render(request, 'generic/generic_edit.html', {'form': form, 'message' : message,'header' : header })
+
+    return render_to_response('generic/generic_edit.html', {
+                                'header' : header,
+                                'message' : message,
+                                'form': form,
+                                'extend': 'index.html',},
+                                context_instance = RequestContext(request)
+                                ) 
 
 @login_required
 def add_payment(request, abonent_id):

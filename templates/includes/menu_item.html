@@ -1,6 +1,6 @@
 {% if item_url %}{% url item_url abonent.id as item_rendered_url %}{% endif %}
 <li{% if request.META.PATH_INFO|cut:item_rendered_url != request.META.PATH_INFO %} class="active"{% endif %}>
   <a href="{{ item_rendered_url }}">
-    {{ item_title }}{% if counter %}<span class="badge pull-right">{{ counter }}</span>{% endif %}
+    {{ item_title }}
   </a>
 </li>

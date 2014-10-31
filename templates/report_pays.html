@@ -1,5 +1,4 @@
 {% extends "index.html" %}
-{% load dict_extras %}
 {% block script %}
   <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
@@ -9,7 +8,7 @@
        var data = google.visualization.arrayToDataTable([
           ['День', 'Количество'],
           {% for item in data%} 
-          ['{{ item.weekday|get_day }}', {{ item.id__count }} ],
+          ['{{ item.weekday }}', {{ item.id__count }} ],
           {% endfor%}
         ]);
 

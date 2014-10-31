@@ -31,7 +31,8 @@ def note_add(request):
 
     return render_to_response('generic/generic_edit.html', {
                                 'header' : header,
-                                'form': form,},
+                                'form': form,
+                                'extend': 'index.html',},
                                 context_instance = RequestContext(request)
                                 ) 
 

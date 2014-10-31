@@ -24,7 +24,6 @@ def create_invoice(request):
             email.content = abonent_event.template_ur.content
             email.destination = email.abonent.notice_email
             email.save()
-            # return HttpResponseRedirect(reverse('payments', args=[abonent_id]))./m
             message  = "Счет создан" 
             form = InvoiceMessageForm()
         else:
@@ -32,7 +31,14 @@ def create_invoice(request):
     else:
         form = InvoiceMessageForm()
     header = 'Отправка счета клиенту'
-    return render(request, 'generic/generic_edit.html', {'form': form, 'message' : message, 'header' : header })
+
+    return render_to_response('generic/generic_edit.html', {
+                                'header' : header,
+                                'message' : message,
+                                'form': form,
+                                'extend': 'index.html',},
+                                context_instance = RequestContext(request)
+                                ) 
 
 @login_required
 def template_del(request,template_id):
@@ -89,7 +95,8 @@ def template_edit(request, template_id):
 
     return render_to_response('generic/generic_edit.html', {
                                 'header' : header,
-                                'form': form,},
+                                'form': form,
+                                'extend': 'index.html',},
                                 context_instance = RequestContext(request)
                                 ) 
 
@@ -112,7 +119,8 @@ def abonentevent_edit(request, abonentevent_id):
 
     return render_to_response('generic/generic_edit.html', {
                                 'header' : header,
-                                'form': form,},
+                                'form': form,
+                                'extend': 'index.html',},
                                 context_instance = RequestContext(request)
                                 ) 
 
@@ -134,7 +142,8 @@ def emailmessage_edit(request, emailmessage_id):
 
     return render_to_response('generic/generic_edit.html', {
                                 'header' : header,
-                                'form': form,},
+                                'form': form,
+                                'extend': 'index.html',},
                                 context_instance = RequestContext(request)
                                 ) 
 
@@ -177,10 +186,12 @@ def write_groupemail(request):
             return HttpResponseRedirect(reverse('email_all',))
     else:
         form = GroupEmailForm()
-    
-    return render_to_response('write_groupemail.html', {
-                                'form': form, 
-                                }, context_instance = RequestContext(request))     
+
+    return render_to_response('generic/generic_edit.html', { 
+                                'header' : 'Групповое сообщение',
+                                'form': form,
+                                'extend': 'index.html', },
+                                 context_instance = RequestContext(request))
 
 @login_required
 def mass_notice_add(request):

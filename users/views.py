@@ -128,13 +128,19 @@ def abonent_add(request,abonent_id=0):
     else:
         form = AbonentForm(instance=abonent)
 
-    return render_to_response('abonent/add.html', {
+    return render_to_response('generic/generic_edit.html', { 
+                                'header' : message,
                                 'form': form,
-                                'message': message,
-                                'new': new,
-                                'abonent' : abonent},
-                                context_instance = RequestContext(request)
-                                )  
+                                'extend': 'index.html', },
+                                 context_instance = RequestContext(request))
+
+    # return render_to_response('abonent/add.html', {
+    #                             'form': form,
+    #                             'message': message,
+    #                             'new': new,
+    #                             'abonent' : abonent},
+    #                             context_instance = RequestContext(request)
+    #                             )  
 @login_required
 def smart_search(request):
     abonent_list = Abonent.objects.none()
@@ -272,7 +278,6 @@ def service_status_change(request, abonent_id, service_id):
     return render_to_response('service/service_status_changes.html', {
                                 'abonent' : abonent, 
                                 'service' : service, 
-                                'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), 
                                 'form': form }, 
                                 context_instance = RequestContext(request) )   
 # Добававление интерфейса услуги
@@ -299,8 +304,7 @@ def service_iface_add(request, service_id):
     return render_to_response('service/service_generic_changes.html', { 
                                 'abonent' : abonent, 
                                 'form': form, 
-                                'menu_title': 'Создание нового интерфейса', 
-                                'count_serv' : Service.objects.filter(abon__pk=abonent.pk,status__in=['A','N']).count() },
+                                'menu_title': 'Создание нового интерфейса', },
                                  context_instance = RequestContext(request))
 
 # Удаление интерфейса услуги
@@ -339,16 +343,16 @@ def service_iface_edit(request, service_id, iface_id):
     return render_to_response('service/service_generic_changes.html', { 
                                 'abonent' : abonent, 
                                 'form': form, 
-                                'menu_title': 'Изменение параметров интерфейса', 
-                                'count_serv' : Service.objects.filter(abon__pk=abonent.pk,status__in=['A','N']).count() },
+                                'menu_title': 'Изменение параметров интерфейса',  },
                                  context_instance = RequestContext(request))
 
 # Редактирование статуса услуги
 @login_required
 def service_state_edit(request, abonent_id, service_id):
     try:
-        abonent = Abonent.objects.get(pk=abonent_id)
+        # abonent = Abonent.objects.get(pk=abonent_id)
         service = Service.objects.get(pk=service_id)
+        abonent = service.abon
     except:
         raise Http404
 
@@ -363,16 +367,16 @@ def service_state_edit(request, abonent_id, service_id):
     return render_to_response('service/service_generic_changes.html', { 
                                 'abonent' : abonent, 
                                 'form': form, 
-                                'menu_title': 'Принудительная установка статуса', 
-                                'count_serv' : Service.objects.filter(abon__pk=abonent_id,status__in=['A','N']).count() },
+                                'menu_title': 'Принудительная установка статуса',  },
                                  context_instance = RequestContext(request))
 
 # Редактирование оборудования
 @login_required
 def service_equip_edit(request, abonent_id, service_id):
     try:
-        abonent = Abonent.objects.get(pk=abonent_id)
+        # abonent = Abonent.objects.get(pk=abonent_id)
         service = Service.objects.get(pk=service_id)
+        abonent = service.abon
     except:
         raise Http404
 
@@ -386,16 +390,16 @@ def service_equip_edit(request, abonent_id, service_id):
     return render_to_response('service/service_generic_changes.html', { 
                                 'abonent' : abonent, 
                                 'form': form, 
-                                'menu_title': 'Редактирование оборудования', 
-                                'count_serv' : Service.objects.filter(abon__pk=abonent_id,status__in=['A','N']).count() },
+                                'menu_title': 'Редактирование оборудования',  },
                                  context_instance = RequestContext(request))
 
 # Редактирование скорости услуги
 @login_required
 def service_speed_edit(request, abonent_id, service_id):
     try:
-        abonent = Abonent.objects.get(pk=abonent_id)
+        # abonent = Abonent.objects.get(pk=abonent_id)
         service = Service.objects.get(pk=service_id)
+        abonent = service.abon
     except:
         raise Http404
 
@@ -409,16 +413,16 @@ def service_speed_edit(request, abonent_id, service_id):
     return render_to_response('service/service_generic_changes.html', { 
                                 'abonent' : abonent, 
                                 'form': form, 
-                                'menu_title': 'Ручной контроль скорости', 
-                                'count_serv' : Service.objects.filter(abon__pk=abonent_id,status__in=['A','N']).count() },
+                                'menu_title': 'Ручной контроль скорости',  },
                                  context_instance = RequestContext(request))
 
 # Редактирование списка vlan услуги
 @login_required
 def service_vlan_edit(request, abonent_id, service_id):
     try:
-        abonent = Abonent.objects.get(pk=abonent_id)
+        # abonent = Abonent.objects.get(pk=abonent_id)
         service = Service.objects.get(pk=service_id)
+        abonent = service.abon
     except:
         raise Http404
 
@@ -432,16 +436,16 @@ def service_vlan_edit(request, abonent_id, service_id):
     return render_to_response('service/service_generic_changes.html', { 
                                 'abonent' : abonent, 
                                 'form': form, 
-                                'menu_title': 'Редактирование спсика Vlan', 
-                                'count_serv' : Service.objects.filter(abon__pk=abonent_id,status__in=['A','N']).count() },
+                                'menu_title': 'Редактирование спсика Vlan', },
                                  context_instance = RequestContext(request))
 
 # Редактирование местоположения услуги
 @login_required
 def service_location_edit(request, abonent_id, service_id):
     try:
-        abonent = Abonent.objects.get(pk=abonent_id)
+        # abonent = Abonent.objects.get(pk=abonent_id)
         service = Service.objects.get(pk=service_id)
+        abonent = service.abon
     except:
         raise Http404
 
@@ -458,16 +462,16 @@ def service_location_edit(request, abonent_id, service_id):
     return render_to_response('service/service_generic_changes.html', { 
                                 'abonent' : abonent, 
                                 'form': form, 
-                                'menu_title': 'Изменение местоположения', 
-                                'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() },
+                                'menu_title': 'Изменение местоположения',  },
                                  context_instance = RequestContext(request))
 
 @login_required
 # Смена тарифного плана на услуге
 def service_plan_edit(request, abonent_id, service_id):
     try:
-        abonent = Abonent.objects.get(pk = abonent_id)
+        # abonent = Abonent.objects.get(pk = abonent_id)
         service = Service.objects.get(pk=service_id)
+        abonent = service.abon
     except:
         raise Http404
 
@@ -483,37 +487,9 @@ def service_plan_edit(request, abonent_id, service_id):
 
     return render_to_response('service/service_plan_changes.html', {
                                 'form': form,
-                                'abonent' : abonent,
-                                'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), },
+                                'abonent' : abonent, },
                                 context_instance = RequestContext(request)
                                 ) 
-# @login_required
-# Редактирование технических параметров 
-# Deprecated
-# def service_edit(request, abonent_id, service_id):
-#     try:
-#         abonent = Abonent.objects.get(pk = abonent_id)
-#         service = Service.objects.get(pk = service_id)
-#     except:
-#         raise Http404
-
-#     if request.method == 'POST':
-#         form = ServiceEditForm(request.POST, instance=service)
-#         if form.is_valid():
-#             form.save(commit=True)
-#             return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
-#     else:
-#         form = ServiceEditForm(instance=service)
-#         form.fields['ip'].queryset=IPAddr.objects.filter(net__segment__pk=service.segment.pk).filter(net__net_type='UN').filter(Q(interface=None))|IPAddr.objects.filter(service__pk=service.pk)
-
-#     return render_to_response('service/service_generic_changes.html', {
-#                                 'form': form,
-#                                 'menu_title': 'Изменение параметров услуги', 
-#                                 'abonent' : abonent,
-#                                 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), },
-#                                 context_instance = RequestContext(request)
-#                                 ) 
-
 @login_required
 def service_add(request, abonent_id):
     new = True
@@ -553,7 +529,7 @@ def service_add(request, abonent_id):
             # Создаем уведомление о новой услуге для всех инженеров
             for user in Group.objects.get(name='Инженеры').user_set.all():
                 url_abonent = reverse('abonent_info', args=[abonent.pk])
-                url_service = reverse('service_iface_add', args=[service.pk])
+                url_service = reverse('abonent_services', args=[abonent.pk])
                 new_note = Note(
                     title = u'Добавлена новая услуга',
                     descr = u'У абонента <a href=%s>%s</a> добавлена новая услуга <a href=%s>[%s]</a>. Заполните технические параметры' % (url_abonent,abonent.title,url_service,service.pk)  ,
@@ -571,8 +547,7 @@ def service_add(request, abonent_id):
 
     return render_to_response('service/service_add.html', {
                                 'form': form,
-                                'abonent' : abonent,
-                                'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), },
+                                'abonent' : abonent, },
                                 context_instance = RequestContext(request)
                                 ) 
 
@@ -586,9 +561,7 @@ def abonent_services(request, abonent_id):
     return render_to_response('service/services.html', { 
                                 'abonent' : abonent, 
                                 'services' : Service.objects.filter(abon__pk=abonent_id), 
-                                's_types' : TypeOfService.objects.all(),
-                                'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() 
-                                }, 
+                                's_types' : TypeOfService.objects.all(), }, 
                                 context_instance = RequestContext(request))
 
 @login_required   
@@ -605,7 +578,7 @@ def service_history(request, abonent_id, service_id):
         raise Http404
 
     sscs = ServiceStatusChanges.objects.filter(service__pk=service_id).order_by('-pk')
-    return render_to_response('service/history.html', { 'abonent' : abonent, 'service' : service,  'sscs' : sscs, 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() }, context_instance = RequestContext(request))
+    return render_to_response('service/history.html', { 'abonent' : abonent, 'service' : service,  'sscs' : sscs, }, context_instance = RequestContext(request))
 
 @login_required    
 def abonent_history(request, abonent_id):
@@ -615,7 +588,7 @@ def abonent_history(request, abonent_id):
         raise Http404
 
     ascs = AbonentStatusChanges.objects.filter(abonent__pk=abonent_id).order_by('-pk')
-    return render_to_response('abonent/history.html', { 'abonent' : abonent,  'ascs' : ascs, 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() }, context_instance = RequestContext(request))
+    return render_to_response('abonent/history.html', { 'abonent' : abonent,  'ascs' : ascs, }, context_instance = RequestContext(request))
 
 @login_required
 def abonent_manage(request, abonent_id):
@@ -631,10 +604,11 @@ def abonent_manage(request, abonent_id):
     else:
         form = ManageForm(instance=abonent)
 
-    return render_to_response('abonent/manage.html', { 
-                                'abonent' : abonent, 
-                                'form': form, 
-                                'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() },
+    return render_to_response('generic/generic_edit.html', { 
+                                'header' : 'Настройки абонента',
+                                'form': form,
+                                'abonent': abonent,
+                                'extend': 'abonent/main.html', },
                                  context_instance = RequestContext(request))
 
 @login_required    
@@ -642,10 +616,7 @@ def abonent_info(request, abonent_id):
     try:
         abonent = Abonent.objects.get(pk=abonent_id)
     except:
-        abonent = None
-        info = None
-        template = 'deadend.html'
-        form = PassportForm()
+        raise Http404
     else:
         if abonent.utype == 'F':
             info, created = Passport.objects.get_or_create(abonent__pk=abonent.pk, defaults={'abonent':abonent, 'series':'', 'number' : '', 'issued_by' : '', 'date' : datetime.datetime.now(), 'address' : '' })
@@ -655,7 +626,7 @@ def abonent_info(request, abonent_id):
                     form.save()
             else:
                 form = PassportForm(instance=info)
-            template = 'abonent/info_person.html'
+            header = 'Паспортные данные'
         else:
             info, created = Detail.objects.get_or_create(abonent__pk=abonent.pk, defaults={'abonent':abonent, 'title':'', 'inn' : '', 'kpp' : '', 'account' : '', 'post_address' : '', 'official_address' : '' })
             # for item in Detail.objects.filter(abonent__pk=abonent.pk):
@@ -668,8 +639,14 @@ def abonent_info(request, abonent_id):
                     print form.errors
             else:
                 form = DetailForm(instance=info)
-            template = 'abonent/info_company.html'
-    return render_to_response(template, { 'abonent' : abonent, 'form': form, 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() }, context_instance = RequestContext(request))
+            header = 'Реквизиты компании'
+
+    return render_to_response('generic/generic_edit.html', { 
+                                'header' : header,
+                                'form': form,
+                                'abonent': abonent,
+                                'extend': 'abonent/main.html', },
+                                 context_instance = RequestContext(request))
 
 @login_required
 def abonent_tts(request, abonent_id):
@@ -684,8 +661,7 @@ def abonent_tts(request, abonent_id):
     tts = TroubleTicket.objects.filter(abonent__pk=abonent_id).order_by('-create_date')    
     return render_to_response('abonent/tts.html', { 
                                                     'abonent' : abonent, 
-                                                        'tts' : tts, 
-                                                 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() }, 
+                                                        'tts' : tts, }, 
                               context_instance = RequestContext(request))
 
 def import_abonent_from1C(request):

@@ -27,13 +27,13 @@ class ManageForm(forms.ModelForm):
         model = Abonent
         fields = ['title','notice_email','notice_mobile', 'is_credit', 'status','tag','vip']
         widgets = {
-            'title': forms.TextInput(attrs={'class': 'form-control', 'disabled':'disabled', 'placeholder': 'Доп.название' }),
-            'notice_email': forms.EmailInput(attrs={'class': 'form-control', 'disabled':'disabled', 'placeholder': 'E-Mail'}),
-            'notice_mobile': forms.TextInput(attrs={'class': 'form-control', 'disabled':'disabled', 'placeholder': 'Телефон' }),
-            'is_credit': forms.Select(attrs={'class': 'form-control', 'disabled':'disabled'}),
-            'status': forms.Select(attrs={'class': 'form-control', 'disabled':'disabled'}),
-            'tag': forms.SelectMultiple(attrs={'class' : 'form-control multiple select2-multiple','disabled':'disabled'}),
-            'vip': forms.CheckboxInput(attrs={'disabled':'disabled'}),
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Доп.название' }),
+            'notice_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'E-Mail'}),
+            'notice_mobile': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Телефон' }),
+            'is_credit': forms.Select(attrs={'class': 'form-control', }),
+            'status': forms.Select(attrs={'class': 'form-control', }),
+            'tag': forms.SelectMultiple(attrs={'class' : 'form-control multiple select2-multiple',}),
+            'vip': forms.CheckboxInput(attrs={}),
         }
 
 
@@ -42,12 +42,12 @@ class PassportForm(forms.ModelForm):
         model = Passport
         exclude = ['abonent']
         widgets = {
-            'series': forms.TextInput(attrs={'class': 'form-control', 'size':'4', 'disabled':'disabled'}),
-            'number': forms.TextInput(attrs={'class': 'form-control', 'disabled':'disabled'}),
-            'date': forms.DateInput(attrs={'class': 'form-control', 'disabled':'disabled'}),
-            'issued_by': forms.TextInput(attrs={'class': 'form-control', 'disabled':'disabled'}),
-            'address': forms.TextInput(attrs={'class': 'form-control', 'disabled':'disabled'}),
-            'code': forms.TextInput(attrs={'class': 'form-control', 'disabled':'disabled'}),
+            'series': forms.TextInput(attrs={'class': 'form-control', 'size':'4', }),
+            'number': forms.TextInput(attrs={'class': 'form-control', }),
+            'date': forms.DateInput(attrs={'class': 'form-control', }),
+            'issued_by': forms.TextInput(attrs={'class': 'form-control', }),
+            'address': forms.TextInput(attrs={'class': 'form-control', }),
+            'code': forms.TextInput(attrs={'class': 'form-control', }),
         }
 
 class DetailForm(forms.ModelForm):
@@ -55,13 +55,13 @@ class DetailForm(forms.ModelForm):
         model = Detail
         exclude = ['abonent']
         widgets = {
-            'title': forms.TextInput(attrs={'class': 'form-control', 'size':'4', 'disabled':'disabled'}),
-            'inn': forms.TextInput(attrs={'class': 'form-control', 'disabled':'disabled'}),
-            'kpp': forms.DateInput(attrs={'class': 'form-control', 'disabled':'disabled'}),
-            'account': forms.TextInput(attrs={'class': 'form-control', 'disabled':'disabled'}),
-            'post_address': forms.TextInput(attrs={'class': 'form-control', 'disabled':'disabled'}),
-            'official_address': forms.TextInput(attrs={'class': 'form-control', 'disabled':'disabled'}),
-            'bank': forms.Select(attrs={'class': 'form-control','disabled':'disabled'}),
+            'title': forms.TextInput(attrs={'class': 'form-control', 'size':'4', }),
+            'inn': forms.TextInput(attrs={'class': 'form-control', }),
+            'kpp': forms.DateInput(attrs={'class': 'form-control', }),
+            'account': forms.TextInput(attrs={'class': 'form-control', }),
+            'post_address': forms.TextInput(attrs={'class': 'form-control', }),
+            'official_address': forms.TextInput(attrs={'class': 'form-control', }),
+            'bank': forms.Select(attrs={'class': 'form-control',}),
         }
 
 class SmartSearchForm(forms.Form):

@@ -111,7 +111,8 @@ def device_edit(request, device_id):
 
     return render_to_response('generic/generic_edit.html', {
                                 'header' : header,
-                                'form': form,},
+                                'form': form,
+                                'extend': 'index.html',},
                                 context_instance = RequestContext(request)
                                 ) 
 
@@ -144,7 +145,8 @@ def device_iface_add(request, device_id):
 
     return render_to_response('generic/generic_edit.html', { 
                                 'header' : header,
-                                'form': form, },
+                                'form': form,
+                                'extend': 'index.html', },
                                  context_instance = RequestContext(request))
 
 # Удаление интерфейса
@@ -181,7 +183,8 @@ def device_iface_edit(request, device_id, iface_id):
 
     return render_to_response('generic/generic_edit.html', { 
                                 'header' : header,
-                                'form': form, },
+                                'form': form, 
+                                'extend': 'index.html',},
                                  context_instance = RequestContext(request))
 
 # Редактирование местоположения оборудования
@@ -205,7 +208,8 @@ def device_location_edit(request, device_id):
 
     return render_to_response('generic/generic_edit.html', { 
                                 'header' : header,
-                                'form': form, },
+                                'form': form,
+                                'extend': 'index.html', },
                                  context_instance = RequestContext(request))
 
 def syslog_host(request,iface_id):
@@ -244,7 +248,7 @@ def syslog_list(request):
                 sql = """SELECT * from logs WHERE datetime >'%s' AND datetime <='%s' order by `seq`;""" % (datestart,datefinish)
     else:
         form = SyslogFilterForm()
-        sql = """SELECT * from logs order by `seq` desc limit 150;"""
+        sql = """SELECT * from logs order by `seq` desc limit 50;"""
     
     cursor.execute(sql)
     data = cursor.fetchall()
@@ -298,6 +302,7 @@ def app_edit(request, app_id):
 
     return render_to_response('generic/generic_edit.html', {
                                 'header' : header,
-                                'form': form,},
+                                'form': form,
+                                'extend': 'index.html',},
                                 context_instance = RequestContext(request)
                                 ) 

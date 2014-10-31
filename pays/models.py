@@ -161,12 +161,19 @@ class Payment(models.Model):
 
     def save(self, *args, **kwargs):
         isNew = not self.pk
+        if not isNew:
+            diff = Payment.objects.get(pk=self.pk).sum - self.sum
+            Abonent.objects.filter(pk=self.abon.pk).update(balance=F('balance') - diff)
+            abonent = Abonent.objects.get(pk=self.abon.pk)
+            abonent.check_status(reason='Изменен размер платежа')
+        if self.sum == 0:
+            self.valid = False
         super(Payment, self).save(*args, **kwargs)
         if isNew: 
             if self.num == '':
                 self.num = self.pk
                 super(Payment, self).save(*args, **kwargs)
-            # self.abon.balance = F('balance') + self.sum
+
             PromisedPays.objects.filter(abonent__pk=self.abon.pk, pay_onaccount=True).update(repaid=True)
             Abonent.objects.filter(pk=self.abon.pk).update(balance=F('balance') + self.sum)
             abonent = Abonent.objects.get(pk=self.abon.pk)
@@ -178,13 +185,6 @@ class Payment(models.Model):
             else:
                 extra_keys = { 'summa' : self.sum, 'balance' : round(abonent.balance,2) }
                 abonentevent.generate_messages([self.abon],extra_keys)
-             
-            # Здесь формируем уведомление о платеже
-            # if abonent.notice_email and self.sum > 0:
-            #     email = EmailMessage(abonent=abonent, destination = abonent.notice_email, subject = 'Зачисление средств', content = u' На ваш счет зачислено: %s руб. Теперь на вашем счету %s руб.' % (self.sum, abonent.balance) )
-            #     email.save()        
-            # self.abon.balance += self.sum
-            # self.abon.save()
             
     def delete(self, *args, **kwargs):
         # self.abon.balance = F('balance') - self.sum
