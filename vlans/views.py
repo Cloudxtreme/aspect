@@ -38,7 +38,8 @@ def get_ip(request):
                 if ipaddr.interface.for_device:
                     device = ipaddr.interface.device_set.all()[0]
                     desc = u'%s  %s' % (device.devtype, device.location)
-                    url = reverse('devices_all')
+                    anchortag = '#%s' % device.pk
+                    url = reverse('devices_list', args=[ipaddr.net.pk]) + anchortag
                 else:
                     service = ipaddr.interface.service_set.all()[0]
                     desc = u'%s  %s' % (service.abon, service.location)

@@ -183,6 +183,12 @@ class OrgServiceForm(forms.ModelForm):
         widget=forms.Select(attrs={'class' : 'form-control'}),
      )
 
+    datechange = forms.DateField(
+        label=u'Дата активации услуги', 
+        required=False,
+        widget=DateTimePicker(options={"format": "YYYY-MM-DD", "pickTime": False}),
+     )
+
     price = forms.FloatField(label=u'Абон. плата, руб.')
     install_price = forms.FloatField(label=u'Стоимость подключения, руб.')
 

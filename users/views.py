@@ -491,9 +491,13 @@ def service_plan_edit(request, abonent_id, service_id):
                                 context_instance = RequestContext(request)
                                 ) 
 @login_required
-def service_add(request, abonent_id):
-    new = True
-    service = Service()
+def service_add(request, abonent_id, service_id):
+    if service_id == '0':
+        message = 'Добавление услуги'
+        service = Service()
+    else:
+        message = 'Изменение услуги'
+        service = Service.objects.get(pk=service_id)
 
     try:
         abonent = Abonent.objects.get(pk = abonent_id)
@@ -513,6 +517,7 @@ def service_add(request, abonent_id):
                 speed = form.cleaned_data['speed']
                 price = form.cleaned_data['price']
                 install_price = form.cleaned_data['install_price']
+                datechange = form.cleaned_data['datechange']
                 title = u'%s' % (speed)
                 plan = Plan(title = title,
                             tos = service.tos,
@@ -526,6 +531,17 @@ def service_add(request, abonent_id):
                 plan.segment.add(service.segment)
                 service.plan = plan
             service.save()
+            # Создаем запись об активации услуги
+            if datechange:
+                ssc = ServiceStatusChanges(
+                                service=service,
+                                newstatus=settings.STATUS_ACTIVE,
+                                comment='Изменение тарифного плана',
+                                date=datechange,
+                                # done=True,
+                                # successfully=True,
+                        )
+                ssc.save()
             # Создаем уведомление о новой услуге для всех инженеров
             for user in Group.objects.get(name='Инженеры').user_set.all():
                 url_abonent = reverse('abonent_info', args=[abonent.pk])
@@ -545,11 +561,17 @@ def service_add(request, abonent_id):
         else:
             form = OrgServiceForm(instance=service)
 
-    return render_to_response('service/service_add.html', {
-                                'form': form,
-                                'abonent' : abonent, },
-                                context_instance = RequestContext(request)
-                                ) 
+    return render_to_response('service/service_generic_changes.html', { 
+                                'abonent' : abonent, 
+                                'form': form, 
+                                'menu_title': message, },
+                                 context_instance = RequestContext(request))
+
+    # return render_to_response('service/service_add.html', {
+    #                             'form': form,
+    #                             'abonent' : abonent, },
+    #                             context_instance = RequestContext(request)
+    #                             ) 
 
 @login_required	
 def abonent_services(request, abonent_id):

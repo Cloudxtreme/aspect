@@ -59,15 +59,6 @@ def calcnet(net, mask):
         return (net,mask1),(net1,mask1)
     return ((net,mask1),(net1,mask1), calcnet(net,mask1),calcnet(net1,mask1))
 
-# class SubInterface(models.Model):
-#     title = models.CharField(u'Название', max_length=50)
-#     ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', unique=True)
-
-#     class Meta:
-#         verbose_name = u'Интерфейс'
-#         verbose_name_plural = u'Интерфейсы'
-#         ordering = ['ip']
-
 class Device(models.Model):
     interfaces = models.ManyToManyField('users.Interface', verbose_name=u'Интерфейсы',blank=True, null=True)
     devtype = models.ForeignKey(DevType, verbose_name=u'Модель')

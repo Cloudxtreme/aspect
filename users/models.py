@@ -45,8 +45,8 @@ class Pipe(models.Model):
     speed_out = models.PositiveIntegerField(default=0, blank=True, null=True)
 
     class Meta:
-        verbose_name = u'Тип услуги'
-        verbose_name_plural = u'Типы услуг'
+        verbose_name = u'Pipe'
+        verbose_name_plural = u'Pipes'
         ordering = ['speed_in','speed_out']
 
     def __unicode__(self):

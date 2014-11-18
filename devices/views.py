@@ -9,7 +9,7 @@ from devices.models import Device, DevType, DeviceStatusEntry, Application
 from devices.forms import DeviceEditForm, SyslogFilterForm, AppEditForm
 from users.forms import ServiceInterfaceForm
 from users.models import Interface
-from vlans.models import IPAddr
+from vlans.models import IPAddr, Network
 from vlans.forms import LocationForm
 from django.core import serializers
 import MySQLdb
@@ -74,6 +74,7 @@ def set_state(request):
     else:
         return HttpResponse('Device found')
 
+# Depricated -->
 @login_required
 def devices_all(request):
     devices_list = Device.objects.all()
@@ -89,7 +90,27 @@ def devices_all(request):
         # If page is out of range (e.g. 9999), deliver last page of results.
         devices = paginator.page(paginator.num_pages)
 
-    return render_to_response('devices/devices_list.html', { 'devices': devices }, context_instance = RequestContext(request))
+    return render_to_response('devices/devices_list.html', { 
+                                'devices': devices }, 
+                                context_instance = RequestContext(request))
+# <-- Depricated
+
+@login_required
+def devices_list(request, net_id):
+    parent_nets = Network.objects.filter(net_type='EN')
+    if net_id == '0':
+        dev_list = Device.objects.none()
+    elif net_id=='1':
+        dev_list = Device.objects.filter(interfaces=None)
+    else:
+        net = Network.objects.get(pk=net_id)
+        iface_list = net.ipaddr_set.all().values_list('interface')
+        dev_list = Device.objects.filter(interfaces__in=iface_list).order_by('interfaces')
+
+    return render_to_response('devices/dev_list.html', { 
+                                'dev_list' : dev_list, 
+                                'parent_nets' : parent_nets }, 
+                                context_instance = RequestContext(request))
 
 @login_required
 def device_edit(request, device_id):
@@ -105,7 +126,12 @@ def device_edit(request, device_id):
         if form.is_valid():
             newdevice = form.save()
             newdevice.save()
-            return HttpResponseRedirect(reverse('devices_all'))
+            if device.interfaces.all().count():
+               net_id = device.interfaces.all()[0].ip.net_id
+            else:
+                net_id = 1
+            anchortag = '#%s' % device.pk
+            return HttpResponseRedirect(reverse('devices_list', args=[net_id]) + anchortag)
     else:
         form = DeviceEditForm(instance=device)
 
@@ -132,7 +158,12 @@ def device_iface_add(request, device_id):
             iface.for_device = True
             iface.save()
             device.interfaces.add(iface)
-            return HttpResponseRedirect(reverse('devices_all'))
+            if device.interfaces.all().count():
+               net_id = device.interfaces.all()[0].ip.net_id
+            else:
+                net_id = 1
+            anchortag = '#%s' % device.pk
+            return HttpResponseRedirect(reverse('devices_list', args=[net_id]) + anchortag)
     else:
         form = ServiceInterfaceForm()
     
@@ -159,7 +190,7 @@ def device_iface_del(request, iface_id):
 
     interface.delete()
 
-    return HttpResponseRedirect(reverse('devices_all'))
+    return HttpResponseRedirect(reverse('devices_list'), args=[0])
 
 # Редактирование интерфейса
 @login_required
@@ -175,7 +206,12 @@ def device_iface_edit(request, device_id, iface_id):
         form = ServiceInterfaceForm(request.POST,instance=interface)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('devices_all'))
+            if device.interfaces.all().count():
+               net_id = device.interfaces.all()[0].ip.net_id
+            else:
+                net_id = 1
+            anchortag = '#%s' % device.pk
+            return HttpResponseRedirect(reverse('devices_list', args=[net_id]) + anchortag)
     else:
         form = ServiceInterfaceForm(instance=interface)
         net_type = ['UN','EN'] if device.router else ['EN']
@@ -202,7 +238,12 @@ def device_location_edit(request, device_id):
             location = form.save()
             device.location = location
             device.save()
-            return HttpResponseRedirect(reverse('devices_all'))
+            if device.interfaces.all().count():
+               net_id = device.interfaces.all()[0].ip.net_id
+            else:
+                net_id = 1
+            anchortag = '#%s' % device.pk
+            return HttpResponseRedirect(reverse('devices_list', args=[net_id]) + anchortag)
     else:
         form = LocationForm(instance=device.location)
 
@@ -211,6 +252,15 @@ def device_location_edit(request, device_id):
                                 'form': form,
                                 'extend': 'index.html', },
                                  context_instance = RequestContext(request))
+
+# Поиск заявок в журнале на работу с оборудованием по IP адресу
+def get_application_entries(request):
+    if request.GET:
+        ipaddr = request.GET['ipaddr']
+        app_list = Application.objects.filter(ipaddr__icontains=ipaddr)
+    else:
+        app_list = Application.objects.none()
+    return render_to_response('devices/applications_list.html', { 'app_list': app_list }, context_instance = RequestContext(request))
 
 def syslog_host(request,iface_id):
     log_list = []
@@ -238,14 +288,17 @@ def syslog_list(request):
         if form.is_valid():
             datestart = form.cleaned_data['datestart']
             datefinish = form.cleaned_data['datefinish']
-            datefinish = datefinish + timedelta(days=1)
             host = form.cleaned_data['host']
+            conditions = """"""
+            if datestart:
+                conditions += """AND datetime >'%s'""" % datestart
+            if datefinish:
+                datefinish = datefinish + timedelta(days=1)
+                conditions += """AND datetime <='%s'""" % datefinish
             if host:
-                ip = host.ip.ip
-                sql = """SELECT * from logs WHERE host='%s'AND datetime >'%s' AND datetime <='%s' order by `seq`;""" % (ip,datestart,datefinish)
-                print sql
-            else:
-                sql = """SELECT * from logs WHERE datetime >'%s' AND datetime <='%s' order by `seq`;""" % (datestart,datefinish)
+                conditions += """AND host='%s'""" % host
+
+            sql = """SELECT * from logs WHERE 1 %s order by `seq`;""" % conditions
     else:
         form = SyslogFilterForm()
         sql = """SELECT * from logs order by `seq` desc limit 50;"""

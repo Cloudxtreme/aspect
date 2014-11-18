@@ -101,7 +101,7 @@
                 <ul class="dropdown-menu">
                     <li><a href={% url "ips" 0 %}>IP Адреса</a></li>
                     <li><a href={% url "vlans.views.vlans_all" %}>VLANs</a></li>
-                    <li><a href={% url "devices.views.devices_all" %}>Оборудование</a></li>
+                    <li><a href={% url "devices_list" 0 %}>Оборудование</a></li>
                     <li><a href={% url "apps_all" %}>Журнал работы с оборудованием</a></li>
                     <li><a href={% url "syslog_list" %}>Syslog</a></li>
                 </ul>
