@@ -262,6 +262,23 @@ def get_application_entries(request):
         app_list = Application.objects.none()
     return render_to_response('devices/applications_list.html', { 'app_list': app_list }, context_instance = RequestContext(request))
 
+def zapret_info_log(request):
+    log_list = []
+    db = MySQLdb.connect(host="192.168.64.6", user="syslog", \
+                         passwd="yfpfgbcm", db="syslog", charset='utf8')
+    cursor = db.cursor()
+    sql = """SELECT * from logs WHERE program='zapret_checker.' order by `seq` desc limit 150;"""
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    for rec in data:
+        host, facility, priority, level, tag, date, program, msg, seq = rec
+        entry = {'host':host, 'msg':msg, 'seq' :seq, 'facility':facility, 'priority':priority, 'level':level, 'tag':tag, 'date':date, 'program':program }
+        log_list.append(entry)
+    db.close()
+
+    return render_to_response('resources/syslog_list.html', { 'log_list': log_list, },
+                                 context_instance = RequestContext(request))
+
 def syslog_host(request,iface_id):
     log_list = []
     db = MySQLdb.connect(host="192.168.64.6", user="syslog", \

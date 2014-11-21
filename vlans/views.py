@@ -82,6 +82,7 @@ def ipaddr_list(request, parent_id):
     parent_nets = Network.objects.filter(net_type='DN')
     if parent_id == '0':
         net_list = Network.objects.none()
+        result_list = ()
     else:
         nonexsistent_nets = list()
         nonexsistent_nets.append(Network(ip='194.190.13.4',mask=30,net_type='EN',decip=1))
