@@ -9,4 +9,4 @@ def calcnet(net,mask):
 	net1 = dec2ip(ip2dec(net)+pow(2,31-mask))
 	if mask >= 29:
 	    return (net,mask1),(net1,mask1)
-	return list(net,mask1),(net1,mask1), calcnet(net,mask1),calcnet(net1,mask1)
+	return (net,mask1),(net1,mask1), calcnet(net,mask1),calcnet(net1,mask1)

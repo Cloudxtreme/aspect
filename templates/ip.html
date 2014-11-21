@@ -27,6 +27,7 @@
 <div class="page-header">
 	<h2 class="sub-header">Управление адресами</h2>
 </div>
+
 <div class="row">
     <div class="col-md-3">
         <ul class="nav nav-pills nav-stacked">
@@ -41,27 +42,33 @@
     <div class="col-md-9">
     	<div class="panel-group" id="accordion">
     	{% for net in net_list %}
-    	  <div class="panel panel-default">
-    	    <div class="panel-heading">
-    	      <h4 class="panel-title">
-    	        {% if net.mask != 32 %}<a data-toggle="collapse"  data-parent="#accordion" href="#collapse{{net.pk}}">
-    	          {{ net.ip }}/{{ net.mask }} - {{ net.vlan.description }} 
-                  <span class="badge pull-right">vlan {{ net.vlan.number }}</span>
-    	        </a>&nbsp;
-    			<img id="spinner{{net.pk}}" style="display:none;" src="/media/images/spinner2.gif" alt="Loading"/>
-                {% else %} 
-                    {{ net.ip }} создать сеть
-                {% endif %}
-    	      </h4>
-    	    </div>
-    	    <div id="collapse{{net.pk}}" class="panel-collapse collapse" val="{{net.pk}}">
-    	      <div class="panel-body">
-    			<ul id="list-group{{net.pk}}" class="list-group">
-    			<!-- Сюда подгружается список IP адресов через ajax-->
-    			</ul>	      	
-    	      </div>
-    	    </div>
-    	  </div>
+            {% if net.pk %}
+        	  <div class="panel panel-default">
+        	    <div class="panel-heading">
+        	      <h4 class="panel-title">
+        	        {% if net.mask != 32 %}<a data-toggle="collapse"  data-parent="#accordion" href="#collapse{{net.pk}}">
+        	          {{ net.ip }}/{{ net.mask }} - {{ net.vlan.description }} 
+                      <span class="badge pull-right">vlan {{ net.vlan.number }}</span>
+        	        </a>&nbsp;
+                    <img id="spinner{{net.pk}}" style="display:none;" src="/media/images/spinner2.gif" alt="Loading"/>
+                    {% else %} 
+                        {{ net.ip }} создать сеть
+                    {% endif %}
+        	      </h4>
+        	    </div>
+        	    <div id="collapse{{net.pk}}" class="panel-collapse collapse" val="{{net.pk}}">
+        	      <div class="panel-body">
+        			<ul id="list-group{{net.pk}}" class="list-group">
+        			<!-- Сюда подгружается список IP адресов через ajax-->
+        			</ul>	      	
+        	      </div>
+        	    </div>
+        	  </div>
+            {% else %}
+                <button type="button" class="btn btn-primary">
+                    {{ net.ip }}/{{ net.mask }}
+                </button>
+            {% endif %}
     	{% endfor %}
     	</div>
     </div>

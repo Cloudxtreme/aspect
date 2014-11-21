@@ -62,14 +62,39 @@ def vlans_all(request):
     vlan_list = Vlan.objects.all().order_by('number')
     return render_to_response('resources/vlan_list.html', { 'vlan_list': vlan_list }, context_instance = RequestContext(request))
 
+
+def dec2ip(ip):
+     return '.'.join([str((ip >> 8 * i) & 255) for i in range(3, -1, -1)])
+        
+def ip2dec(ip):
+    return sum([int(q) << i * 8 for i, q in enumerate(reversed(ip.split(".")))])
+
+def calcnet(net,mask):
+    mask1 = mask + 1
+    net1 = dec2ip(ip2dec(net) + pow(2,31-mask))
+    if mask >= 29:
+        return (net,mask1),(net1,mask1)
+    return (net,mask1),(net1,mask1),calcnet(net,mask1),calcnet(net1,mask1)
+
 @login_required
-def ips(request, parent_id):
-	parent_nets = Network.objects.filter(net_type='DN')
-	if parent_id == '0':
-		net_list = Network.objects.none()
-	else:
-		net_list = Network.objects.all().filter(parent__pk=parent_id).order_by('decip')
-	return render_to_response('ip.html', { 'net_list' : net_list, 'parent_nets' : parent_nets }, context_instance = RequestContext(request))
+def ipaddr_list(request, parent_id):
+    from itertools import chain
+    parent_nets = Network.objects.filter(net_type='DN')
+    if parent_id == '0':
+        net_list = Network.objects.none()
+    else:
+        nonexsistent_nets = list()
+        nonexsistent_nets.append(Network(ip='194.190.13.4',mask=30,net_type='EN',decip=1))
+        nonexsistent_nets.append(Network(ip='194.190.13.8',mask=30,net_type='EN',decip=2))
+        net_list = list(Network.objects.all().filter(parent__pk=parent_id))
+        result_list = sorted(
+                chain(net_list, nonexsistent_nets),
+                key=lambda instance: instance.decip) 
+
+    return render_to_response('ip.html', { 
+                                'net_list' : result_list, 
+                                'parent_nets' : parent_nets }, 
+                                context_instance = RequestContext(request))
 
 @login_required
 def vlan_edit(request, vlan_id):

@@ -173,7 +173,7 @@ class Abonent(models.Model):
                     self.status = (settings.STATUS_ACTIVE if self.balance >= settings.TURNOFFBALANCE else settings.STATUS_OUT_OF_BALANCE)
                 else: # Постоплатников c минусовым балансом выключаем 25 числа или в любой другой день, как только сумма на счете станет меньше чем сумма всех услуг
                     service_sum = self.service_set.filter(status__in=['A','N']).aggregate(Sum('plan__price'))['plan__price__sum'] or 0
-                    self.status = (settings.STATUS_OUT_OF_BALANCE if (self.balance - settings.TURNOFFBALANCE < -service_sum  ) or (self.balance < settings.TURNOFFBALANCE and datetime.datetime.today().day > 24) else settings.STATUS_ACTIVE)
+                    self.status = (settings.STATUS_OUT_OF_BALANCE if (self.balance - settings.TURNOFFBALANCE < -service_sum) or (self.balance < settings.TURNOFFBALANCE and datetime.datetime.today().day > 24) else settings.STATUS_ACTIVE)
                 super(Abonent, self).save()
                 self.set_changes(reason, old_status)
 
@@ -316,7 +316,7 @@ class Service(models.Model):
         today = date.date()
         qty_days = calendar.mdays[today.month]
         summ = self.plan.price * (qty_days - today.day)/qty_days
-        if summ > 0:
+        if summ > 0 and self.abon.is_credit == settings.PAY_BEFORE:
             from pays.models import PaymentSystem,Payment
             top = PaymentSystem.objects.get(pk=4)
             payment = Payment(abon=self.abon, top=top, sum=summ, date=date)
