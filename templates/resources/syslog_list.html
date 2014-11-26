@@ -5,10 +5,10 @@
 {% endblock %}
 
 {% block main %} 
-{% if form %}
 <div class="page-header">
-  <h2 class="sub-header">Журнал syslog</h2>
+    <h2 class="sub-header">{{ header }}</h2>
 </div>
+{% if form %}
 <form method="post" class="form-horizontal" role="form" enctype="multipart/form-data">{% csrf_token %}
     {% for field in form %}
         <div class="form-group">

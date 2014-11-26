@@ -9,6 +9,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'aspekt.settings'
 
 from users.models import Abonent
 from notice.models import AbonentEvent
+from django.conf import settings
 
 if len (sys.argv) == 2:
     try:
@@ -17,5 +18,5 @@ if len (sys.argv) == 2:
         pass
     else:
         extra_keys = {}
-        abonent_list = Abonent.objects.filter(balance__lt=0,utype='U') # Получаем список юр лиц с отрицательным балансом
+        abonent_list = Abonent.objects.filter(balance__lt=settings.TURNOFFBALANCE,utype='U') # Получаем список юр лиц с отрицательным балансом
         abonentevent.generate_messages(abonent_list,extra_keys)

@@ -254,6 +254,7 @@ def device_location_edit(request, device_id):
                                  context_instance = RequestContext(request))
 
 # Поиск заявок в журнале на работу с оборудованием по IP адресу
+@login_required
 def get_application_entries(request):
     if request.GET:
         ipaddr = request.GET['ipaddr']
@@ -262,6 +263,7 @@ def get_application_entries(request):
         app_list = Application.objects.none()
     return render_to_response('devices/applications_list.html', { 'app_list': app_list }, context_instance = RequestContext(request))
 
+@login_required
 def zapret_info_log(request):
     log_list = []
     db = MySQLdb.connect(host="192.168.64.6", user="syslog", \
@@ -275,16 +277,19 @@ def zapret_info_log(request):
         entry = {'host':host, 'msg':msg, 'seq' :seq, 'facility':facility, 'priority':priority, 'level':level, 'tag':tag, 'date':date, 'program':program }
         log_list.append(entry)
     db.close()
+    header = u'Журнал получения списка запрещенных сайтов'
 
-    return render_to_response('resources/syslog_list.html', { 'log_list': log_list, },
+    return render_to_response('resources/syslog_list.html', { 'log_list': log_list, 'header' : header },
                                  context_instance = RequestContext(request))
 
+@login_required
 def syslog_host(request,iface_id):
     log_list = []
     db = MySQLdb.connect(host="192.168.64.6", user="syslog", \
                          passwd="yfpfgbcm", db="syslog", charset='utf8')
     cursor = db.cursor()
-    sql = """SELECT * from logs WHERE host='%s' order by `seq` desc limit 150;""" % (Interface.objects.get(pk=iface_id).ip.ip)
+    ip = Interface.objects.get(pk=iface_id).ip.ip
+    sql = """SELECT * from logs WHERE host='%s' order by `seq` desc limit 150;""" % (ip)
     cursor.execute(sql)
     data = cursor.fetchall()
     for rec in data:
@@ -292,9 +297,12 @@ def syslog_host(request,iface_id):
         entry = {'host':host, 'msg':msg, 'seq' :seq, 'facility':facility, 'priority':priority, 'level':level, 'tag':tag, 'date':date, 'program':program }
         log_list.append(entry)
     db.close()
+    header = u'Журнал событий узла %s' % ip
 
-    return render_to_response('resources/syslog_list.html', { 'log_list': log_list, },
+    return render_to_response('resources/syslog_list.html', { 'log_list': log_list, 'header' : header },
                                  context_instance = RequestContext(request))    
+
+@login_required    
 def syslog_list(request):
     log_list = []
     db = MySQLdb.connect(host="192.168.64.6", user="syslog", \
@@ -330,7 +338,8 @@ def syslog_list(request):
 
     db.close()
 
-    return render_to_response('resources/syslog_list.html', { 'log_list': log_list, 'form': form, },
+    header = u'Журнал syslog'
+    return render_to_response('resources/syslog_list.html', { 'log_list': log_list, 'form': form, 'header' : header },
                                  context_instance = RequestContext(request))    
 
 
@@ -355,10 +364,10 @@ def apps_all(request):
 def app_edit(request, app_id):
     try:
         app = Application.objects.get(pk = app_id)
-        header = 'Редактирование заявки'
+        header = u'Редактирование заявки'
     except:
         app = Application()
-        header = 'Создание новой заявки'
+        header = u'Создание новой заявки'
 
     if request.method == 'POST':
         form = AppEditForm(request.POST, instance=app)
