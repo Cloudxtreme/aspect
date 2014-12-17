@@ -3,21 +3,23 @@
     <script type="text/javascript">
     $(function(){
         $('.panel-collapse').on('show.bs.collapse', function (){
-        	var spin = '#spinner' + $(this).attr('val');
-        	var lstgroup = '#list-group' + $(this).attr('val');
-        	$(spin).show();
-            $.getJSON("/ajax/get_ip/",{id:+$(this).attr('val')}, function(j) {
-                var options = '';
-                for (var i = 0; i < j.length; i++) {
-                    if (j[i]['abon_pk']==0) {url=''}
-                    else {url = '/abonent/' + j[i]['abon_pk'] + '/services/'};
-                    options += '<a href="' + j[i]['url'] + '" class="list-group-item">';
-                    options += '<h4 class="list-group-item-heading">' + j[i]['ip'] + '</h4>';
-                    options += '<p class="list-group-item-text">' + j[i]['desc'] + '</p></a>';
-                    }
-    	                $(lstgroup).html(options);
-    	                $(spin).hide();
-                    });
+            if ($(this).attr('val')!='None') {
+            	var spin = '#spinner' + $(this).attr('val');
+            	var lstgroup = '#list-group' + $(this).attr('val');
+            	$(spin).show();
+                $.getJSON("/ajax/get_ip/",{id:+$(this).attr('val')}, function(j) {
+                    var options = '';
+                    for (var i = 0; i < j.length; i++) {
+                        if (j[i]['abon_pk']==0) {url=''}
+                        else {url = '/abonent/' + j[i]['abon_pk'] + '/services/'};
+                        options += '<a href="' + j[i]['url'] + '" class="list-group-item">';
+                        options += '<h4 class="list-group-item-heading">' + j[i]['ip'] + '</h4>';
+                        options += '<p class="list-group-item-text">' + j[i]['desc'] + '</p></a>';
+                        }
+        	                $(lstgroup).html(options);
+        	                $(spin).hide();
+                        });
+            };
         });
     })
     </script>
@@ -42,33 +44,31 @@
     <div class="col-md-9">
     	<div class="panel-group" id="accordion">
     	{% for net in net_list %}
-            {% if net.pk %}
-        	  <div class="panel panel-default">
+        	  <div class="panel panel-{% if net.pk %}default{% else %}info{% endif%}">
         	    <div class="panel-heading">
         	      <h4 class="panel-title">
-        	        {% if net.mask != 32 %}<a data-toggle="collapse"  data-parent="#accordion" href="#collapse{{net.pk}}">
+        	        <a data-toggle="collapse"  data-parent="#accordion" 
+                    href="#collapse{% if net.pk %}{{ net.pk }}{% else %}{{ net.decip }}{% endif%}">
         	          {{ net.ip }}/{{ net.mask }} - {{ net.vlan.description }} 
                       <span class="badge pull-right">vlan {{ net.vlan.number }}</span>
         	        </a>&nbsp;
                     <img id="spinner{{net.pk}}" style="display:none;" src="/media/images/spinner2.gif" alt="Loading"/>
-                    {% else %} 
-                        {{ net.ip }} создать сеть
-                    {% endif %}
         	      </h4>
         	    </div>
-        	    <div id="collapse{{net.pk}}" class="panel-collapse collapse" val="{{net.pk}}">
+        	    <div id="collapse{% if net.pk %}{{ net.pk }}{% else %}{{ net.decip }}{% endif%}" 
+                class="panel-collapse collapse" val="{{net.pk}}">
         	      <div class="panel-body">
+                    {% if not net.pk %}
+                        <button type="button" class="btn btn-primary">
+                        Создать сеть {{ net.ip }}/{{ net.mask }}
+                        </button>
+                    {% endif %}
         			<ul id="list-group{{net.pk}}" class="list-group">
         			<!-- Сюда подгружается список IP адресов через ajax-->
         			</ul>	      	
         	      </div>
         	    </div>
         	  </div>
-            {% else %}
-                <button type="button" class="btn btn-primary">
-                    {{ net.ip }}/{{ net.mask }}
-                </button>
-            {% endif %}
     	{% endfor %}
     	</div>
     </div>

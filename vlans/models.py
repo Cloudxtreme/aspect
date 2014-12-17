@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*- 
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+# from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 from vlans.fields import LocationField
 
@@ -31,8 +31,8 @@ class Vlan(models.Model):
     description = models.CharField(u'Описание',max_length=200, blank=True, null=True)
 
     class Meta:
-        verbose_name = _('Vlan')
-        verbose_name_plural = _('Vlans')
+        verbose_name = u'Vlan'
+        verbose_name_plural = u'Vlans'
         ordering = ['number']
 
     def __unicode__(self):
@@ -97,9 +97,10 @@ class Network(models.Model):
     ip = models.IPAddressField()
     mask = models.IntegerField(max_length=2)
     vlan = models.ForeignKey(Vlan,null=True,blank=True)
-    net_type = models.CharField(_('net_type'),max_length = 2, choices=TYPE_OF_NETS)
+    net_type = models.CharField(u'Тип сети',max_length = 2, choices=TYPE_OF_NETS)
     decip = models.PositiveIntegerField(null=True, blank=True)
     segment = models.ForeignKey('users.Segment')
+    in_dhcpd = models.BooleanField(u'Включать в DHCP',default=False)
 
     def clean(self):
         self.ip = dec2ip((ip2dec(self.ip) / pow(2, 32-self.mask))*pow(2, 32-self.mask))
@@ -153,8 +154,8 @@ class IPAddr(models.Model):
 #    decip = property(_get_decimal_ip)
 
     class Meta:
-        verbose_name = _('IP Address')
-        verbose_name_plural = _('IP Addresses')
+        verbose_name = u'IP Адрес'
+        verbose_name_plural = u'IP Адреса'
         ordering = ['decip']
 
     def __unicode__(self):

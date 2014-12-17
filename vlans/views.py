@@ -85,8 +85,8 @@ def ipaddr_list(request, parent_id):
         result_list = ()
     else:
         nonexsistent_nets = list()
-        nonexsistent_nets.append(Network(ip='194.190.13.4',mask=30,net_type='EN',decip=1))
-        nonexsistent_nets.append(Network(ip='194.190.13.8',mask=30,net_type='EN',decip=2))
+        nonexsistent_nets.append(Network(ip='194.190.13.4',mask=30,net_type='EN',decip=ip2dec('194.190.13.4')))
+        nonexsistent_nets.append(Network(ip='194.190.13.24',mask=30,net_type='EN',decip=ip2dec('194.190.13.24')))
         net_list = list(Network.objects.all().filter(parent__pk=parent_id))
         result_list = sorted(
                 chain(net_list, nonexsistent_nets),
