@@ -1,6 +1,6 @@
 #!/home/diamond/venv/billing/bin/python
 # -*- coding: utf-8 -*- 
-# Скрипт выдает список IP-адресов, разрешенных к доступу в интернет
+# Скрипт генерирует файл конфигурации DHCP сервера
 import os
 import sys
 
@@ -8,6 +8,7 @@ sys.path.append("/home/diamond/venv/billing/aspekt")
 os.environ['DJANGO_SETTINGS_MODULE'] = 'aspekt.settings'
 from vlans.models import Network, IPAddr
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # arg = sys.argv[1] if len (sys.argv) == 2 else False
 
 def dec2ip(ip):
@@ -26,7 +27,7 @@ config += '        range 192.168.64.253 192.168.64.254;\n'
 config += '        deny unknown-clients;\n'
 config += '}\n'
 
-f = open('dhcpd.conf', 'w')
+f = open(os.path.join(BASE_DIR, 'dhcpd.conf'), 'w')
 
 for net in Network.objects.filter(net_type='UN',in_dhcpd=True):
     mask = dec2ip(4294967295 - pow(2,32-net.mask)+1)

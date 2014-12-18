@@ -99,13 +99,6 @@
                 <a href="{% url 'users.views.service_vlan_edit' abonent.id service.id %}" data-toggle="tooltip" data-placement="left" title="Изменить список vlan'ов">
                 <span class="glyphicon glyphicon-cog"></span></a>
             </td>
-{#             <td>
-                {% if service.user_device %}
-                    {{ service.user_device }}
-                {% endif %}
-                <a href="{% url 'users.views.service_equip_edit' abonent.id service.id %}">
-                <span class="glyphicon glyphicon-cog"></span></a>
-            </td> #}
             <td>
                 {% ifequal service.adm_status '0' %}
                     {{ service.get_status_display }}

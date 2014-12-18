@@ -3,3 +3,6 @@ import1cdb.py
 my.cnf
 build/
 apache/
+media/invoices/
+scripts/*
+!scripts/*.py
