@@ -38,8 +38,8 @@
             <th class="col-md-1">Начало</th>
             <th>Тариф</th>
             <th class="col-md-1">Скорость</th>
-            <th class="col-md-2">Параметры</th>
-            <th class="col-md-1">Оборудование</th>
+            <th class="col-md-3">Параметры</th>
+            {# <th class="col-md-1">Оборудование</th> #}
             <th>Статус</th>
           </tr>
         </thead>
@@ -75,7 +75,7 @@
             <td>
                 {% for iface in service.ifaces.all %}
                     <p>
-                        {{ iface.ip.ip }}
+                        {{ iface.ip.ip }} - <small>{{ iface.mac }}</small>
                         <a id='#btn_iparp{{ iface.ip.pk }}' 
                         onclick="$.get( '/devices/get_iparp/?ip={{ iface.ip.ip }}&vlan={{ iface.ip.net.vlan.number }}', 
                         function( data ) {
@@ -99,13 +99,13 @@
                 <a href="{% url 'users.views.service_vlan_edit' abonent.id service.id %}" data-toggle="tooltip" data-placement="left" title="Изменить список vlan'ов">
                 <span class="glyphicon glyphicon-cog"></span></a>
             </td>
-            <td>
+{#             <td>
                 {% if service.user_device %}
                     {{ service.user_device }}
                 {% endif %}
                 <a href="{% url 'users.views.service_equip_edit' abonent.id service.id %}">
                 <span class="glyphicon glyphicon-cog"></span></a>
-            </td>
+            </td> #}
             <td>
                 {% ifequal service.adm_status '0' %}
                     {{ service.get_status_display }}

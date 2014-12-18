@@ -49,7 +49,7 @@
         	      <h4 class="panel-title">
         	        <a data-toggle="collapse"  data-parent="#accordion" 
                     href="#collapse{% if net.pk %}{{ net.pk }}{% else %}{{ net.decip }}{% endif%}">
-        	          {{ net.ip }}/{{ net.mask }} - {{ net.vlan.description }} 
+        	          {{ net.ip }}/{{ net.mask }} - {{ net.vlan.description }} {% if net.in_dhcpd %}<span class="badge">Включена в DHCP</span>{% endif %}
                       <span class="badge pull-right">vlan {{ net.vlan.number }}</span>
         	        </a>&nbsp;
                     <img id="spinner{{net.pk}}" style="display:none;" src="/media/images/spinner2.gif" alt="Loading"/>

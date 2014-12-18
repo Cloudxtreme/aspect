@@ -17,6 +17,7 @@ from users.models import Detail
 import sys
 import os
 import re
+from pytils import translit
 
 # SMTPserver = 'smtp.yandex.ru'
 # sender =     'albeon@ptls.ru'
@@ -88,18 +89,23 @@ class AbonentEvent(models.Model):
         return u'%s' % (self.title,)    
 
 class EmailMessage(models.Model):
+    def translate_path(self, filename):
+        fname, dot, extension = filename.rpartition('.')
+        filename = translit.slugify(fname)+'.'+extension
+        path = ''.join(["invoices/",filename])
+        return path
+
     abonent = models.ForeignKey('users.Abonent', verbose_name=u'Абонент', blank=True, null=True)
     destination = models.CharField(u'Получатель', max_length=70)
     subject = models.CharField(u'Тема', max_length=70)
     content = HTMLField(u'Сообщение')
     date = models.DateTimeField(default=datetime.now, verbose_name=u'Дата рассылки')
     sent = models.BooleanField(u'Отправлено', default=False)
-    attach = models.FileField(upload_to='invoices',blank=True, null=True)
+    attach = models.FileField(upload_to=translate_path,blank=True, null=True)
 
     def sendit(self):
         text_subtype = 'html' # typical values for text_subtype are plain, html, xml
         try:
-            # msg = MIMEText(self.content, text_subtype, 'utf-8')
             msg = MIMEMultipart()
             msg['Subject'] = self.subject
             msg['From']    = settings.EMAIL_SENDER # some SMTP servers will do this automatically, not all
