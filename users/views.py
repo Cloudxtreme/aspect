@@ -36,11 +36,11 @@ def balance(request):
     ip = request.META.get('REMOTE_ADDR', '') or request.META.get('HTTP_X_FORWARDED_FOR', '')
     
     try:
-        result = '%s руб.' % (IPAddr.objects.get(ip=ip).interface.service_set.all()[0].abon.balance)
+        balance = '%s руб.' % round((IPAddr.objects.get(ip=ip).interface.service_set.all()[0].abon.balance),2)
     except:
-        result = 'Баланс неизвестен'
+        balance = 'неизвестен'
 
-    return HttpResponse(result)
+    return render_to_response('balance.html', {'balance': balance})
 
 @login_required 
 def aquicksearch(request):
