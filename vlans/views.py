@@ -38,7 +38,8 @@ def edit_network(request,net_id):
     if request.method == 'POST':
         form = NetworkForm(request.POST,instance=net)
         if form.is_valid():
-            form.save()
+            network = form.save()
+            return HttpResponseRedirect(reverse('ips', args=[network.parent_id]))
     else:
         form = NetworkForm(instance=net)
 
