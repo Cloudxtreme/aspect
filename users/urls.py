@@ -46,4 +46,5 @@ urlpatterns = patterns('',
     url(r'^ajax/plans/$', 'users.views.abonent_search'),
     url(r'^ajax/planbytos/$', 'users.views.feeds_plans_by_tos'),
     url(r'^ajax/ipbyseg/$', 'users.views.feeds_ip_by_seg'),
+    url(r'^balance/$', 'users.views.balance', name='balance'),
 )

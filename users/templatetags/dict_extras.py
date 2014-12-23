@@ -23,6 +23,10 @@ def get_day(value):
     dict = {1: 'Понедельник', 2 : 'Вторник', 3 : 'Среда', 4 : 'Четверг', 5 : 'Пятница', 6 : 'Суббота', 7 : 'Воскресенье' }
     return dict.get(value)
 
+@register.filter    
+def get_shift_by_mask(value):
+    result = value - 17 if value < 25 else value - 25
+    return result
 
 # @register.filter
 # def get_promised(abonent_id):

@@ -94,8 +94,8 @@ class Network(models.Model):
     # ('LN','Сеть разделитель'),
     # )
     parent = models.ForeignKey('self', null=True, blank=True, related_name='children')
-    ip = models.IPAddressField()
-    mask = models.IntegerField(max_length=2)
+    ip = models.IPAddressField(u'Адрес сети')
+    mask = models.IntegerField(u'Маска',max_length=2)
     vlan = models.ForeignKey(Vlan,null=True,blank=True)
     net_type = models.CharField(u'Тип сети',max_length = 2, choices=TYPE_OF_NETS)
     decip = models.PositiveIntegerField(null=True, blank=True)

@@ -5,4 +5,7 @@ from django.conf import settings
 urlpatterns = patterns('',
     url(r'^(?P<vlan_id>\d+)/edit/$','vlans.views.vlan_edit', name='vlan_edit'),
     url(r'^all/$', 'vlans.views.vlans_all', name='vlan_all'),
+    url(r'^create_network/$', 'vlans.views.create_network', name='create_network'),
+    url(r'^ipaddr_list/(?P<parent_id>\d+)/$', 'vlans.views.ipaddr_list', name='ips'),
+    url(r'^edit_network/(?P<net_id>\d+)/$', 'vlans.views.edit_network', name='edit_network'),
 )

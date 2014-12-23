@@ -7,11 +7,8 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth import login, logout
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
-# from django.http import HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.core import serializers
-# from django.views.decorators.csrf import csrf_exempt, csrf_protect
-# from django.core.context_processors import csrf
 from django.template import RequestContext
 from users.forms import  ServiceForm, OrgServiceForm, SearchForm, LoginForm, \
                          PassportForm, DetailForm, ManageForm, AbonentForm, \
@@ -34,6 +31,16 @@ from pays.models import Payment
 from notes.models import Note
 from vlans.models import Location
 from contacts.models import Contact
+
+def balance(request):
+    ip = request.META.get('REMOTE_ADDR', '') or request.META.get('HTTP_X_FORWARDED_FOR', '')
+    
+    try:
+        result = '%s руб.' % (IPAddr.objects.get(ip=ip).interface.service_set.all()[0].abon.balance)
+    except:
+        result = 'Баланс неизвестен'
+
+    return HttpResponse(result)
 
 @login_required 
 def aquicksearch(request):
@@ -134,13 +141,6 @@ def abonent_add(request,abonent_id=0):
                                 'extend': 'index.html', },
                                  context_instance = RequestContext(request))
 
-    # return render_to_response('abonent/add.html', {
-    #                             'form': form,
-    #                             'message': message,
-    #                             'new': new,
-    #                             'abonent' : abonent},
-    #                             context_instance = RequestContext(request)
-    #                             )  
 @login_required
 def smart_search(request):
     abonent_list = Abonent.objects.none()

@@ -25,6 +25,8 @@
     </script>
 {% endblock %}
 
+{% load dict_extras %}
+
 {% block main %} 
 <div class="page-header">
 	<h2 class="sub-header">Управление адресами</h2>
@@ -41,34 +43,49 @@
         	{% endfor %}
         </ul>
     </div>
+
     <div class="col-md-9">
     	<div class="panel-group" id="accordion">
     	{% for net in net_list %}
-        	  <div class="panel panel-{% if net.pk %}default{% else %}info{% endif%}">
-        	    <div class="panel-heading">
-        	      <h4 class="panel-title">
-        	        <a data-toggle="collapse"  data-parent="#accordion" 
-                    href="#collapse{% if net.pk %}{{ net.pk }}{% else %}{{ net.decip }}{% endif%}">
-        	          {{ net.ip }}/{{ net.mask }} - {{ net.vlan.description }} {% if net.in_dhcpd %}<span class="badge">Включена в DHCP</span>{% endif %}
-                      <span class="badge pull-right">vlan {{ net.vlan.number }}</span>
-        	        </a>&nbsp;
-                    <img id="spinner{{net.pk}}" style="display:none;" src="/media/images/spinner2.gif" alt="Loading"/>
-        	      </h4>
-        	    </div>
-        	    <div id="collapse{% if net.pk %}{{ net.pk }}{% else %}{{ net.decip }}{% endif%}" 
-                class="panel-collapse collapse" val="{{net.pk}}">
-        	      <div class="panel-body">
-                    {% if not net.pk %}
-                        <button type="button" class="btn btn-primary">
-                        Создать сеть {{ net.ip }}/{{ net.mask }}
-                        </button>
-                    {% endif %}
-        			<ul id="list-group{{net.pk}}" class="list-group">
-        			<!-- Сюда подгружается список IP адресов через ajax-->
-        			</ul>	      	
-        	      </div>
-        	    </div>
-        	  </div>
+            {% if net.pk %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse"  data-parent="#accordion" 
+                            href="#collapse{{ net.pk }}">
+                            {{ net.ip }}/{{ net.mask }} - {{ net.vlan.description }} 
+                            {% if net.in_dhcpd %}<span class="badge">Включена в DHCP</span>{% endif %}
+                            <a href='{% url 'edit_network' net.pk %}'><span class="glyphicon glyphicon-edit"></span></a>
+                            <span class="badge pull-right">vlan {{ net.vlan.number }}</span>
+                            </a>&nbsp;<img id="spinner{{net.pk}}" style="display:none;" src="/media/images/spinner2.gif" alt="Loading"/>
+                        </h4>
+                    </div>
+                    <div id="collapse{{ net.pk }}" class="panel-collapse collapse" val="{{net.pk}}">
+                        <div class="panel-body">
+                            <ul id="list-group{{net.pk}}" class="list-group">
+                            <!-- Сюда подгружается список IP адресов через ajax-->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="panel panel-info col-md-offset-{{net.mask|get_shift_by_mask}}">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse"  data-parent="#accordion" 
+                            href="#collapse{{ net.decip }}_{{net.mask}}">
+                            {{ net.ip }}/{{ net.mask }}</a>
+                        </h4>
+                    </div>
+                    <div id="collapse{{ net.decip }}_{{net.mask}}" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            <a href='/vlans/create_network?ip={{net.decip}}&mask={{net.mask}}' type="button" class="btn btn-primary">
+                                Создать сеть {{ net.ip }}/{{ net.mask }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif%}        	    
     	{% endfor %}
     	</div>
     </div>
