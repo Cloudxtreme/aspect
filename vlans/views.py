@@ -170,7 +170,7 @@ def ipaddr_list(request, parent_id):
         net_list = list(Network.objects.all().filter(parent__pk=parent_id))
         result_list = sorted(
                 chain(net_list, nonexsistent_nets),
-                key=lambda instance: instance.decip) 
+                key=lambda instance: instance.decip + instance.mask * 0.01 ) 
 
     return render_to_response('ip.html', { 
                                 'net_list' : result_list, 

@@ -28,6 +28,10 @@ def get_shift_by_mask(value):
     result = value - 17 if value < 25 else value - 25
     return result
 
+@register.filter    
+def pow_2(value):
+    return pow(2,32-value)-2
+
 # @register.filter
 # def get_promised(abonent_id):
 # 	return PromisedPays.objects.filter(abonent__pk=abonent_id, pay_onaccount = True).count()
