@@ -9,9 +9,22 @@ from django.shortcuts import render_to_response, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.db.models import Avg, Max, Min, Sum
 from django.contrib.auth.models import User
-from datetime import timedelta
+from datetime import timedelta, datetime
+from django.conf import settings
 
 # Create your views here.close_promisedpay
+
+@login_required
+def get_defaulters(request):
+    today = datetime.now()
+    abonent_list = []
+    for abonent in Abonent.objects.filter(status=settings.STATUS_OUT_OF_BALANCE):
+        if abonent.payment_set.all().count() > 0:
+            if today - abonent.payment_set.all().order_by('-date')[0].date > timedelta(days=180):
+                abonent_list.append(abonent) 
+
+    return render_to_response('aqsearch_result.html', { 'abonents' : abonent_list, 'abonent_list_count' : len(abonent_list) } , context_instance = RequestContext(request))
+
 @login_required
 def close_promisedpay(request, abonent_id, promisedpay_id):
 	PromisedPays.objects.get(pk=promisedpay_id).close()
