@@ -17,13 +17,13 @@ def importcontacts1cdb():
   data = cursor.fetchall()
   cList = []
   for rec in data:
-    uid, addr, cnt, prs = rec
+    uid, addr, cnt, prs = rec # Номер договора, адрес, контакты, имена
     try:
-      abonent = Abonent.objects.get(contract=uid)
+      abonent = Abonent.objects.get(contract=uid) # Если не можем найти договор абонента, то ничего не делаем.
     except:
       pass
     else:
-      r_email = re.compile(r'(\b[\w.]+@+[\w.]+.+[\w.]\b)')
+      r_email = re.compile(r'(\b[\w.]+@+[\w.]+.+[\w.]\b)') # Ищем email в строке
       emails = r_email.findall(cnt)
 
       if emails:
@@ -32,12 +32,14 @@ def importcontacts1cdb():
         email = ''
 
       if prs == '':
-        person = abonent.title
+        person = abonent.title # Если имени нет, то берем из тайтла абонента
       else:
         person = prs.decode('cp1251')
 
       if addr:
         address = addr.decode('cp1251')
+      else:
+        address = ''
 
       cList += [Contact(
                         abonent=abonent,
