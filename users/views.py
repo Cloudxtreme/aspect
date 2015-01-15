@@ -639,6 +639,28 @@ def abonent_info(request, abonent_id):
         abonent = Abonent.objects.get(pk=abonent_id)
     except:
         raise Http404
+
+    if abonent.utype == 'F':
+        header = 'Паспортные данные'
+        template = 'abonent/info_fiz.html'
+        data,created = Passport.objects.get_or_create(abonent__pk=abonent.pk, defaults={'abonent':abonent, 'series':'', 'number' : '', 'issued_by' : '', 'date' : datetime.datetime.now(), 'address' : '' })
+    else:
+        header = 'Реквизиты компании'
+        template = 'abonent/info_ur.html'
+        data,created = Detail.objects.get_or_create(abonent__pk=abonent.pk, defaults={'abonent':abonent, 'title':'', 'inn' : '', 'kpp' : '', 'account' : '', 'post_address' : '', 'official_address' : '' })
+
+    return render_to_response(template, { 
+                                'abonent': abonent,
+                                'header' : header,
+                                'data': data,},
+                                 context_instance = RequestContext(request))
+
+@login_required    
+def abonent_info_edit(request, abonent_id):
+    try:
+        abonent = Abonent.objects.get(pk=abonent_id)
+    except:
+        raise Http404
     else:
         if abonent.utype == 'F':
             info, created = Passport.objects.get_or_create(abonent__pk=abonent.pk, defaults={'abonent':abonent, 'series':'', 'number' : '', 'issued_by' : '', 'date' : datetime.datetime.now(), 'address' : '' })
@@ -646,13 +668,12 @@ def abonent_info(request, abonent_id):
                 form = PassportForm(request.POST,instance=info)
                 if form.is_valid():
                     form.save()
+                    return HttpResponseRedirect(reverse('abonent_info', args=[abonent.id]))
             else:
                 form = PassportForm(instance=info)
             header = 'Паспортные данные'
         else:
             info, created = Detail.objects.get_or_create(abonent__pk=abonent.pk, defaults={'abonent':abonent, 'title':'', 'inn' : '', 'kpp' : '', 'account' : '', 'post_address' : '', 'official_address' : '' })
-            # for item in Detail.objects.filter(abonent__pk=abonent.pk):
-            #     print item.pk
             if request.method == 'POST':
                 form = DetailForm(request.POST,instance=info)
                 if form.is_valid():
@@ -663,9 +684,12 @@ def abonent_info(request, abonent_id):
                 form = DetailForm(instance=info)
             header = 'Реквизиты компании'
 
+    breadcrumbs = [({'url':reverse('abonent_info', args=[abonent.pk]),'title':header})]
+
     return render_to_response('generic/generic_edit.html', { 
                                 'header' : header,
                                 'form': form,
+                                'breadcrumbs':breadcrumbs,
                                 'abonent': abonent,
                                 'extend': 'abonent/main.html', },
                                  context_instance = RequestContext(request))

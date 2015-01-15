@@ -135,8 +135,11 @@ def device_edit(request, device_id):
     else:
         form = DeviceEditForm(instance=device)
 
+    breadcrumbs = [({'url':reverse('devices_list', args=[0]),'title':'Список устройств'})]
+
     return render_to_response('generic/generic_edit.html', {
                                 'header' : header,
+                                'breadcrumbs' :breadcrumbs,
                                 'form': form,
                                 'extend': 'index.html',},
                                 context_instance = RequestContext(request)
@@ -174,8 +177,11 @@ def device_iface_add(request, device_id):
         net_type = ['EN']
         form.fields['ip'].queryset=IPAddr.objects.filter(interface=None).filter(net__net_type__in=net_type).filter(net__vlan=device.mgmt_vlan)
 
+    breadcrumbs = [({'url':reverse('devices_list', args=[1]),'title':'Список устройств без адреса'})]
+
     return render_to_response('generic/generic_edit.html', { 
                                 'header' : header,
+                                'breadcrumbs':breadcrumbs,
                                 'form': form,
                                 'extend': 'index.html', },
                                  context_instance = RequestContext(request))

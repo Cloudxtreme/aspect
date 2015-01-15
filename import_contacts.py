@@ -12,7 +12,7 @@ def importcontacts1cdb():
                          passwd="Aa12345", db="radius")
   db.set_character_set("cp1251")
   cursor = db.cursor()
-  sql = """SELECT SubscriberID, Address,Contacts,ContactPerson FROM Subscribers WHERE SubscriberID LIKE '50______' AND tarif > 1;"""
+  sql = """SELECT SubscriberID, Address, Contacts, ContactPerson FROM Subscribers WHERE SubscriberID LIKE '50______' AND tarif > 1;"""
   cursor.execute(sql)
   data = cursor.fetchall()
   cList = []

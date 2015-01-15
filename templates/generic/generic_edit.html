@@ -10,11 +10,22 @@
     {{ form.media }}
 {% endblock %}
 
+{% block breadcrumb %}
+    {% if breadcrumbs %}
+                <ol class="breadcrumb">
+                    {% for item in breadcrumbs %}
+                        <li><a href="{{ item.url }}">{{ item.title }}</a></li>
+                    {% endfor %}
+                    <li class="active">Редактирование</li>
+                </ol>
+    {% endif %}
+{% endblock %}
+
 {% block pages %}
 
 {% load dict_extras %}
 {% if message %}
-    <div class="alert alert-{% if form.errors %}danger{% else %}success{% endif %}" role="alert">{{ message }}</div>
+    <div class="alert alert-{% if form.errors %}danger{% else %} {% endif %}" role="alert">{{ message }}</div>
 {% endif %}
 
 <div class="page-header">

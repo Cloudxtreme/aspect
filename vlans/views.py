@@ -45,8 +45,11 @@ def edit_network(request,net_id):
 
     message = 'Редактирование подсети'
 
+    breadcrumbs = [({'url':reverse('ips', args=[net.parent_id]),'title':'Список сетей'})]
+
     return render_to_response('generic/generic_edit.html', { 
                                 'header' : message,
+                                'breadcrumbs':breadcrumbs,
                                 'form': form,
                                 'extend': 'index.html', },
                                  context_instance = RequestContext(request))        
@@ -68,10 +71,12 @@ def create_network(request):
     else:
         form = NetworkForm()
 
-    message = 'Создание подсети'
+    message = 'Создание подсети'    
+    breadcrumbs = [({'url':reverse('ips', args=[0]),'title':'Список сетей'})]
 
     return render_to_response('generic/generic_edit.html', { 
                                 'header' : message,
+                                'breadcrumbs':breadcrumbs,
                                 'form': form,
                                 'extend': 'index.html', },
                                  context_instance = RequestContext(request))
@@ -195,9 +200,12 @@ def vlan_edit(request, vlan_id):
     else:
         form = VlanEditForm(instance=vlan)
 
+    breadcrumbs = [({'url':reverse('vlan_all',),'title':'Список вланов'})]
+
     return render_to_response('generic/generic_edit.html', {
                                 'header' : header,
                                 'form': form,
+                                'breadcrumbs':breadcrumbs,
                                 'extend': 'index.html',},
                                 context_instance = RequestContext(request)
                                 ) 

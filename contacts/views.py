@@ -41,13 +41,16 @@ def contact_edit(request, abonent_id, contact_id=0):
     else:
         form = ContactModelForm(instance=contact)
 
-    return render_to_response('contact/contact_edit.html', {
+    header = 'Контакт'
+    breadcrumbs = [({'url':reverse('contacts', args=[abonent.pk]),'title':'Контакты'})]
+
+    return render_to_response('generic/generic_edit.html', { 
+                                'header' : header,
                                 'form': form,
-                                'message': message,
-                                'new': new,
-                                'abonent' : abonent,},
-                                context_instance = RequestContext(request)
-                                ) 
+                                'breadcrumbs':breadcrumbs,
+                                'abonent': abonent,
+                                'extend': 'abonent/main.html', },
+                                 context_instance = RequestContext(request))
 
 @login_required
 def contacts_all(request, abonent_id):

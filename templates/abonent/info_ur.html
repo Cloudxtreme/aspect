@@ -1,0 +1,47 @@
+{% extends "abonent/main.html" %}
+
+{% block pages %}
+
+<div class="page-header">
+    <h2 class="sub-header">{{ header }}</h2>
+</div>
+
+<table class="table">
+    <thead>
+    </thead>
+    <tbody>
+        <tr>
+            <td><b>Наименование компании</b></td>
+            <td>{{ data.title }}</td>
+        </tr>
+        <tr>
+            <td><b>ИНН</b></td>
+            <td>{{ data.inn }}</td>
+        </tr>
+        <tr>
+            <td><b>КПП</b></td>
+            <td>{{ data.kpp }}</td>
+        </tr>
+        <tr>
+            <td><b>Расчетный счет</b></td>
+            <td>{{ data.account }}</td>
+        </tr>
+        <tr>
+            <td><b>Почтовый Адрес</b></td>
+            <td>{{ data.post_address }}</td>
+        </tr>
+        <tr>
+            <td><b>Юридический адрес</b></td>
+            <td>{{ data.official_address }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="row">
+    <div class="col-lg-9">
+        <a href={% url 'abonent_info_edit' abonent.pk %} class="btn btn-warning" >Редактировать <span class="glyphicon glyphicon-edit"></span>
+        </a>
+    </div>
+</div>
+
+{% endblock %}

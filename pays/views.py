@@ -32,22 +32,33 @@ def close_promisedpay(request, abonent_id, promisedpay_id):
 
 @login_required
 def add_promisedpay(request, abonent_id):
-	try:
-		abonent = Abonent.objects.get(pk=abonent_id)
-	except:
-		abonent = None
+    try:
+        abonent = Abonent.objects.get(pk=abonent_id)
+    except:
+        abonent = None
 
-	if request.method == 'POST':
-		form = PromisedPayForm(request.POST)
-		if form.is_valid():
-			promisedpay = form.save(commit=False)
-			promisedpay.abonent = abonent
-			promisedpay.user = request.user
-			promisedpay.save()
-			return HttpResponseRedirect(reverse('promisedpays', args=[abonent_id]))
-	else:
-		form = PromisedPayForm(initial={'summ': round(abs(0 - abonent.balance),2) })
-	return render(request, 'abonent/add_promisedpay.html', {'form': form, 'abonent' : abonent})
+    if request.method == 'POST':
+        form = PromisedPayForm(request.POST)
+        if form.is_valid():
+            promisedpay = form.save(commit=False)
+            promisedpay.abonent = abonent
+            promisedpay.user = request.user
+            promisedpay.save()
+            return HttpResponseRedirect(reverse('promisedpays', args=[abonent_id]))
+    else:
+        form = PromisedPayForm(initial={'summ': round(abs(0 - abonent.balance),2) })
+    # return render(request, 'abonent/add_promisedpay.html', {'form': form, 'abonent' : abonent})
+
+    breadcrumbs = [({'url':reverse('promisedpays', args=[abonent.pk]),'title':'Обещанные платежи'})]
+
+    return render_to_response('generic/generic_edit.html', { 
+                                'header' : 'Обещанный платеж',
+                                'form': form,
+                                'breadcrumbs':breadcrumbs,
+                                'abonent': abonent,
+                                'extend': 'abonent/main.html', },
+                                 context_instance = RequestContext(request))
+
 
 @login_required
 def payments_all(request):
@@ -123,43 +134,62 @@ def add_quickpayment(request):
 
 @login_required
 def add_payment(request, abonent_id):
-	try:
-		abonent = Abonent.objects.get(pk=abonent_id)
-	except:
-		abonent = None
+    try:
+        abonent = Abonent.objects.get(pk=abonent_id)
+    except:
+        abonent = None
 
-	if request.method == 'POST':
-		form = PaymentForm(request.POST)
-		if form.is_valid():
-			payment = form.save(commit=False)
-			payment.abon = abonent
-			payment.user = request.user
-			payment.save()
-			return HttpResponseRedirect(reverse('payments', args=[abonent_id]))
-	else:
-		form = PaymentForm()
-	return render(request, 'abonent/add_payment.html', {'form': form, 'abonent' : abonent})
+    if request.method == 'POST':
+        form = PaymentForm(request.POST)
+        if form.is_valid():
+            payment = form.save(commit=False)
+            payment.abon = abonent
+            payment.user = request.user
+            payment.save()
+            return HttpResponseRedirect(reverse('payments', args=[abonent_id]))
+    else:
+        form = PaymentForm()
 
+    # return render(request, 'abonent/add_payment.html', {'form': form, 'abonent' : abonent})
+    breadcrumbs = [({'url':reverse('payments', args=[abonent.pk]),'title':'Список платежей'})]
+
+    return render_to_response('generic/generic_edit.html', { 
+                                'header' : 'Добавление платежа',
+                                'form': form,
+                                'breadcrumbs':breadcrumbs,
+                                'abonent': abonent,
+                                'extend': 'abonent/main.html', },
+                                 context_instance = RequestContext(request))
 @login_required
 def add_payoff(request, abonent_id):
-	try:
-		abonent = Abonent.objects.get(pk=abonent_id)
-	except:
-		abonent = None	
+    try:
+        abonent = Abonent.objects.get(pk=abonent_id)
+    except:
+        abonent = None	
 
-	if request.method == 'POST':
-		form = WriteOffForm(request.POST)
-		if form.is_valid():
-			# form.save()
-			payoff = form.save(commit=False)
-			payoff.abonent = abonent
-			payoff.user = request.user
-			payoff.save()
-			return HttpResponseRedirect(reverse('writeoffs', args=[abonent_id]))
-	else:
-		form = WriteOffForm()
-		form.fields['service'].queryset=Service.objects.filter(abon__pk=abonent_id)
-	return render(request, 'abonent/add_payoff.html', {'form': form, 'abonent' : abonent})
+    if request.method == 'POST':
+        form = WriteOffForm(request.POST)
+        if form.is_valid():
+            # form.save()
+            payoff = form.save(commit=False)
+            payoff.abonent = abonent
+            payoff.user = request.user
+            payoff.save()
+            return HttpResponseRedirect(reverse('writeoffs', args=[abonent_id]))
+    else:
+        form = WriteOffForm()
+        form.fields['service'].queryset=Service.objects.filter(abon__pk=abonent_id)
+
+    # return render(request, 'abonent/add_payoff.html', {'form': form, 'abonent' : abonent})
+    breadcrumbs = [({'url':reverse('writeoffs', args=[abonent.pk]),'title':'Список списаний'})]
+
+    return render_to_response('generic/generic_edit.html', { 
+                                'header' : 'Списать средства',
+                                'form': form,
+                                'breadcrumbs':breadcrumbs,
+                                'abonent': abonent,
+                                'extend': 'abonent/main.html', },
+                                 context_instance = RequestContext(request))    
 
 @login_required    
 def abonent_payments(request, abonent_id):
