@@ -1,0 +1,34 @@
+{% extends "abonent/main.html" %}
+
+{% block pages %}
+
+<div class="page-header">
+    <h2 class="sub-header">Настройки клиента</h2>
+</div>
+
+{% if settings %}   
+<table class="table table-striped h6">
+<thead>
+  <tr>
+    <th>Местоположение</th>
+    <th>IP</th>
+    <th>Маска</th>
+    <th>Шлюз</th>
+    {# <th>DNS</th> #}
+  </tr>
+</thead>
+<tbody>
+{% for item in settings %}
+<tr>
+    <td>{{ item.location }}</td>
+    <td>{{ item.ip }}</td>
+    <td>{{ item.mask }}</td>
+    <td>{{ item.gw }}</td>
+    {# <td>194.190.13.246</td> #}
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %} 
+
+{% endblock %}

@@ -31,6 +31,7 @@ from pays.models import Payment
 from notes.models import Note
 from vlans.models import Location
 from contacts.models import Contact
+from devices.models import dec2ip,ip2dec
 import re
 
 def balance(request):
@@ -792,6 +793,25 @@ def import_abonent_from1C(request):
     db.close()
     url = reverse('abonent_info', args=[created_abon.pk]) if created_abon else settings.LOGIN_REDIRECT_URL
     return HttpResponseRedirect(url)
+
+def abonent_settings(request, abonent_id):
+    try:
+        abonent = Abonent.objects.get(pk=abonent_id)
+    except:
+        raise Http404
+    else:   
+        setting_list = []
+        for service in abonent.service_set.all():
+            for iface in service.ifaces.all():
+                mask = dec2ip(4294967295 - pow(2,32-iface.ip.net.mask) + 1)
+                gw = Interface.objects.get(device__router=True,ip__net__pk=iface.ip.net.pk)
+                entry = {'location':service.location,'ip': iface.ip.ip, 'mask': mask, 'gw' : gw }
+                setting_list.append(entry)
+
+    return render_to_response('abonent/settings.html', { 
+                                'abonent': abonent,
+                                'settings':setting_list,},
+                                 context_instance = RequestContext(request))
 
 def log_in(request):
     if request.method == 'POST':
