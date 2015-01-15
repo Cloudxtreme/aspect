@@ -31,6 +31,7 @@ from pays.models import Payment
 from notes.models import Note
 from vlans.models import Location
 from contacts.models import Contact
+import re
 
 def balance(request):
     ip = request.META.get('REMOTE_ADDR', '') or request.META.get('HTTP_X_FORWARDED_FOR', '')
@@ -715,11 +716,11 @@ def import_abonent_from1C(request):
                              passwd="Aa12345", db="radius", charset='utf8')
 
     cursor = db.cursor()
-    sql = """SELECT s.tarif, s.FIO, s.SubscriberID, s.State, s.AddressOfService, s.PasportS, s.PasportN, s.PasportWhon, s.PasportWhen, s.Address FROM Subscribers AS s, Tarifs as t WHERE s.tarif=t.tarifid AND s.SubscriberID LIKE '50______' AND s.tarif > 1 AND s.FIO!='<b>Фамилия Имя отчество</b>';"""
+    sql = """SELECT s.tarif, s.FIO, s.SubscriberID, s.State, s.AddressOfService, s.PasportS, s.PasportN, s.PasportWhon, s.PasportWhen, s.Address, s.Contacts, s.ContactPerson FROM Subscribers AS s, Tarifs as t WHERE s.tarif=t.tarifid AND s.SubscriberID LIKE '50______' AND s.tarif > 1 AND s.FIO!='<b>Фамилия Имя отчество</b>';"""
     cursor.execute(sql)
     data = cursor.fetchall()
     for rec in data:
-        plan_id, title, contract, state, address, pass_ser, pass_num, pass_who, pass_when, pass_addr = rec
+        plan_id, title, contract, state, address, pass_ser, pass_num, pass_who, pass_when, pass_addr, cnt, prs = rec
         abonent, created = Abonent.objects.get_or_create(contract=contract, defaults={
                           'title' : title,
                           'contract' :contract,
@@ -760,6 +761,33 @@ def import_abonent_from1C(request):
                             address = pass_addr
                             )
             passport.save()
+            # Создаем контакт
+            r_email = re.compile(r'(\b[\w.]+@+[\w.]+.+[\w.]\b)') # Ищем email в строке
+            emails = r_email.findall(cnt)
+
+            if emails:
+                email = emails[0]
+            else:
+                email = ''
+
+            if prs == '':
+                person = abonent.title # Если имени нет, то берем из тайтла абонента
+            else:
+                person = prs.decode('cp1251')
+
+            if pass_addr:
+                addr = pass_addr
+            else:
+                addr = ''
+
+            contact = Contact(
+                            abonent=abonent,
+                            surname=person,
+                            address=addr,
+                            phone=cnt.decode('cp1251'),
+                            email=email,
+                  )
+            contact.save()
 
     db.close()
     url = reverse('abonent_info', args=[created_abon.pk]) if created_abon else settings.LOGIN_REDIRECT_URL
