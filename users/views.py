@@ -822,13 +822,17 @@ def abonent_map(request, abonent_id):
             raise Http404
         else:   
             for service in abonent.service_set.all():
-                
-                if service.location.geolocation:
-                    coord = service.location.geolocation
-                    lat,lon = coord.split(',')
-                    comment = """<a href="%s">%s</a>""" % (reverse('abonent_services', args=[service.abon.pk]),service.location.address)
-                    entry = {'lat':lat,'lon': lon,'title': service.location.address,'comment' :comment } 
-                    points.append(entry)
+                if service.location:
+                    if service.location.geolocation:
+                        coord = service.location.geolocation
+                        lat,lon = coord.split(',')
+                        if service.location.address:
+                            address = service.location.address
+                        else:
+                            address = 'Адрес не внесен'
+                        comment = """<a href="%s#tr-%s">%s</a>""" % (reverse('abonent_services', args=[service.abon.pk]),service.pk,address)                            
+                        entry = {'lat':lat,'lon': lon,'title': address,'comment' :comment } 
+                        points.append(entry)
             extend = 'abonent/main.html'
             header = 'Карта услуг абонента'
     else:
