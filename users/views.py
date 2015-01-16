@@ -813,6 +813,45 @@ def abonent_settings(request, abonent_id):
                                 'settings':setting_list,},
                                  context_instance = RequestContext(request))
 
+def abonent_map(request, abonent_id):
+    points = []
+    if abonent_id != '0':
+        try:
+            abonent = Abonent.objects.get(pk=abonent_id)
+        except:
+            raise Http404
+        else:   
+            for service in abonent.service_set.all():
+                
+                if service.location.geolocation:
+                    coord = service.location.geolocation
+                    lat,lon = coord.split(',')
+                    comment = """<a href="%s">%s</a>""" % (reverse('abonent_services', args=[service.abon.pk]),service.location.address)
+                    entry = {'lat':lat,'lon': lon,'title': service.location.address,'comment' :comment } 
+                    points.append(entry)
+            extend = 'abonent/main.html'
+            header = 'Карта услуг абонента'
+    else:
+        # for location in Location.objects.all():
+        for service in Service.objects.all():
+            if service.location:
+                if service.location.geolocation:
+                    coord = service.location.geolocation
+                    lat,lon = coord.split(',')
+                    comment = """<a href="%s">%s</a>""" % (reverse('abonent_info', args=[service.abon.pk]),service.abon)
+                    entry = {'lat':lat,'lon': lon,'title': service.location.address,'comment' : comment} 
+                    points.append(entry)
+        extend = 'index.html'
+        abonent = None
+        header = 'Карта абонентов'
+
+    return render_to_response('abonent/map.html', { 
+                                'abonent': abonent,
+                                'extend' : extend,
+                                'header' : header,
+                                'points':points,},
+                                 context_instance = RequestContext(request))
+
 def log_in(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)

@@ -1,0 +1,75 @@
+{% extends extend %}
+
+{% block script %}
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+{% endblock %}
+
+{% block pages %}
+
+<div class="page-header">
+    <h2 class="sub-header">{{ header }}</h2>
+</div>
+    <script type="text/javascript">
+    //<![CDATA[
+        var map_geolocation;
+        
+        function savePosition_geolocation(point)
+        {
+            var input = document.getElementById("id_geolocation");
+            input.value = point.lat().toFixed(6) + "," + point.lng().toFixed(6);
+            map_geolocation.panTo(point);
+        }
+        
+        function load_geolocation() {
+            var point = new google.maps.LatLng(0,0);
+
+            var options = {
+                zoom: 9,
+                center: point,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+                // mapTypeControl: true,
+                // navigationControl: true
+            };
+            
+            map_geolocation = new google.maps.Map(document.getElementById("map_geolocation"), options);
+
+            var markersBounds = new google.maps.LatLngBounds();
+
+            {% for point in points %}
+                var markerPosition = new google.maps.LatLng({{point.lat}},{{point.lon}});
+
+                markersBounds.extend(markerPosition);
+
+                var contentString = '{{point.comment|safe}}';
+
+                var infowindow{{forloop.counter}} = new google.maps.InfoWindow({
+                    content: contentString
+                });
+
+                var marker{{forloop.counter}} = new google.maps.Marker({
+                        map: map_geolocation,
+                        position: markerPosition,
+                        draggable: false,
+                        title:'{{point.title}}'
+                
+                });
+
+                google.maps.event.addListener(marker{{forloop.counter}}, 'click', function() {
+                    infowindow{{forloop.counter}}.open(map_geolocation,marker{{forloop.counter}});
+                });    
+            {% endfor %}
+
+            map_geolocation.setCenter(markersBounds.getCenter(), map_geolocation.fitBounds(markersBounds));
+
+        }
+        
+        $(document).ready(function(){
+            load_geolocation();
+        });
+
+    //]]>
+    </script>
+
+    <div id="map_geolocation" style="width: 100%; height: 600px"></div>
+
+{% endblock %}

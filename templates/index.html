@@ -8,6 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
+    {% block script %}
+    {% endblock %}    
     <link rel="shortcut icon" href="/media/images/favicon.ico">
     <title>Albeon client control system</title>
     <!-- Bootstrap core CSS -->
@@ -31,8 +33,6 @@
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
       <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-    {% block script %}
-    {% endblock %}
   </head>
   <body role="document">
     <!-- Fixed navbar -->
@@ -55,6 +55,7 @@
                 <a href='#' class="dropdown-toggle" data-toggle="dropdown" id="dropdownMenu2">Абоненты <b class="caret"></b></a>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
                     <li><a href={% url "users.views.abonent_search" %}>Поиск абонентов</a></li>
+                    <li><a href={% url "users.views.abonent_map" 0 %}>Карта абонентов</a></li>
                     <li><a href={% url "users.views.abonent_add" 0 %}>Добавить абонента</a></li>
                     <li><a href={% url "import_abonent_from1C" %}>Импорт абонентов из 1C</a></li>
                     <li><a href={% url "add_quickpayment" %}>Внести платеж</a></li>
