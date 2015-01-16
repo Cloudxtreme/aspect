@@ -820,7 +820,12 @@ def log_in(request):
             if form.get_user():
                 login(request, form.get_user())
                 # print request.GET.get('next')
-                url = settings.LOGIN_REDIRECT_URL if not request.GET.get('next') else request.GET.get('next')
+                # user =  form.get_user()
+                # Переадресуем в список сообщений, если есть непрочитанные
+                if Note.objects.filter(author=request.user,read=False,kind='G').count():
+                    url = reverse('notes.views.notes_all')
+                else:
+                    url = settings.LOGIN_REDIRECT_URL if not request.GET.get('next') else request.GET.get('next')
                 return HttpResponseRedirect(url)
     else:
         form = LoginForm()

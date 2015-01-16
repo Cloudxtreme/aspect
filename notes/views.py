@@ -40,7 +40,7 @@ def note_add(request):
 def notes_all(request):
     note_list = Note.objects.filter(author=request.user,kind='G').order_by('-pk')|Note.objects.filter(public=True,kind='G').order_by('-date')
     form = NoteModelForm()
-    header = 'Список заметок'
+    header = 'Список ваших сообщений'
     return render_to_response('notes/notes.html', { 'note_list': note_list, 'form' : form, 'header' : header }, context_instance = RequestContext(request))
 
 @login_required

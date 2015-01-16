@@ -3,7 +3,7 @@
 {% block main %} 
 <div class="page-header">
     <h2 class="sub-header">{{ header }}</h2>
-    <a href={% url 'note_add' %}>Добавить новую&nbsp<span class="glyphicon glyphicon-plus"></span></a>
+    <a href={% url 'note_add' %}>Добавить новое&nbsp<span class="glyphicon glyphicon-plus"></span></a>
 </div>
 
 {% if note_list %}
@@ -11,9 +11,13 @@
     {% for note in note_list %}
         <div class="panel {{ note.marks }}">
             <div class="panel-heading">
-                <h3 class="panel-title">{{ note.title }} <small>{{ note.date }}</small>
-                <a href={% url 'note_del' note.id %}><span class="glyphicon glyphicon-remove-circle pull-right"></span></a>
-                {% if not note.read %}<a href={% url 'note_read' note.id %}><span class="glyphicon glyphicon-ok-circle pull-right"></span></a>{% endif %}
+                <h3 class="panel-title">
+                {% if not note.read %}<span class="badge">!</span>{% endif %}
+                {{ note.title }}
+                <small>{{ note.date }}</small>
+                <a href={% url 'note_del' note.id %} data-toggle="tooltip" data-placement="left" title="Удалить"><span class="glyphicon glyphicon-remove-circle pull-right"></span></a>
+                {% if not note.read %}<a href={% url 'note_read' note.id %} data-toggle="tooltip" data-placement="left" title="Пометить как прочитано">
+                <span class="glyphicon glyphicon-ok-circle pull-right"></span></a>{% endif %}
                 </h3>
             </div>
             <div class="panel-body">

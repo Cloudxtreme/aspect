@@ -92,7 +92,9 @@
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="dropdownNotes">
                     <li>
-                        <a href={% url "notes.views.notes_all" %}>Заметки <span class="badge">{{ notes_count|default:"0" }}</span></a>
+                        <a href={% url "notes.views.notes_all" %}>Ваши сообщения 
+                            <span class="badge">{{ unread_notes_count|default:"0" }}/{{ all_notes_count|default:"0" }}</span>
+                        </a>
                     </li>
                 </ul>
             </li>
@@ -140,7 +142,7 @@
             {% endblock %}
         {% endblock %}
         <div class="footer pull-right">
-        <p>User control system version 1.2.3 &copy; Albeon Ltd. 2014</p>
+        <p>User control system version 1.2.4 &copy; ASPEKT Ltd. 2014-2015</p>
         <a href={% url 'show_changelog' %}>История изменений</a>
     </div>
     </div>

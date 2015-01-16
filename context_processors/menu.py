@@ -5,11 +5,14 @@ from notes.models import Note
 def menu(request):
     if request.user.pk:
         my_tt = TroubleTicket.objects.filter(solve_date=None,performer=request.user).count
-        notes_count = Note.objects.filter(author=request.user,read=False,kind='G').count()
+        unread_notes_count = Note.objects.filter(author=request.user,read=False,kind='G').count()
+        all_notes_count = Note.objects.filter(author=request.user,kind='G').count()
     else:
         my_tt = 0
-        notes_count = 0
+        all_notes_count = 0
+        unread_notes_count = 0
 
     return { "open_tt" : TroubleTicket.objects.filter(solve_date=None).count, 
                'my_tt' : my_tt, 
-         'notes_count' : notes_count }
+         'all_notes_count' : all_notes_count,
+         'unread_notes_count': unread_notes_count }
