@@ -11,8 +11,10 @@ def menu(request):
         my_tt = 0
         all_notes_count = 0
         unread_notes_count = 0
+    version = Note.objects.filter(kind='C').order_by('-date')[0].title
 
     return { "open_tt" : TroubleTicket.objects.filter(solve_date=None).count, 
                'my_tt' : my_tt, 
          'all_notes_count' : all_notes_count,
-         'unread_notes_count': unread_notes_count }
+         'unread_notes_count': unread_notes_count,
+         'version':version }

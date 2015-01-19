@@ -35,6 +35,8 @@
 
             var markersBounds = new google.maps.LatLngBounds();
 
+            var counter = 0;
+
             {% for point in points %}
                 var markerPosition = new google.maps.LatLng({{point.lat}},{{point.lon}});
 
@@ -56,11 +58,17 @@
 
                 google.maps.event.addListener(marker{{forloop.counter}}, 'click', function() {
                     infowindow{{forloop.counter}}.open(map_geolocation,marker{{forloop.counter}});
-                });    
+                });
+                counter++;
             {% endfor %}
-
-            map_geolocation.setCenter(markersBounds.getCenter(), map_geolocation.fitBounds(markersBounds));
-
+            
+            if (counter > 1){
+                map_geolocation.setCenter(markersBounds.getCenter(), map_geolocation.fitBounds(markersBounds));
+            }
+            else{
+                map_geolocation.setCenter(markersBounds.getCenter());
+            }
+            
         }
         
         $(document).ready(function(){
@@ -73,3 +81,5 @@
     <div id="map_geolocation" style="width: 100%; height: 600px"></div>
 
 {% endblock %}
+
+
