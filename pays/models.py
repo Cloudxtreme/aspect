@@ -209,4 +209,4 @@ class Payment(models.Model):
         verbose_name_plural = u'Платежи'
 
     def __unicode__(self):
-        return u"%s, %s,  %s руб., %s" % (self.abonent.contract, self.top,  self.sum, self.date.ctime())
+        return u"%s, %s,  %s руб., %s" % (self.abonent.contract, self.top,  self.summ, self.date.ctime())
