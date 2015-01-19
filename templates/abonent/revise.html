@@ -1,0 +1,35 @@
+{% extends "abonent/main.html" %}
+
+{% block pages %}
+
+<div class="page-header">
+    <h2 class="sub-header">Отчет по клиенту</h2>
+</div>
+
+<a href={% url 'reserve_check_balance' abonent.pk %}>Проверка остатков</a>
+
+{% if result_list %}   
+{% load dict_extras %}
+
+<table class="table table-striped h4">
+    <thead>
+      <tr>
+        <th>Дата</th>
+        <th>Операция</th>
+        <th>Остаток на счете</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for item in result_list %}
+    <tr>
+        <td>{{ item.date }}</td>
+        <td><span class="label label-{{ item| get_colored_balance }}">{{ item|get_sign }} руб.</span>
+        <small>{{ item.comment}}</small></td>
+        <td><span class="label label-default">{{ item.newbalance|floatformat:2 }} руб.</span></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %} 
+
+{% endblock %}

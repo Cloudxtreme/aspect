@@ -11,8 +11,29 @@ from django.db.models import Avg, Max, Min, Sum
 from django.contrib.auth.models import User
 from datetime import timedelta, datetime
 from django.conf import settings
+from django.http import Http404
+from itertools import chain
 
 # Create your views here.close_promisedpay
+
+@login_required
+def revise(request, abonent_id):
+    try:
+        abonent = Abonent.objects.get(pk=abonent_id)
+    except:
+        raise Http404
+
+    pay_list = Payment.objects.filter(abonent=abonent)
+    writeoff_list = WriteOff.objects.filter(abonent=abonent)
+
+    result_list = sorted(
+            chain(pay_list, writeoff_list),
+            key=lambda instance: instance.date,reverse=True)
+
+    return render_to_response('abonent/revise.html', {
+                                'abonent' : abonent, 
+                                'result_list' : result_list,}, 
+                                context_instance = RequestContext(request))
 
 @login_required
 def get_defaulters(request):
@@ -35,7 +56,7 @@ def add_promisedpay(request, abonent_id):
     try:
         abonent = Abonent.objects.get(pk=abonent_id)
     except:
-        abonent = None
+        raise Http404
 
     if request.method == 'POST':
         form = PromisedPayForm(request.POST)
@@ -97,7 +118,8 @@ def promisedpays(request, abonent_id):
     try:
         abonent = Abonent.objects.get(pk=abonent_id)
     except:
-        abonent = None
+        raise Http404
+
     promisedpays = PromisedPays.objects.filter(abonent__pk=abonent_id).order_by('-pk')    
 
     return render_to_response('abonent/promised_pays.html', { 
@@ -137,7 +159,7 @@ def add_payment(request, abonent_id):
     try:
         abonent = Abonent.objects.get(pk=abonent_id)
     except:
-        abonent = None
+        raise Http404
 
     if request.method == 'POST':
         form = PaymentForm(request.POST)
@@ -165,7 +187,7 @@ def add_payoff(request, abonent_id):
     try:
         abonent = Abonent.objects.get(pk=abonent_id)
     except:
-        abonent = None	
+        raise Http404	
 
     if request.method == 'POST':
         form = WriteOffForm(request.POST)
@@ -191,12 +213,43 @@ def add_payoff(request, abonent_id):
                                 'extend': 'abonent/main.html', },
                                  context_instance = RequestContext(request))    
 
+
+@login_required
+def reserve_check_balance(request, abonent_id):
+    try:
+        abonent = Abonent.objects.get(pk=abonent_id)
+    except:
+        raise Http404
+
+    balance = abonent.balance
+
+    pay_list = Payment.objects.filter(abonent=abonent)
+    writeoff_list = WriteOff.objects.filter(abonent=abonent)
+
+    result_list = sorted(
+                chain(pay_list, writeoff_list),
+                key=lambda instance: instance.date,reverse=True)
+
+    for item in result_list:
+        item.newbalance = balance
+        if item.__class__.__name__ == 'Payment':
+            balance -= item.summ
+            super(Payment, item).save()
+        else:
+            balance += item.summ
+            super(WriteOff,item).save()
+
+    return HttpResponseRedirect(reverse('revise', args=[abonent.pk]))
+
+
+
 @login_required    
 def abonent_payments(request, abonent_id):
     try:
         abonent = Abonent.objects.get(pk=abonent_id)
     except:
-        abonent = None
+        raise Http404
+
     pays = Payment.objects.filter(abonent__pk=abonent_id, valid=True).order_by('-date')    
     pay_stat = Payment.objects.filter(abonent__pk=abonent_id, valid=True).aggregate(Avg('summ'), Max('summ'), Min('summ'), Sum('summ'))
     return render_to_response('abonent/pays.html', {
@@ -211,7 +264,8 @@ def abonent_payoffs(request, abonent_id):
     try:
         abonent = Abonent.objects.get(pk=abonent_id)
     except:
-        abonent = None
+        raise Http404
+
     payoffs = WriteOff.objects.filter(abonent__pk=abonent_id, valid=True).order_by('-date')    
     return render_to_response('abonent/payoffs.html', { 
                                 'abonent' : abonent, 

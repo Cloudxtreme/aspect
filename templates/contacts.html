@@ -13,7 +13,8 @@
 {% endblock %}
 
 {% block main %} 
-{{contact_list}}
+
+{{ contact_list }}
 
 <form method="post" class="form-horizontal" style="display: none;" id='noteform' action={% url 'note_add' %}>{% csrf_token %}
     <div class="form-group">

@@ -32,6 +32,20 @@ def get_shift_by_mask(value):
 def pow_2(value):
     return pow(2,32-value)-2
 
+@register.filter
+def get_colored_balance(value):
+    if value.__class__.__name__ == 'Payment':
+        return u'success'
+    else:
+        return u'danger'
+
+@register.filter
+def get_sign(value):
+    if value.__class__.__name__ == 'Payment':
+        return u'+ %0.2f' % value.summ
+    else:
+        return u'- %0.2f' % value.summ
+        
 # @register.filter
 # def get_promised(abonent_id):
 # 	return PromisedPays.objects.filter(abonent__pk=abonent_id, pay_onaccount = True).count()
