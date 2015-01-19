@@ -116,7 +116,7 @@ def add_quickpayment(request):
             payment.top = PaymentSystem.objects.get(pk=3)
             payment.user = request.user
             payment.save()
-            message  = "Платеж на сумму %s руб для %s зачислен" % (payment.summ, payment.abon)
+            message  = "Платеж на сумму %s руб для %s зачислен" % (payment.summ, payment.abonent)
             form = QuickPaymentForm()
         else:
             message = "Ошибки в форме"
@@ -143,7 +143,7 @@ def add_payment(request, abonent_id):
         form = PaymentForm(request.POST)
         if form.is_valid():
             payment = form.save(commit=False)
-            payment.abon = abonent
+            payment.abonent = abonent
             payment.user = request.user
             payment.save()
             return HttpResponseRedirect(reverse('payments', args=[abonent_id]))

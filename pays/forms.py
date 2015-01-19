@@ -62,7 +62,7 @@ class WriteOffForm(forms.ModelForm):
 class PaymentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
          super(PaymentForm, self).__init__(*args, **kwargs)
-         self.fields['sum'].localize = True
+         self.fields['summ'].localize = True
     
     class Meta:
         model = Payment
@@ -77,7 +77,7 @@ class PaymentForm(forms.ModelForm):
         }
 
 class QuickPaymentForm(forms.ModelForm):
-    abon = forms.ModelChoiceField(queryset=Abonent.objects.order_by('title'),widget=forms.Select(attrs={'class':'form-control'}), label = u'Абонент')
+    abonent = forms.ModelChoiceField(queryset=Abonent.objects.order_by('title'),widget=forms.Select(attrs={'class':'form-control'}), label = u'Абонент')
     
     def __init__(self, *args, **kwargs):
          super(QuickPaymentForm, self).__init__(*args, **kwargs)
@@ -85,10 +85,10 @@ class QuickPaymentForm(forms.ModelForm):
 
     class Meta:
         model = Payment
-        fields = ['abon', 'summ', 'date']  
+        fields = ['abonent', 'summ', 'date']
         
         widgets = {
-            # 'abon': forms.TextInput(attrs={'class': 'form-control',}),
+            # 'abonent': forms.TextInput(attrs={'class': 'form-control',}),
             'summ': forms.TextInput(attrs={'class': 'form-control',}),
             'date': DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
                                        "pickSeconds": False, }),

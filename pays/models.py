@@ -98,7 +98,6 @@ class WriteOff(models.Model):
 
     def save(self, *args, **kwargs):
         isNew = not self.pk
-        self.newbalance = abonent.balance - summ
         super(WriteOff, self).save(*args, **kwargs)
         if isNew: 
             if self.number == '':
@@ -107,7 +106,8 @@ class WriteOff(models.Model):
             Abonent.objects.filter(pk=self.abonent.pk).update(balance=F('balance') - self.summ)
             abonent = Abonent.objects.get(pk=self.abonent.pk)
             abonent.check_status(reason='Списание средств')
-            # self.newbalance = abonent.balance
+            self.newbalance = abonent.balance
+            super(WriteOff, self).save(*args, **kwargs)
             try:
                 abonentevent = AbonentEvent.objects.get(pk=2) #pk=2 Списание средств
             except Exception, e:
@@ -176,7 +176,6 @@ class Payment(models.Model):
             abonent.check_status(reason='Изменен размер платежа')
         if self.summ == 0:
             self.valid = False
-        self.newbalance = abonent.balance + summ
         super(Payment, self).save(*args, **kwargs)
         if isNew: 
             if self.num == '':
@@ -187,6 +186,8 @@ class Payment(models.Model):
             Abonent.objects.filter(pk=self.abonent.pk).update(balance=F('balance') + self.summ)
             abonent = Abonent.objects.get(pk=self.abonent.pk)
             abonent.check_status(reason='Зачисление средств')
+            self.newbalance = abonent.balance
+            super(Payment, self).save(*args, **kwargs)
             try:
                 abonentevent = AbonentEvent.objects.get(pk=1) #pk=1 Пополнение счета
             except Exception, e:
