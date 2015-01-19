@@ -80,6 +80,7 @@ class PromisedPays(models.Model):
 
 class WriteOff(models.Model):
     def getnumber():
+        # pass
         # no = WriteOff.objects.filter(valid=True).count()
         no = WriteOff.objects.all().order_by("-id")[0].id or 1
         return WRITEOFF_PREFIX + u'%06d' % (no + 1)
@@ -93,9 +94,11 @@ class WriteOff(models.Model):
     number = models.CharField(u'Номер документа', unique=True, default=getnumber, max_length=20)
     valid = models.BooleanField(u'Действителен', default=True)
     comment = models.CharField(u'Комментарии', blank=True, null= True, max_length=200)
+    newbalance = models.FloatField(u'Новый баланс',default=0)
 
     def save(self, *args, **kwargs):
         isNew = not self.pk
+        self.newbalance = abonent.balance - summ
         super(WriteOff, self).save(*args, **kwargs)
         if isNew: 
             if self.number == '':
