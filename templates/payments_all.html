@@ -70,9 +70,9 @@
     {% for pay in payments_list %}
         <tr>
             <td>{{ pay.date }}</td>
-            <td>{{ pay.sum }} руб.</td>
+            <td>{{ pay.summ }} руб.</td>
             <td>{{ pay.top }}</td>
-            <td><a href="{% url 'abonent_info' pay.abon.id %}">{{ pay.abon }}</a></td>
+            <td><a href="{% url 'abonent_info' pay.abonent.id %}">{{ pay.abonent }}</a></td>
         </tr>
     {% endfor %}
     </tbody>

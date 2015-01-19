@@ -80,7 +80,7 @@ def payments_all(request):
 
     return render_to_response('payments_all.html', { 
                                 'payments_list' : payments_list,
-                                'summ' : payments_list.aggregate(Sum('sum'))['sum__sum'],
+                                'summ' : payments_list.aggregate(Sum('summ'))['summ__sum'],
                                 'form' : form }, 
                                 context_instance = RequestContext(request))
 
@@ -197,12 +197,12 @@ def abonent_payments(request, abonent_id):
         abonent = Abonent.objects.get(pk=abonent_id)
     except:
         abonent = None
-    pays = Payment.objects.filter(abon__pk=abonent_id, valid=True).order_by('-date')    
-    pay_stat = Payment.objects.filter(abon__pk=abonent_id, valid=True).aggregate(Avg('sum'), Max('sum'), Min('sum'), Sum('sum'))
-    return render_to_response('abonent/pays.html', { 
-                                'abonent' : abonent, 
-                                'pays' : pays, 
-                                'pay_stat' : pay_stat, 
+    pays = Payment.objects.filter(abonent__pk=abonent_id, valid=True).order_by('-date')    
+    pay_stat = Payment.objects.filter(abonent__pk=abonent_id, valid=True).aggregate(Avg('summ'), Max('summ'), Min('summ'), Sum('summ'))
+    return render_to_response('abonent/pays.html', {
+                                'abonent' : abonent,
+                                'pays' : pays,
+                                'pay_stat' : pay_stat,
                                 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count() }, 
                               context_instance = RequestContext(request))
 

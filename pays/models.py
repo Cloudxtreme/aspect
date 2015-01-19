@@ -104,6 +104,7 @@ class WriteOff(models.Model):
             Abonent.objects.filter(pk=self.abonent.pk).update(balance=F('balance') - self.summ)
             abonent = Abonent.objects.get(pk=self.abonent.pk)
             abonent.check_status(reason='Списание средств')
+            # self.newbalance = abonent.balance
             try:
                 abonentevent = AbonentEvent.objects.get(pk=2) #pk=2 Списание средств
             except Exception, e:
@@ -137,7 +138,7 @@ class PaymentFilterManager(models.Manager):
         if top:
             payment_list = payment_list.filter(top__in=top)
         if utype:
-            payment_list = payment_list.filter(abon__utype__in=utype)
+            payment_list = payment_list.filter(abonent__utype__in=utype)
         return payment_list.order_by('-date')
 
     def get_query_set(self):
@@ -145,52 +146,57 @@ class PaymentFilterManager(models.Manager):
         
 class Payment(models.Model):
     def getnumber():
+        # pass
         # no = Payment.objects.filter(valid=True).count()
         no = Payment.objects.all().order_by("-id")[0].id or 1
         return PAYS_PREFIX + u'%06d' % (no + 1)
     
-    abon = models.ForeignKey(Abonent, verbose_name=u'Абонент')
+    # abon = models.ForeignKey(Abonent, verbose_name=u'Абонент',related_name='old_abonent')
+    abonent = models.ForeignKey(Abonent, verbose_name=u'Абонент',related_name='abonent')
     top = models.ForeignKey(PaymentSystem, verbose_name=u'Платежная система')
-    sum = models.FloatField(u'Сумма')
+    # sum = models.FloatField(u'Сумма')
+    summ = models.FloatField(u'Сумма',default=0)
     date = models.DateTimeField(default=datetime.now, verbose_name=u'Дата')
     user = models.ForeignKey(User, verbose_name=u'Пользователь', blank=True, null= True)
     num = models.CharField(u'Номер документа', max_length=30, unique=True, default=getnumber)
     valid = models.BooleanField(u'Действителен', default=True)
+    newbalance = models.FloatField(u'Новый баланс',default=0)
     objects = models.Manager()
     obj = PaymentFilterManager()
 
     def save(self, *args, **kwargs):
         isNew = not self.pk
         if not isNew:
-            diff = Payment.objects.get(pk=self.pk).sum - self.sum
-            Abonent.objects.filter(pk=self.abon.pk).update(balance=F('balance') - diff)
-            abonent = Abonent.objects.get(pk=self.abon.pk)
+            diff = Payment.objects.get(pk=self.pk).summ - self.summ
+            Abonent.objects.filter(pk=self.abonent.pk).update(balance=F('balance') - diff)
+            abonent = Abonent.objects.get(pk=self.abonent.pk)
             abonent.check_status(reason='Изменен размер платежа')
-        if self.sum == 0:
+        if self.summ == 0:
             self.valid = False
+        self.newbalance = abonent.balance + summ
         super(Payment, self).save(*args, **kwargs)
         if isNew: 
             if self.num == '':
                 self.num = self.pk
                 super(Payment, self).save(*args, **kwargs)
 
-            PromisedPays.objects.filter(abonent__pk=self.abon.pk, pay_onaccount=True).update(repaid=True)
-            Abonent.objects.filter(pk=self.abon.pk).update(balance=F('balance') + self.sum)
-            abonent = Abonent.objects.get(pk=self.abon.pk)
+            PromisedPays.objects.filter(abonent__pk=self.abonent.pk, pay_onaccount=True).update(repaid=True)
+            Abonent.objects.filter(pk=self.abonent.pk).update(balance=F('balance') + self.summ)
+            abonent = Abonent.objects.get(pk=self.abonent.pk)
             abonent.check_status(reason='Зачисление средств')
             try:
                 abonentevent = AbonentEvent.objects.get(pk=1) #pk=1 Пополнение счета
             except Exception, e:
                 pass
             else:
-                extra_keys = { 'summa' : self.sum, 'balance' : round(abonent.balance,2) }
-                abonentevent.generate_messages([self.abon],extra_keys)
+                extra_keys = { 'summa' : self.summ, 'balance' : round(abonent.balance,2) }
+                abonentevent.generate_messages([self.abonent],extra_keys)
             
     def delete(self, *args, **kwargs):
-        # self.abon.balance = F('balance') - self.sum
-        Abonent.objects.filter(pk=self.abon.pk).update(balance=F('balance') - self.sum)
-        # self.abon.balance -= self.sum
-        # self.abon.save()
+        # self.abonent.balance = F('balance') - self.summ
+        Abonent.objects.filter(pk=self.abonent.pk).update(balance=F('balance') - self.summ)
+        # self.abonent.balance -= self.summ
+        # self.abonent.save()
         self.valid = False
         self.save()
         # super(Payment, self).delete(*args, **kwargs)
@@ -200,4 +206,4 @@ class Payment(models.Model):
         verbose_name_plural = u'Платежи'
 
     def __unicode__(self):
-        return u"%s, %s,  %s руб., %s" % (self.abon.contract, self.top,  self.sum, self.date.ctime())
+        return u"%s, %s,  %s руб., %s" % (self.abonent.contract, self.top,  self.sum, self.date.ctime())

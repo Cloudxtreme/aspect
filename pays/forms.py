@@ -66,12 +66,12 @@ class PaymentForm(forms.ModelForm):
     
     class Meta:
         model = Payment
-      	fields = ['top', 'sum', 'date','num']  
+      	fields = ['top', 'summ', 'date','num']  
       	
         widgets = {
             'num': forms.TextInput(attrs={'class': 'form-control',}),
             'top': forms.Select(attrs={'class': 'form-control',}),
-            'sum': forms.TextInput(attrs={'class': 'form-control',}),
+            'summ': forms.TextInput(attrs={'class': 'form-control',}),
             'date': DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
                                        "pickSeconds": False, }),
         }
@@ -85,11 +85,11 @@ class QuickPaymentForm(forms.ModelForm):
 
     class Meta:
         model = Payment
-        fields = ['abon', 'sum', 'date']  
+        fields = ['abon', 'summ', 'date']  
         
         widgets = {
             # 'abon': forms.TextInput(attrs={'class': 'form-control',}),
-            'sum': forms.TextInput(attrs={'class': 'form-control',}),
+            'summ': forms.TextInput(attrs={'class': 'form-control',}),
             'date': DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
                                        "pickSeconds": False, }),
         }

@@ -30,7 +30,7 @@ def report_sumbymonth(request):
 	# data = Payment.objects.extra({'month': "dayofweek(date)" }).values('weekday').order_by('weekday').annotate(Count('id'))
 	data = Payment.objects.filter(valid=True,top__stat=True).extra(select={'month': 'extract( month from date )',
 										 'year': 'extract( year from date )'
-										}).values('month','year').order_by('year','month').annotate(dcount=Count('date'),dsum=Sum('sum'))
+										}).values('month','year').order_by('year','month').annotate(dcount=Count('date'),dsum=Sum('summ'))
 	return render_to_response('report_sumbymonth.html', { 'data' : data }, context_instance = RequestContext(request))
 
 @login_required	

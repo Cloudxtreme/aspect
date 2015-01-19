@@ -27,7 +27,7 @@
             <td>{{ pay.num }}</td>
             <td>{{ pay.top.title }}</td>
             <td>{% if pay.user %} {{ pay.user.get_full_name }} {% else %} Автоматический платеж {% endif %}</td>
-            <td>{{ pay.sum }} руб. </td>
+            <td>{{ pay.summ }} руб. </td>
             <td>{{ pay.date|date:'Y-M-d' }}</td>
         </tr>
 		{% endfor %}
