@@ -34,6 +34,9 @@ from contacts.models import Contact
 from devices.models import dec2ip,ip2dec
 import re
 
+def zapret(request):
+    return render_to_response('zapret.html')
+
 def balance(request):
     ip = request.META.get('REMOTE_ADDR', '') or request.META.get('HTTP_X_FORWARDED_FOR', '')
     
