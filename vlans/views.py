@@ -29,6 +29,19 @@ def ip2dec(ip):
     return sum([int(q) << i * 8 for i, q in enumerate(reversed(ip.split(".")))])
 
 @login_required
+def network_del(request,net_id):
+    try:
+        net = Network.objects.get(pk=net_id)
+    except:
+        raise Http404
+
+    parent_id = net.parent_id
+    net.delete()
+
+    return HttpResponseRedirect(reverse('ips', args=[parent_id]))    
+
+
+@login_required
 def edit_network(request,net_id):
     try:
         net = Network.objects.get(pk=net_id)
