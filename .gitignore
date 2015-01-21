@@ -4,5 +4,6 @@ my.cnf
 build/
 apache/
 media/invoices/
+media/configs/
 scripts/*
 !scripts/*.py
