@@ -45,8 +45,8 @@ class Location(models.Model):
     bs_type = models.CharField(u'Тип', max_length = 2, 
                                choices=TYPE_OF_OBJECTS)
     comment  = models.CharField(u'Комментарий', max_length=300, blank=True, null=True, default='')
-    geolocation = LocationField(u'Карта', max_length=100, blank=True, null=True)
-    # geolocation = models.CharField(u'Карта', max_length=100, blank=True, null=True) # Заглушка для South
+    # geolocation = LocationField(u'Карта', max_length=100, blank=True, null=True)
+    geolocation = models.CharField(u'Карта', max_length=100, blank=True, null=True) # Заглушка для South
    
     @property
     def get_geolocation(self):
@@ -99,6 +99,7 @@ class Network(models.Model):
     vlan = models.ForeignKey(Vlan,null=True,blank=True)
     net_type = models.CharField(u'Тип сети',max_length = 2, choices=TYPE_OF_NETS)
     decip = models.PositiveIntegerField(null=True, blank=True)
+    description = models.CharField(max_length=200, blank=True, null=True)
     segment = models.ForeignKey('users.Segment')
     in_dhcpd = models.BooleanField(u'Включать в DHCP',default=False)
 
