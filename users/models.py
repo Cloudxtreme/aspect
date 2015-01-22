@@ -263,6 +263,14 @@ class Interface(models.Model):
     def __unicode__(self):
         return u"%s" % (self.ip)
 
+# Функция возвращает первый день следующего месяца
+def get_1stdaynextmonth(sourcedate,months):
+    month = sourcedate.month - 1 + months
+    year = sourcedate.year + month / 12
+    month = month % 12 + 1
+    day = min(sourcedate.day,calendar.monthrange(year,month)[1])
+    return datetime.date(year,month,1)
+
 class Service(models.Model):
     abon = models.ForeignKey(Abonent,verbose_name=u'Абонент')
     segment = models.ForeignKey(Segment,verbose_name=u'Сегмент')
@@ -295,20 +303,26 @@ class Service(models.Model):
         ssc.save()
 
     def set_status(self, new_status, date=datetime.datetime.now()):
+        # Если статус не изменился - выходим
         if self.status == new_status:
             return False
 
-        if self.abon.status in [settings.STATUS_ARCHIVED, settings.STATUS_PAUSED, settings.STATUS_NEW] and not new_status in [settings.STATUS_ARCHIVED, settings.STATUS_PAUSED, settings.STATUS_NEW]:
+        # Если статус абонента пассивный, а новый статус услуги активный - выходим
+        if (self.abon.status in [settings.STATUS_ARCHIVED, settings.STATUS_PAUSED, settings.STATUS_NEW]) and (new_status not in [settings.STATUS_ARCHIVED, settings.STATUS_PAUSED, settings.STATUS_NEW]):
             return False
 
-        else:
-            if self.status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE] and new_status in [settings.STATUS_ARCHIVED, settings.STATUS_PAUSED, settings.STATUS_NEW]:
-                self.stop(date, newstatus=new_status)
-            elif self.status in [settings.STATUS_ARCHIVED, settings.STATUS_PAUSED, settings.STATUS_NEW] and new_status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE]:
-                self.start(date, newstatus=new_status)
-            self.status = new_status if not new_status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE] else self.abon.status
-            self.save()
-            return True
+        # Если статус услуги был активным, а становится пассивным, то останавливаем услугу
+        if self.status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE] and new_status in [settings.STATUS_ARCHIVED, settings.STATUS_PAUSED, settings.STATUS_NEW]:
+            self.stop(date, newstatus=new_status)
+
+        # Если статус услги был пассивным, а стал активным, то стартуем услугу
+        elif self.status in [settings.STATUS_ARCHIVED, settings.STATUS_PAUSED, settings.STATUS_NEW] and new_status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE]:
+            self.start(date, newstatus=new_status)
+
+        # Если новый статус услуги пассивный, то присваиваем его, а если активный, то статус услуги = статусу абонента
+        self.status = new_status if new_status not in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE] else self.abon.status
+        self.save()
+        return True
 
     def stop(self, date=datetime.datetime.now(), newstatus=settings.STATUS_ARCHIVED):
         self.status = newstatus
@@ -343,9 +357,9 @@ class Service(models.Model):
         write_off = WriteOff(abonent=self.abon, service=self, wot=wot_install,summ=self.plan.install_price, date=targetday, comment=u'Подключение услуги [%s]' % (self.plan.title))
         write_off.save()
    
-        # Если кредитная форма оплаты, но подключен в предыдущем месяце, то списываем абон первым числом.
+        # Если кредитная форма оплаты, но подключен в предыдущем месяце, то списываем абон первым числом следующего месяца.
         if self.abon.is_credit == settings.PAY_CREDIT and (targetday.year*12 + targetday.month) != (now.year*12 + now.month):
-            write_off = WriteOff(abonent=self.abon, service=self, wot=wot_abon,summ=summ, comment=comment, date=datetime.datetime(targetday.year,targetday.month+1,1))
+            write_off = WriteOff(abonent=self.abon, service=self, wot=wot_abon,summ=summ, comment=comment, date=get_1stdaynextmonth(targetday,1))
             write_off.save()
 
         # Если предоплата, то списываем за услуги сразу. Если нет, платежи будут списаны в начале следующего месяца
