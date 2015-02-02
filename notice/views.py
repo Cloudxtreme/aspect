@@ -243,7 +243,8 @@ def sms_edit(request,sms_id):
         sms = SMSMessage.objects.get(pk = sms_id)
         header = 'Редактирование SMS-уведомления'    
     except:
-        raise Http404    
+        sms = SMSMessage()
+        header = 'Создание SMS-уведомления'
 
     if request.method == 'POST':
         form = SMSMessageForm(request.POST, instance=sms)

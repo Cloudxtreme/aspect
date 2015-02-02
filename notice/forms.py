@@ -27,6 +27,11 @@ class SMSMessageForm(forms.ModelForm):
     class Meta:
         model = SMSMessage
         exclude = ['status','sent']
+        widgets = {
+            'text': forms.Textarea(),
+            'date': DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",
+                                       "pickSeconds": False, }),
+        }
 
 class EmailMessageForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

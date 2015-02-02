@@ -6,6 +6,7 @@
 </div>
 
 <p>На счету {{ balance }} руб.</p>
+<p><a href="{% url 'sms_edit' 0 %}">Создать SMS&nbsp<span class="glyphicon glyphicon-edit"></span></a></p>
 <p><a href="{% url 'mass_notice_add' %}">Создать новую рассылку&nbsp<span class="glyphicon glyphicon-envelope"></span></a></p>
 <p>
     {% if count != 0 %}
