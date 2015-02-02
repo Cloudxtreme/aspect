@@ -155,7 +155,7 @@ class Payment(models.Model):
         return PAYS_PREFIX + u'%06d' % (no + 1)
     
     # abon = models.ForeignKey(Abonent, verbose_name=u'Абонент',related_name='old_abonent')
-    abonent = models.ForeignKey(Abonent, verbose_name=u'Абонент',related_name='abonent')
+    abonent = models.ForeignKey(Abonent, verbose_name=u'Абонент')
     top = models.ForeignKey(PaymentSystem, verbose_name=u'Платежная система')
     # sum = models.FloatField(u'Сумма')
     summ = models.FloatField(u'Сумма',default=0)
