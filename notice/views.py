@@ -4,13 +4,14 @@ from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
-from notice.models import EmailMessage, AbonentEvent, TemplateMessage
-from notice.forms import AbonentFilterForm, AbonentEventForm, TemplateMessageForm, GroupEmailForm, EmailMessageForm, InvoiceMessageForm
+from notice.models import EmailMessage, AbonentEvent, TemplateMessage, SMSMessage
+from notice.forms import AbonentFilterForm, AbonentEventForm, TemplateMessageForm, GroupEmailForm, EmailMessageForm, InvoiceMessageForm,SMSMessageForm
 from users.models import Abonent, Service
 from datetime import datetime
 from django.conf import settings
 from django.db.models import Q
 from django.db.models import Max
+import smsru
 
 @login_required
 def create_invoice(request):
@@ -227,6 +228,49 @@ def send_message(request,message_id):
     return HttpResponseRedirect(reverse('email_all'))
 
 @login_required
+def sms_send(request,sms_id):
+    try:
+        sms = SMSMessage.objects.get(pk=sms_id)
+    except:
+        raise Http404
+    else:
+        sms.sendit()
+    return HttpResponseRedirect(reverse('sms_all'))
+
+@login_required
+def sms_edit(request,sms_id):
+    try:
+        sms = SMSMessage.objects.get(pk = sms_id)
+        header = 'Редактирование SMS-уведомления'    
+    except:
+        raise Http404    
+
+    if request.method == 'POST':
+        form = SMSMessageForm(request.POST, instance=sms)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('sms_all'))
+    else:
+        form = SMSMessageForm(instance=sms)
+
+    return render_to_response('generic/generic_edit.html', {
+                                'header' : header,
+                                'form': form,
+                                'extend': 'index.html',},
+                                context_instance = RequestContext(request)
+                                ) 
+
+@login_required
+def sms_del(request,sms_id):
+    try:
+        sms = SMSMessage.objects.get(pk=sms_id)
+    except:
+        raise Http404
+    else:
+        sms.delete()
+    return HttpResponseRedirect(reverse('sms_all'))
+
+@login_required
 def notices_exec(request):
     for item in EmailMessage.objects.filter(date__lte=datetime.now(), sent=False):
         item.sendit()
@@ -234,10 +278,29 @@ def notices_exec(request):
     return HttpResponseRedirect(reverse('email_all'))
 
 @login_required
+def sms_all_send(request):
+    for item in SMSMessage.objects.filter(date__lte=datetime.now(), sent=False):
+        item.sendit()
+
+    return HttpResponseRedirect(reverse('sms_all'))
+
+@login_required
+def sms_all(request):
+    notice_list = SMSMessage.objects.all()
+    count = SMSMessage.objects.filter(sent=False).count()
+    cli = smsru.Client()
+    balance = cli.balance()
+
+    return render_to_response('notice/sms_all.html', { 
+                                'notice_list': notice_list, 
+                                'count' : count,
+                                'balance' : balance,
+                                }, context_instance = RequestContext(request))
+
+@login_required
 def email_all(request):
     notice_list = EmailMessage.objects.all()
     count = EmailMessage.objects.filter(sent=False).count()
-    print count
 
     return render_to_response('notice/email_all.html', { 
                                 'notice_list': notice_list, 

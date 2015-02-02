@@ -94,15 +94,24 @@ class SMSMessage(models.Model):
     date = models.DateTimeField(default=datetime.now, verbose_name=u'Дата рассылки')
     sent = models.BooleanField(u'Отправлено', default=False)
     text = models.CharField(u'Текст', max_length=280)
-    status = models.CharField(u'Статус', max_length=3)
+    status = models.CharField(u'Статус', max_length=3,default='0')
 
     def sendit(self):
         if self.abonent.notice_mobile:
             cli = smsru.Client()
-            status, msg, number = cli.send(self.abonent.notice_mobile, text)
+            status, msg, number = cli.send(self.abonent.notice_mobile, self.text)
             self.status = status
             self.sent = True
             self.save()
+
+    class Meta:
+        verbose_name = u'SMS Сообщение'
+        verbose_name_plural = u'SMS Сообщения'
+        ordering = ['sent','-pk']
+
+    def __unicode__(self):
+        return u"%s [%s]" % ( self.date.ctime(), self.abonent.notice_mobile )
+
 
 class EmailMessage(models.Model):
     def translate_path(self, filename):

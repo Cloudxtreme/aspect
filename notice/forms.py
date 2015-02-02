@@ -19,13 +19,14 @@ class TemplateMessageForm(forms.ModelForm):
 
 class SMSMessageForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(SMSMessage, self).__init__(*args, **kwargs)
+        super(SMSMessageForm, self).__init__(*args, **kwargs)
         # adding css classes to widgets without define the fields:
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
 
     class Meta:
         model = SMSMessage
+        exclude = ['status','sent']
 
 class EmailMessageForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

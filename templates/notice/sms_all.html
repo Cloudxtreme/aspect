@@ -1,0 +1,64 @@
+{% extends "index.html" %}
+
+{% block main %}
+<div class="page-header">
+    <h2 class="sub-header">Список SMS уведомлений</h2>
+</div>
+
+<p>На счету {{ balance }} руб.</p>
+<p><a href="{% url 'mass_notice_add' %}">Создать новую рассылку&nbsp<span class="glyphicon glyphicon-envelope"></span></a></p>
+<p>
+    {% if count != 0 %}
+    <a href="{% url 'sms_all_send' %}">Отправить все ({{ count }}) sms в очереди&nbsp<span class="glyphicon glyphicon-share"></span></a>
+    {% endif %}
+</p>
+</br>
+{% load dict_extras %}
+    <div class="table-responsive">
+        <table class="table h6">
+        <thead>
+          <tr>
+            <th class='col-md-1'>Дата</th>
+            <th>Статус</th>
+            <th>Результат</th>
+            <th>Получатель</th>
+            <th>Содержание</th>
+            <th class='col-md-1'>
+          </tr>
+        </thead>
+        <tbody>
+        {% if notice_list %}
+        {% for notice in notice_list %}
+        <tr {% if not notice.sent %}class="active"{% endif %}>
+            <td>{{ notice.date }}</td>
+            <td>
+                {{ notice.sent|yesno:"Отправлен,В очереди" }}
+            </td>
+            <td>
+                {{ notice.status|sms_status }}
+            </td>
+            <td>{% if notice.abonent %}
+                    <a href="{% url 'abonent_info' notice.abonent.id %}">{{ notice.abonent }}</a>
+                {% endif %}
+            </td>
+            <td>
+                {{ notice.text }}
+            </td>
+            <td>
+                {% if not notice.sent %}
+                    <p class='pull-right'><a href="{% url 'sms_send' notice.id %}">Отправить&nbsp
+                    <span class="glyphicon glyphicon-share-alt"></span></a></p>
+                    <p class='pull-right'><a href="{% url 'sms_edit' notice.id %}">Изменить&nbsp
+                    <span class="glyphicon glyphicon-edit"></span></a></p>
+                    <p class='pull-right'><a href="{% url 'sms_del' notice.id %}">Удалить&nbsp
+                    <span class="glyphicon glyphicon-remove"></span></a></p>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+        </tbody>
+        </table>
+    </div>
+    
+{% endblock %}

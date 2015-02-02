@@ -36,7 +36,8 @@ import urllib
 import urllib2
 
 
-CONFIG_FILES = ("~/.config/smsru.conf", "/etc/smsru.conf")
+# CONFIG_FILES = ("~/.config/smsru.conf", "/etc/smsru.conf")
+CONFIG_FILES = ("/home/diamond/venv/billing/aspekt/smsru.conf", "/etc/smsru.conf")
 
 SEND_STATUS = {
     100: "Message accepted",

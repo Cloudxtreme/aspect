@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 from django import template
 from pays.models import PromisedPays
+import notice.smsru as smsru
 
 register = template.Library()
+
+@register.filter
+def sms_status(value):
+    return smsru.SEND_STATUS.get(int(value), "Unknown status")
 
 @register.filter
 def get_item(dictionary, key):
