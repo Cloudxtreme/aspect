@@ -58,7 +58,7 @@ class Location(models.Model):
         verbose_name_plural = u'Местонахождения'
 
     def __unicode__(self):
-        return "%s" % (self.address)
+        return "[%s] %s" % (self.pk, self.address)
 
 class Node(models.Model):
     title  = models.CharField(max_length=100)

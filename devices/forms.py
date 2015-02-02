@@ -2,6 +2,7 @@
 from django import forms
 from devices.models import Device, Application
 from users.models import Interface
+from vlans.models import Location
 from bootstrap3_datetime.widgets import DateTimePicker
 
 class AppEditForm(forms.ModelForm):
@@ -17,6 +18,13 @@ class AppEditForm(forms.ModelForm):
         widgets = {
             'date': DateTimePicker(),
             }
+
+class DeviceChoiceLocationForm(forms.ModelForm):
+    location = forms.ModelChoiceField(queryset=Location.objects.filter(bs_type='B'),widget=forms.Select(attrs={'class':'form-control'}), label = u'Местоположение')
+    
+    class Meta:
+        model = Device
+        fields = ['location']
 
 class DeviceEditForm(forms.ModelForm):
     

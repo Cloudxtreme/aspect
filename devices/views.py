@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
 from devices.models import Device, DevType, DeviceStatusEntry, Application
-from devices.forms import DeviceEditForm, SyslogFilterForm, AppEditForm
+from devices.forms import DeviceEditForm, SyslogFilterForm, AppEditForm, DeviceChoiceLocationForm
 from users.forms import ServiceInterfaceForm
 from users.models import Interface
 from vlans.models import IPAddr, Network
@@ -228,6 +228,36 @@ def device_iface_edit(request, device_id, iface_id):
                                 'form': form, 
                                 'extend': 'index.html',},
                                  context_instance = RequestContext(request))
+@login_required
+def device_location_choice(request, device_id):
+    try:
+        device = Device.objects.get(pk=device_id)
+        header = 'Выбор узла связи'
+        if device.interfaces.all().count():
+           net_id = device.interfaces.all()[0].ip.net_id
+        else:
+            net_id = 1
+        anchortag = '#%s' % device.pk
+    except:
+        raise Http404
+
+    if request.method == 'POST':
+        form = DeviceChoiceLocationForm(request.POST,instance=device)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('devices_list', args=[net_id]) + anchortag)
+    else:
+        form = DeviceChoiceLocationForm(instance=device)
+
+    breadcrumbs = [({'url':reverse('devices_list', args=[net_id]) + anchortag,'title':'Устройства'})]
+
+    return render_to_response('generic/generic_edit.html', { 
+                                'header' : header,
+                                'breadcrumbs' : breadcrumbs,
+                                'form': form,
+                                'extend': 'index.html', },
+                                 context_instance = RequestContext(request))
+
 
 # Редактирование местоположения оборудования
 @login_required
@@ -253,8 +283,11 @@ def device_location_edit(request, device_id):
     else:
         form = LocationForm(instance=device.location)
 
+    breadcrumbs = [({'url':reverse('devices_list', args=[0]),'title':'Устройства'})]
+
     return render_to_response('generic/generic_edit.html', { 
                                 'header' : header,
+                                'breadcrumbs' : breadcrumbs,
                                 'form': form,
                                 'extend': 'index.html', },
                                  context_instance = RequestContext(request))

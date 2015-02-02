@@ -1,7 +1,7 @@
 ﻿from django import forms
 from django.contrib.auth import authenticate
 from users.models import Abonent, Service, Plan, TypeOfService, Segment, Agent, Passport, Detail, Interface, Pipe
-from vlans.models import Vlan
+from vlans.models import Vlan, Location
 from users.fields import JSONWidget
 from bootstrap3_datetime.widgets import DateTimePicker
 # from django.forms.extras.widgets import SelectDateWidget
@@ -157,6 +157,13 @@ class PipeEditForm(forms.ModelForm):
 
     class Meta:
         model = Pipe
+
+class ServiceChoiceLocationForm(forms.ModelForm):
+    location = forms.ModelChoiceField(queryset=Location.objects.all(),widget=forms.Select(attrs={'class':'form-control'}), label = u'Местоположение')
+    
+    class Meta:
+        model = Service
+        fields = ['location']
 
 class ServiceSpeedForm(GenericServiceForm):
     class Meta(GenericServiceForm.Meta):

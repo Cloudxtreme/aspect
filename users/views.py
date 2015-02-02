@@ -14,7 +14,7 @@ from users.forms import  ServiceForm, OrgServiceForm, SearchForm, LoginForm, \
                          PassportForm, DetailForm, ManageForm, AbonentForm, \
                          ServicePlanForm, ServiceEditForm, ServiceInterfaceForm, \
                          ServiceSpeedForm, ServiceStateForm, ServiceVlanForm, \
-                         ServiceEquipForm, SmartSearchForm
+                         ServiceEquipForm, SmartSearchForm, ServiceChoiceLocationForm
 from journaling.forms import ServiceStatusChangesForm
 from notice.forms import AbonentFilterForm
 from users.models import Abonent, Service, TypeOfService, Plan, Passport, Detail, Interface, Segment
@@ -442,6 +442,33 @@ def service_vlan_edit(request, abonent_id, service_id):
                                 'abonent' : abonent, 
                                 'form': form, 
                                 'menu_title': 'Редактирование спсика Vlan', },
+                                 context_instance = RequestContext(request))
+
+# Выбор местоположения услуги
+def service_location_choice(request, service_id):
+    try:
+        service = Service.objects.get(pk=service_id)
+        abonent = service.abon
+        header = 'Выбор местоположения услуги'
+    except:
+        raise Http404
+
+    if request.method == 'POST':
+        form = ServiceChoiceLocationForm(request.POST,instance=service)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('abonent_services', args=[abonent.id]))
+    else:
+        form = ServiceChoiceLocationForm(instance=service)
+
+    breadcrumbs = [({'url':reverse('abonent_services', args=[abonent.id]),'title':'Услуги абонента'})]
+
+    return render_to_response('generic/generic_edit.html', { 
+                                'header' : header,
+                                'abonent' : abonent,
+                                'breadcrumbs' : breadcrumbs,
+                                'form': form,
+                                'extend': 'abonent/main.html', },
                                  context_instance = RequestContext(request))
 
 # Редактирование местоположения услуги

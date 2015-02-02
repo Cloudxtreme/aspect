@@ -17,6 +17,7 @@ from users.models import Detail
 import sys
 import os
 import re
+import smsru
 from pytils import translit
 
 # SMTPserver = 'smtp.yandex.ru'
@@ -87,6 +88,21 @@ class AbonentEvent(models.Model):
 
     def __unicode__(self):
         return u'%s' % (self.title,)    
+
+class SMSMessage(models.Model):
+    abonent = models.ForeignKey('users.Abonent', verbose_name=u'Абонент', blank=True, null=True)
+    date = models.DateTimeField(default=datetime.now, verbose_name=u'Дата рассылки')
+    sent = models.BooleanField(u'Отправлено', default=False)
+    text = models.CharField(u'Текст', max_length=280)
+    status = models.CharField(u'Статус', max_length=3)
+
+    def sendit(self):
+        if self.abonent.notice_mobile:
+            cli = smsru.Client()
+            status, msg, number = cli.send(self.abonent.notice_mobile, text)
+            self.status = status
+            self.sent = True
+            self.save()
 
 class EmailMessage(models.Model):
     def translate_path(self, filename):

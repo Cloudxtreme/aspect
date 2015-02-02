@@ -32,6 +32,7 @@ class DevType(models.Model):
         ('24V', '24V'),
         ('220V', '220V'),
     )
+    is_radio = models.BooleanField(u'Радио',default=True)
     vendor = models.CharField(max_length=50)
     model = models.CharField(max_length=50)
     description = models.CharField(max_length=200, blank=True, null=True)

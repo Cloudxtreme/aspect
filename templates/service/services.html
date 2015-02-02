@@ -50,8 +50,10 @@
             <td>
                 {{ service.location.address }}
                 <p><small>{{ service.location.geolocation }}</small></p>
-                <a href="{% url 'users.views.service_location_edit' abonent.id service.id %}" data-toggle="tooltip" data-placement="left" title="Редактировать местоположение">
+                <a href="{% url 'service_location_edit' abonent.id service.id %}" data-toggle="tooltip" data-placement="left" title="Редактировать местоположение">
                 <span class="glyphicon glyphicon-edit"></span></a>
+                <a href="{% url 'service_location_choice' service.id %}" data-toggle="tooltip" data-placement="left" title="Выбрать местоположение">
+                <span class="glyphicon glyphicon-folder-open"></span></a>
                 <p><small>{{ service.location.comment }}</small></p>
             </td>
             <td>{{ service.datestart|date:'Y-M-d' }}</td>

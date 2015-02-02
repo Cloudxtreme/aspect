@@ -68,15 +68,23 @@
                           <p><a href="{% url 'get_application_entries' %}?ipaddr={{ iface.ip.ip }}">Журнал работы с оборудованием</a></p>
                         {% endfor %}
                         {% if device.interfaces.all.count == 0 %}
-                          <a href={% url 'device_iface_add' device.id %} data-toggle="tooltip" data-placement="left" title="Добавить">Добавить <span class="glyphicon glyphicon-plus"></span></a>
+                          <a href={% url 'device_iface_add' device.id %} data-toggle="tooltip" data-placement="left" title="Добавить">Добавить IP <span class="glyphicon glyphicon-plus"></span></a>
                         {% endif %}
                         </li>
                       {% endif %}
                     <li class="list-group-item">
-                        {{ device.location.address }}
-                        <a href="{% url 'device_location_edit' device.id %}">
-                        <span class="glyphicon glyphicon-edit"></span></a>
-                        <p><small>{{ device.location.comment }}</small></p>
+                        {% if device.location %}
+                            {{ device.location.address }}
+                            <a href="{% url 'device_location_edit' device.id %}">Редактировать
+                            <span class="glyphicon glyphicon-edit"></span></a>
+                        {% else %}
+                            Местоположение: 
+                            <a href="{% url 'device_location_edit' device.id %}">Создать
+                            <span class="glyphicon glyphicon-edit"></span></a>
+                            <a href="{% url 'device_location_choice' device.id %}">Выбрать
+                            <span class="glyphicon glyphicon-folder-open"></span></a>
+                            <p><small>{{ device.location.comment }}</small></p>
+                        {% endif %}
                     </li>
                     {% for service in device.user_device.all %}
                         <li class="list-group-item">
