@@ -19,7 +19,7 @@ db = MySQLdb.connect(host="10.255.0.10", user="d.sitnikov",
 cursor = db.cursor()
 
 def importosmp1cdb():
-    sql = """SELECT o.txn_id, o.sum, o.date, o.time, s.SubscriberID FROM Subscribers AS s, OSMP_reestr as o WHERE s.SubscriberID=o.SubscriberID AND s.SubscriberID LIKE '50______' AND s.tarif > 1  AND o.date >= '%s'""" % (datetime.now() - timedelta(hours=440)).date()
+    sql = """SELECT o.txn_id, o.sum, o.date, o.time, s.SubscriberID FROM Subscribers AS s, OSMP_reestr as o WHERE s.SubscriberID=o.SubscriberID AND s.SubscriberID LIKE '50______' AND s.tarif > 1  AND o.date >= '%s'""" % (datetime.now() - timedelta(hours=24)).date()
     cursor.execute(sql)
     data = cursor.fetchall()
     p_ps = PaymentSystem.objects.get(pk=1) # OSMP id=1
@@ -55,7 +55,7 @@ def importosmp1cdb():
     # Payment.objects.bulk_create(payList)
 
 def importuntlcdb():
-    sql = """SELECT u.Order_IDP, u.summ, u.time_create, s.SubscriberID, u.canceled FROM Subscribers AS s, Uniteller_reestr as u WHERE s.SubscriberID=u.SubscriberID AND s.SubscriberID LIKE '50______' AND u.paid = 1 AND u.canceled = 0 AND u.time_create >= '%s'""" % (datetime.now() - timedelta(hours=440)).date()
+    sql = """SELECT u.Order_IDP, u.summ, u.time_create, s.SubscriberID, u.canceled FROM Subscribers AS s, Uniteller_reestr as u WHERE s.SubscriberID=u.SubscriberID AND s.SubscriberID LIKE '50______' AND u.paid = 1 AND u.canceled = 0 AND u.time_create >= '%s'""" % (datetime.now() - timedelta(hours=24)).date()
     cursor.execute(sql)
     data = cursor.fetchall()
     p_ps = PaymentSystem.objects.get(pk=2) # Uniteller id=2

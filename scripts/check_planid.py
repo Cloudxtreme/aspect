@@ -3,9 +3,11 @@
 
 # Скрипт проверки тарифного плана пользователей
 import sys, os, re
-import MySQLdb
+
 sys.path.append("/home/diamond/venv/dev/aspekt")
 os.environ['DJANGO_SETTINGS_MODULE'] = 'aspekt.settings'
+
+import MySQLdb
 from users.models import Abonent, Plan
 
 db = MySQLdb.connect(host="10.255.0.10", user="d.sitnikov", 
