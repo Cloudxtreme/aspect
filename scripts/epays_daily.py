@@ -34,7 +34,7 @@ def importosmp1cdb():
         else:
             payment = Payment(abonent=p_ab,
                         top = p_ps,
-                        sum = p_sum,
+                        summ = p_sum,
                         date = full_time,
                         num = p_id,
                         valid = True,
@@ -42,7 +42,7 @@ def importosmp1cdb():
             payment.save()
             # payList += [Payment(abon=p_ab,
             #             top = p_ps,
-            #             sum = p_sum,
+            #             summ = p_sum,
             #             date = full_time,
             #             num = p_id,
             #             valid = True,
@@ -65,7 +65,7 @@ def importuntlcdb():
         else:
             payment = Payment(abonent=p_ab,
                             top=p_ps,
-                            sum=p_sum,
+                            summ=p_sum,
                             date=p_date,
                             num=p_id,
                             valid=not p_canceled,
@@ -73,7 +73,7 @@ def importuntlcdb():
             payment.save()
             # payList += [Payment(abon=p_ab,
             #                 top=p_ps,
-            #                 sum=p_sum,
+            #                 summ=p_sum,
             #                 date=p_date,
             #                 num=p_id,
             #                 valid=not p_canceled,
