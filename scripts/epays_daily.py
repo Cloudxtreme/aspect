@@ -32,7 +32,7 @@ def importosmp1cdb():
         except:
             pass
         else:
-            payment = Payment(abon=p_ab,
+            payment = Payment(abonent=p_ab,
                         top = p_ps,
                         sum = p_sum,
                         date = full_time,
@@ -63,7 +63,7 @@ def importuntlcdb():
         except:
             pass
         else:
-            payment = Payment(abon=p_ab,
+            payment = Payment(abonent=p_ab,
                             top=p_ps,
                             sum=p_sum,
                             date=p_date,

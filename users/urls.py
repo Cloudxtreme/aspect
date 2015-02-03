@@ -3,6 +3,17 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 urlpatterns = patterns('',
+    url(r'^(?P<abonent_id>\d+)/notice/$','notice.views.for_abonent', name='for_abonent'),
+    url(r'^(?P<abonent_id>\d+)/notice/sms/$','notice.views.sms_abonent', name='sms_abonent'),
+    url(r'^(?P<abonent_id>\d+)/finance/$','pays.views.revise', name='revise'),
+    url(r'^(?P<abonent_id>\d+)/reserve_check_balance$','pays.views.reserve_check_balance', name='reserve_check_balance'),
+    url(r'^(?P<abonent_id>\d+)/finance/payments$','pays.views.abonent_payments', name='payments'),
+    url(r'^(?P<abonent_id>\d+)/finance/payments/add$','pays.views.add_payment', name='addpayment'),
+    url(r'^(?P<abonent_id>\d+)/finance/payoffs$','pays.views.abonent_payoffs', name='writeoffs'),
+    url(r'^(?P<abonent_id>\d+)/finance/payoffs/add$','pays.views.add_payoff', name='addpayoff'),
+    url(r'^(?P<abonent_id>\d+)/promisedpays$','pays.views.promisedpays', name='promisedpays'),
+    url(r'^(?P<abonent_id>\d+)/promisedpays/add$','pays.views.add_promisedpay', name='addpromisedpay'),
+    url(r'^(?P<abonent_id>\d+)/promisedpays/(?P<promisedpay_id>\d+)/close$','pays.views.close_promisedpay', name='closepromisedpay'),
 	url(r'^(?P<abonent_id>\d+)/services/$', 
         'users.views.abonent_services', name='abonent_services'),
     url(r'^(?P<abonent_id>\d+)/statuses/$', 

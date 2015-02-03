@@ -333,7 +333,7 @@ class Service(models.Model):
         if summ > 0 and self.abon.is_credit == settings.PAY_BEFORE:
             from pays.models import PaymentSystem,Payment
             top = PaymentSystem.objects.get(pk=4)
-            payment = Payment(abon=self.abon, top=top, sum=summ, date=date)
+            payment = Payment(abonent=self.abon, top=top, sum=summ, date=date)
             payment.save()
         self.datefinish = date
         self.save()

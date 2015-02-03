@@ -2,14 +2,18 @@
 
 {% block pages %} 
 
-<div class="row">
-    <div class="col-xs-3">
-        <a href="{% url 'addpayment' abonent.id %}" class="btn btn-primary btn-xm" role="button">
-            Добавить платеж
-        </a>
-    </div>
-</div>   
-<hr>  
+<div class="btn-group" role="group" aria-label="...">
+  <a href={% url 'payments' abonent.id %} type="button" class="btn btn-default active">Платежи</a>
+  <a href={% url 'writeoffs' abonent.id %} type="button" class="btn btn-default">Списания</a>
+  <a href={% url 'revise' abonent.id %} type="button" class="btn btn-default">Сверка</a>
+</div>
+
+<div class="page-header">
+    <h2 class="sub-header">Платежи клиента</h2>
+</div>
+
+<a href="{% url 'addpayment' abonent.id %}" class="btn btn-primary btn-xm" role="button">Добавить платеж</a>
+
 {% if pays %}	
 		<table class="table table-striped h6">
 		<thead>

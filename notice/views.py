@@ -321,3 +321,17 @@ def for_abonent(request, abonent_id):
                                 'abonent' : abonent,
                                 'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), 
                                 }, context_instance = RequestContext(request))
+
+@login_required
+def sms_abonent(request, abonent_id):
+    try:
+        abonent = Abonent.objects.get(pk=abonent_id)
+    except:
+        raise Http404
+
+    notice_list = SMSMessage.objects.filter(abonent__pk=abonent_id).order_by('-pk')
+    return render_to_response('abonent/sms_notices.html', { 
+                                'notice_list': notice_list, 
+                                'abonent' : abonent,
+                                'count_serv' : Service.objects.filter(abon__pk=abonent_id).exclude(status='D').count(), 
+                                }, context_instance = RequestContext(request))

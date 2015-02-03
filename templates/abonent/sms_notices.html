@@ -3,12 +3,12 @@
 {% block pages %}
 
 <div class="btn-group" role="group" aria-label="...">
-  <a href={% url 'sms_abonent' abonent.id %} type="button" class="btn btn-default">SMS</a>
-  <a href={% url 'for_abonent' abonent.id %} type="button" class="btn btn-default active">Email</a>
+  <a href={% url 'sms_abonent' abonent.id %} type="button" class="btn btn-default active">SMS</a>
+  <a href={% url 'for_abonent' abonent.id %} type="button" class="btn btn-default">Email</a>
 </div>
 
 <div class="page-header">
-    <h2 class="sub-header">Email-уведомления</h2>
+    <h2 class="sub-header">SMS-уведомления</h2>
 </div>
 
 {% load dict_extras %}
@@ -18,7 +18,7 @@
           <tr>
             <th>Дата</th>
             <th class='col-md-1'>Статус</th>
-            <th>Тема</th>
+            <th>Результат</th>
             <th>Содержание</th>
             <th class='col-md-1'>
           </tr>
@@ -31,13 +31,15 @@
                 <td>
                     {{ notice.sent|yesno:"Отправлен,В очереди" }}
                 </td>
-                <td>{{ notice.subject }}</td>
-                <td>{{ notice.content|safe }}</td>
+                <td>
+                    {{ notice.status|sms_status }}
+                </td>
+                <td>{{ notice.text }}</td>
                 <td>
                     {% if not notice.sent %}
-                        <p class='pull-right'><a href="{% url 'send_message' notice.id %}">Отправить<span class="glyphicon glyphicon-share-alt"></span></a></p>
-                        <p class='pull-right'><a href="{% url 'emailmessage_edit' notice.id %}">Изменить<span class="glyphicon glyphicon-edit"></span></a></p>
-                        <p class='pull-right'><a href="{% url 'notice_email_del' 0 notice.id %}">Удалить<span class="glyphicon glyphicon-remove"></span></a></p>
+                        <p class='pull-right'><a href="{% url 'sms_send' notice.id %}">Отправить<span class="glyphicon glyphicon-share-alt"></span></a></p>
+                        <p class='pull-right'><a href="{% url 'sms_edit' notice.id %}">Изменить<span class="glyphicon glyphicon-edit"></span></a></p>
+                        <p class='pull-right'><a href="{% url 'sms_del' notice.id %}">Удалить<span class="glyphicon glyphicon-remove"></span></a></p>
                     {% endif %}
                 </td>
             </tr>

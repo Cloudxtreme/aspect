@@ -1,14 +1,19 @@
 {% extends "abonent/main.html" %}
 
 {% block pages %} 
-    <div class='row'>
-        <div class="col-xs-3">
-            <a href="{% url 'addpayoff' abonent.id %}" class="btn btn-primary btn-xm" role="button">
-                Списать средства
-            </a>
-        </div>
-    </div>  
-<hr>   
+
+<div class="btn-group" role="group" aria-label="...">
+  <a href={% url 'payments' abonent.id %} type="button" class="btn btn-default">Платежи</a>
+  <a href={% url 'writeoffs' abonent.id %} type="button" class="btn btn-default active">Списания</a>
+  <a href={% url 'revise' abonent.id %} type="button" class="btn btn-default">Сверка</a>
+</div>
+
+<div class="page-header">
+    <h2 class="sub-header">Списания со счета</h2>
+</div>
+
+<a href="{% url 'addpayoff' abonent.id %}" class="btn btn-primary btn-xm" role="button">Списать средства</a>
+ 
 {% if payoffs %}	
 		<table class="table table-striped h6">
 		<thead>

@@ -2,11 +2,17 @@
 
 {% block pages %}
 
+<div class="btn-group" role="group" aria-label="...">
+  <a href={% url 'payments' abonent.id %} type="button" class="btn btn-default">Платежи</a>
+  <a href={% url 'writeoffs' abonent.id %} type="button" class="btn btn-default">Списания</a>
+  <a href={% url 'revise' abonent.id %} type="button" class="btn btn-default active">Сверка</a>
+</div>
+
 <div class="page-header">
     <h2 class="sub-header">Отчет по клиенту</h2>
 </div>
 
-<a href={% url 'reserve_check_balance' abonent.pk %}>Проверка остатков</a>
+<a href={% url 'reserve_check_balance' abonent.pk %}>Пересчитать остатки</a>
 
 {% if result_list %}   
 {% load dict_extras %}
