@@ -1,10 +1,10 @@
 #!/home/diamond/venv/billing/bin/python
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- 
+# Скрипт проверяет изменения в тарифном плане
+import os
+import sys
 
-# Скрипт проверки тарифного плана пользователей
-import sys, os, re
-
-sys.path.append("/home/diamond/venv/dev/aspekt")
+sys.path.append("/home/diamond/venv/billing/aspekt")
 os.environ['DJANGO_SETTINGS_MODULE'] = 'aspekt.settings'
 
 import MySQLdb
