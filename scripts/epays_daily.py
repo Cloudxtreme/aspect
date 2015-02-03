@@ -8,6 +8,7 @@ sys.path.append("/home/diamond/venv/billing/aspekt")
 os.environ['DJANGO_SETTINGS_MODULE'] = 'aspekt.settings'
 
 import MySQLdb
+from django.db import IntegrityError
 from datetime import datetime, time
 from datetime import timedelta
 from users.models import Abonent
@@ -18,7 +19,7 @@ db = MySQLdb.connect(host="10.255.0.10", user="d.sitnikov",
 cursor = db.cursor()
 
 def importosmp1cdb():
-    sql = """SELECT o.txn_id, o.sum, o.date, o.time, s.SubscriberID FROM Subscribers AS s, OSMP_reestr as o WHERE s.SubscriberID=o.SubscriberID AND s.SubscriberID LIKE '50______' AND s.tarif > 1  AND o.date >= '%s'""" % (datetime.now() - timedelta(hours=24)).date()
+    sql = """SELECT o.txn_id, o.sum, o.date, o.time, s.SubscriberID FROM Subscribers AS s, OSMP_reestr as o WHERE s.SubscriberID=o.SubscriberID AND s.SubscriberID LIKE '50______' AND s.tarif > 1  AND o.date >= '%s'""" % (datetime.now() - timedelta(hours=440)).date()
     cursor.execute(sql)
     data = cursor.fetchall()
     p_ps = PaymentSystem.objects.get(pk=1) # OSMP id=1
@@ -39,7 +40,10 @@ def importosmp1cdb():
                         num = p_id,
                         valid = True,
                         )
-            payment.save()
+            try:
+                payment.save()
+            except IntegrityError as e:
+                print 'Дублированный платеж %s' % payment
             # payList += [Payment(abon=p_ab,
             #             top = p_ps,
             #             summ = p_sum,
@@ -51,7 +55,7 @@ def importosmp1cdb():
     # Payment.objects.bulk_create(payList)
 
 def importuntlcdb():
-    sql = """SELECT u.Order_IDP, u.summ, u.time_create, s.SubscriberID, u.canceled FROM Subscribers AS s, Uniteller_reestr as u WHERE s.SubscriberID=u.SubscriberID AND s.SubscriberID LIKE '50______' AND u.paid = 1 AND u.canceled = 0 AND u.time_create >= '%s'""" % (datetime.now() - timedelta(hours=24)).date()
+    sql = """SELECT u.Order_IDP, u.summ, u.time_create, s.SubscriberID, u.canceled FROM Subscribers AS s, Uniteller_reestr as u WHERE s.SubscriberID=u.SubscriberID AND s.SubscriberID LIKE '50______' AND u.paid = 1 AND u.canceled = 0 AND u.time_create >= '%s'""" % (datetime.now() - timedelta(hours=440)).date()
     cursor.execute(sql)
     data = cursor.fetchall()
     p_ps = PaymentSystem.objects.get(pk=2) # Uniteller id=2
@@ -70,7 +74,10 @@ def importuntlcdb():
                             num=p_id,
                             valid=not p_canceled,
                             )
-            payment.save()
+            try:
+                payment.save()
+            except IntegrityError as e:
+                print 'Дублированный платеж %s' % payment
             # payList += [Payment(abon=p_ab,
             #                 top=p_ps,
             #                 summ=p_sum,
