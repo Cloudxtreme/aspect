@@ -81,7 +81,7 @@ class QuickPaymentForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
          super(QuickPaymentForm, self).__init__(*args, **kwargs)
-         self.fields['sum'].localize = True
+         self.fields['summ'].localize = True
 
     class Meta:
         model = Payment
