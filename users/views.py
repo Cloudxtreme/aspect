@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*- 
 # from django.shortcuts import render
 from django.shortcuts import render_to_response, render, HttpResponseRedirect
+from requests.auth import HTTPDigestAuth
 from django.forms.formsets import formset_factory
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.contrib.auth.models import User, Group
@@ -24,14 +25,15 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from vlans.models import Network, IPAddr, Vlan
 from vlans.forms import LocationForm
 from django.db.models import Avg, Max, Min, Sum, Q
-import datetime
-import MySQLdb
 from django.conf import settings
 from pays.models import Payment
 from notes.models import Note
 from vlans.models import Location
 from contacts.models import Contact
 from devices.models import dec2ip,ip2dec
+import datetime
+import MySQLdb
+import requests
 import re
 
 def zapret(request):
@@ -742,6 +744,31 @@ def abonent_tts(request, abonent_id):
                                                         'tts' : tts, }, 
                               context_instance = RequestContext(request))
 
+def sync_balance_from1C(abonent_id):
+    try:
+        abonent = Abonent.objects.get(pk=abonent_id)
+    except:
+        return 0
+    else:        
+        s = requests.Session()
+        r = s.get('http://agent.albeon.ru:1180/', auth=HTTPDigestAuth('aspekt', 'sapekt123'))
+
+        payload = {'SubscriberID':abonent.contract}
+        r = s.get('http://agent.albeon.ru:1180/agent/full_fiz.asp', params=payload, auth=HTTPDigestAuth('aspekt', 'sapekt123'))
+        html = r.content.decode('cp1251')
+        status_str = u'активен</td>'
+        if html.find(status_str)==-1:
+            balance_str = u'Баланс: ([-]?\d+) руб.'
+        else:
+            balance_str = u'Остаток: ([-]?\d+) руб.'
+
+        result = re.findall(balance_str, html)
+        if len(result):
+            balance = float(result[0])
+
+        return balance
+
+
 def import_abonent_from1C(request):
     db = MySQLdb.connect(host="10.255.0.10", user="d.sitnikov", 
                              passwd="Aa12345", db="radius", charset='utf8')
@@ -750,6 +777,8 @@ def import_abonent_from1C(request):
     sql = """SELECT s.tarif, s.FIO, s.SubscriberID, s.State, s.AddressOfService, s.PasportS, s.PasportN, s.PasportWhon, s.PasportWhen, s.Address, s.Contacts, s.ContactPerson FROM Subscribers AS s, Tarifs as t WHERE s.tarif=t.tarifid AND s.SubscriberID LIKE '50______' AND s.tarif > 1 AND s.FIO!='<b>Фамилия Имя отчество</b>';"""
     cursor.execute(sql)
     data = cursor.fetchall()
+    created_abon = None
+    
     for rec in data:
         plan_id, title, contract, state, address, pass_ser, pass_num, pass_who, pass_when, pass_addr, cnt, prs = rec
         abonent, created = Abonent.objects.get_or_create(contract=contract, defaults={
@@ -759,10 +788,13 @@ def import_abonent_from1C(request):
                           'utype' :'F',
                           'is_credit' : 'R',
                         })
-        created_abon = None
+        
         if created:
             # print u'Создан абонент #%s - %s' % (abonent.contract,abonent.title)
             created_abon = abonent
+            # Получаем баланс изи 1С и синхронизируем
+            abonent.balance = sync_balance_from1C(abonent.pk)
+            abonent.save()
             try:
                 plan = Plan.objects.get(pk=plan_id+1000)
             except:
@@ -804,7 +836,8 @@ def import_abonent_from1C(request):
             if prs == '':
                 person = abonent.title # Если имени нет, то берем из тайтла абонента
             else:
-                person = prs.decode('cp1251')
+                # person = prs.decode('cp1251') Тут какие-то проблемы возникают
+                person = prs
 
             if pass_addr:
                 addr = pass_addr
@@ -821,6 +854,7 @@ def import_abonent_from1C(request):
             contact.save()
 
     db.close()
+    print created_abon
     url = reverse('abonent_info', args=[created_abon.pk]) if created_abon else settings.LOGIN_REDIRECT_URL
     return HttpResponseRedirect(url)
 

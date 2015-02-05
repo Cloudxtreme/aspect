@@ -4,15 +4,15 @@ from users.models import Abonent
 
 class Contact(models.Model):
     abonent = models.ForeignKey(Abonent, verbose_name=u'Абонент',blank=True, null=True)
-    surname = models.CharField(u'Фамилия', max_length=200,blank=True, null=True)
-    first_name = models.CharField(u'Имя', max_length=50,blank=True, null=True)
-    second_name = models.CharField(u'Отчество', max_length=50,blank=True, null=True)
-    position = models.CharField(u'Должность', max_length=70,blank=True, null=True)
-    phone = models.CharField(u'Телефон', max_length=200,blank=True, null=True)
-    mobile = models.CharField(u'Мобильный',max_length=12,blank=True, null=True)
-    fax = models.CharField(u'Факс',max_length=12,blank=True, null=True)
-    email = models.CharField(max_length=50,blank=True, null=True)
-    address = models.CharField(u'Адрес',max_length=200,blank=True, null=True)
+    surname = models.CharField(u'Фамилия', max_length=200,default='')
+    first_name = models.CharField(u'Имя', max_length=50,default='')
+    second_name = models.CharField(u'Отчество', max_length=50,default='')
+    position = models.CharField(u'Должность', max_length=70,default='')
+    phone = models.CharField(u'Телефон', max_length=200,default='')
+    mobile = models.CharField(u'Мобильный',max_length=12,default='')
+    fax = models.CharField(u'Факс',max_length=12,default='')
+    email = models.CharField(max_length=50,default='')
+    address = models.CharField(u'Адрес',max_length=200,default='')
     primary_contact = models.BooleanField(u'Основной контакт', default=False)
 
     class Meta:

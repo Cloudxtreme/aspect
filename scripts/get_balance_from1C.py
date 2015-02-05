@@ -18,9 +18,20 @@ for abonent in Abonent.objects.filter(utype='F'):
     payload = {'SubscriberID':abonent.contract}
     r = s.get('http://agent.albeon.ru:1180/agent/full_fiz.asp', params=payload, auth=HTTPDigestAuth('aspekt', 'sapekt123'))
     html = r.content.decode('cp1251')
-    first_pos = html.find(u'Баланс') + 8
-    last_pos = html.find(u'руб.;') - 1
-    balance = float(html[first_pos:last_pos])
+
+    status_str = u'активен</td>'
+    if html.find(status_str) == -1:
+        balance_str = u'Баланс: ([-]?\d+) руб.' # Абонент не активен
+    else:
+        balance_str = u'Остаток: ([-]?\d+) руб.' # Абонент Активен
+
+    result = re.findall(balance_str, html)
+    if len(result):
+        balance = float(result[0])    
+
+    # first_pos = html.find(u'Баланс') + 8
+    # last_pos = html.find(u'руб.;') - 1
+    # balance = float(html[first_pos:last_pos])
     print u'%s текущий баланс: %s, новый баланс: %s' % (abonent.contract,abonent.balance,balance)
     abonent.balance = balance
     abonent.save()
