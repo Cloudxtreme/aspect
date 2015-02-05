@@ -758,9 +758,9 @@ def sync_balance_from1C(abonent_id):
         html = r.content.decode('cp1251')
         status_str = u'активен</td>'
         if html.find(status_str)==-1:
-            balance_str = u'Баланс: ([-]?\d+) руб.'
+            balance_str = u'Баланс: ([-]?\d+[.]?\d*) руб.'
         else:
-            balance_str = u'Остаток: ([-]?\d+) руб.'
+            balance_str = u'Остаток: ([-]?\d+[.]?\d*) руб.'
 
         result = re.findall(balance_str, html)
         if len(result):
