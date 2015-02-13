@@ -2,6 +2,7 @@
 from django import template
 from pays.models import PromisedPays
 import notice.smsru as smsru
+import re
 
 register = template.Library()
 
@@ -13,6 +14,13 @@ def sms_status(value):
 def get_item(dictionary, key):
     return dictionary.get(key)
     
+@register.filter    
+def freq_list(value):
+    result = ''
+    for item in re.findall('\d{4}',value):
+        result += '%s Mhz' % item
+    return result
+
 @register.filter    
 def get_color(value):
     dict = {'A': 'success', 'S' : 'warning', 'N' : 'danger', 'D' : 'info' }

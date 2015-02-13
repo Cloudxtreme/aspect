@@ -2,6 +2,7 @@
 from django.contrib.auth import authenticate
 from users.models import Abonent, Service, Plan, TypeOfService, Segment, Agent, Passport, Detail, Interface, Pipe
 from vlans.models import Vlan, Location
+from devices.models import Device
 from users.fields import JSONWidget
 from bootstrap3_datetime.widgets import DateTimePicker
 # from django.forms.extras.widgets import SelectDateWidget
@@ -145,7 +146,7 @@ class ServiceForm(forms.ModelForm):
 
     class Meta:
         model = Service
-        exclude = {'abon', 'status', 'datestart','datefinish','pipe', 'ip','vlan','adm_status','mac','user_device','bs_device' }
+        exclude = {'abon', 'status', 'datestart','datefinish','pipe', 'ip','vlan','adm_status','mac' }
 
 
 class PipeEditForm(forms.ModelForm):
@@ -158,16 +159,28 @@ class PipeEditForm(forms.ModelForm):
     class Meta:
         model = Pipe
 
-class ServiceChoiceLocationForm(forms.ModelForm):
-    location = forms.ModelChoiceField(queryset=Location.objects.all(),widget=forms.Select(attrs={'class':'form-control'}), label = u'Местоположение')
+class ServiceLocationForm(forms.ModelForm):
+    location = forms.ModelChoiceField(
+            queryset=Location.objects.all(),
+            widget=forms.Select(attrs={'class':'form-control'}), 
+            label = u'Местоположение')
     
     class Meta:
         model = Service
         fields = ['location']
 
+class ServiceDeviceForm(forms.ModelForm):
+    device = forms.ModelChoiceField(
+            queryset=Device.objects.filter(location=None,service=None),
+            widget=forms.Select(attrs={'class':'form-control'}), 
+            label = u'Устройство')
+    
+    class Meta:
+        model = Service
+        fields = ['device']
+
 class ServiceSpeedForm(GenericServiceForm):
     class Meta(GenericServiceForm.Meta):
-        pass
         fields = {'speed',}
 
 class ServiceStateForm(GenericServiceForm):
@@ -177,10 +190,6 @@ class ServiceStateForm(GenericServiceForm):
 class ServiceVlanForm(GenericServiceForm):
     class Meta(GenericServiceForm.Meta):
         fields = {'vlan_list',}
-
-class ServiceEquipForm(GenericServiceForm):
-    class Meta(GenericServiceForm.Meta):
-        fields = {'user_device','bs_device',}
 
 class OrgServiceForm(forms.ModelForm):
     # speed = forms.IntegerField(label=u'Скорость доступа, Кбит/с')

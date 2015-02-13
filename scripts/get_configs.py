@@ -30,7 +30,7 @@ for device in Device.objects.filter(devtype__in=ubnt_dev):
     # Выполняем копирование
     path = '/tmp/configs/%s/%s/system.cfg' % (ip,datetime.date.today())
     cmd = """sshpass -p 'yfxfkj' scp -o ConnectTimeout=3 -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null hflbcn@%s:/tmp/system.cfg %s""" % (ip,path)
-    print ip, path
+    # print ip, path
     if run_command(cmd):
         if os.path.exists(path):
             myfile = open(path)

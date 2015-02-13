@@ -1,5 +1,24 @@
 {% extends "index.html" %}
 
+{% block script %}
+    <script type="text/javascript">
+    $(function(){
+        $('.panel-collapse').on('show.bs.collapse', function (){
+            if ($(this).attr('val')!='None') {
+                var label = '#list-group' + $(this).attr('val');
+                $(label).show();
+                $.getJSON("/ajax/get_radio_param/",{ip:+$(this).attr('val')}, function(j) {
+                    var options = '';
+                    options += '<p> Используемые частоты:' + j['freq'] + ' Mhz</p>';
+                    options += '<p> Ширина полосы' + j['width'] + 'MHz </p>';
+                    $(label).html(options);
+                });
+            };
+        });
+    })
+    </script>
+{% endblock %}
+
 {% block main %} 
 <!-- Small modal -->
 <div id='modal' class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
@@ -60,41 +79,35 @@
                         </li>
                       {% else %}
                       <li class="list-group-item">
-                        {% for iface in device.interfaces.all %}
-                          <p>{{ iface.ip.ip }}
-                          <a href={% url 'device_iface_edit' device.id iface.id %} data-toggle="tooltip" data-placement="left" title="Изменить"><span class="glyphicon glyphicon-edit"></span></a>
-                          <a href={% url 'device_iface_del' iface.id %} data-toggle="tooltip" data-placement="left" title="Удалить"><span class="glyphicon glyphicon-remove"></span></a>
-                          <p><a href='{% url 'syslog_host' iface.id %}'>Журнал syslog</a></p>
-                          <p><a href="{% url 'get_application_entries' %}?ipaddr={{ iface.ip.ip }}">Журнал работы с оборудованием</a></p>
-                        {% endfor %}
-                        {% if device.interfaces.all.count == 0 %}
+                        {{ device.ip.ip }}
+                         {% if device.interfaces.all.count == 0 %}
                           <a href={% url 'device_iface_add' device.id %} data-toggle="tooltip" data-placement="left" title="Добавить">Добавить IP <span class="glyphicon glyphicon-plus"></span></a>
                         {% endif %}
                         </li>
                       {% endif %}
                     <li class="list-group-item">
                         {% if device.location %}
-                            {{ device.location.address }}
-                            <a href="{% url 'device_location_edit' device.id %}">Редактировать
-                            <span class="glyphicon glyphicon-edit"></span></a>
+                            {{ device.location }}
+                            <a href="{% url 'device_location_choice' device.id %}">Переместить
+                            <span class="glyphicon glyphicon-move"></span></a>
                         {% else %}
                             Местоположение: 
                             <a href="{% url 'device_location_edit' device.id %}">Создать
                             <span class="glyphicon glyphicon-edit"></span></a>
                             <a href="{% url 'device_location_choice' device.id %}">Выбрать
                             <span class="glyphicon glyphicon-folder-open"></span></a>
-                            <p><small>{{ device.location.comment }}</small></p>
-                        {% endif %}
+                         {% endif %}
                     </li>
-                    {% for service in device.user_device.all %}
-                        <li class="list-group-item">
-                            <a href="{% url 'abonent_info' service.abon.id %}">{{ service.abon }}</a>
-                        </li>
+                    {% for service in device.service_set.all %}
+                    <li class="list-group-item">
+                        <a href="{% url 'abonent_info' service.abon.id %}">{{ service.abon }}</a>
+                    </li>
                     {% endfor %}
                     {% for config in device.config_set.all|slice:":2" %}
                     <li class="list-group-item">
                             Конфигурация от 
-                        <small><a href='{{ MEDIA_URL }}{{ config.attach }}'>{{ config.date }} <span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span></a></small>
+                        <small><a href='{{ MEDIA_URL }}{{ config.attach }}'>{{ config.date }} 
+                        <span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span></a></small>
                     </li>
                     {% endfor %}
                     

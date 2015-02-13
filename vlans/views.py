@@ -4,11 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
-from vlans.models import Vlan, IPAddr, Network
-from vlans.forms import VlanEditForm, NetworkForm
+from vlans.models import Vlan, IPAddr, Network, Location
+from vlans.forms import VlanEditForm, NetworkForm, LocationForm
 from users.models import Segment
 from django.core import serializers
 from django.utils import simplejson
+from devices.aux import dec2ip,ip2dec
+from devices.models import Device
 
 NETWORK_USERS = 'UN'
 NETWORK_EQUIP = 'EN'
@@ -21,12 +23,6 @@ TYPE_OF_NETS = (
     (NETWORK_DISTRIB,'Сеть для распределения'),
     (NETWORK_LIMITER,'Сеть разделитель'),
 )
-
-def dec2ip(ip):
-     return '.'.join([str((ip >> 8 * i) & 255) for i in range(3, -1, -1)])
-        
-def ip2dec(ip):
-    return sum([int(q) << i * 8 for i, q in enumerate(reversed(ip.split(".")))])
 
 @login_required
 def network_del(request,net_id):
@@ -165,13 +161,6 @@ def gen_nets(parent_id):
     
     return result
 
-# def calcnet(net,mask):
-#     mask1 = mask + 1
-#     net1 = dec2ip(ip2dec(net) + pow(2,31-mask))
-#     if mask >= 29:
-#         return (net,mask1),(net1,mask1)
-#     return (net,mask1),(net1,mask1),calcnet(net,mask1),calcnet(net1,mask1)
-
 @login_required
 def ipaddr_list(request, parent_id):
     from itertools import chain
@@ -183,8 +172,6 @@ def ipaddr_list(request, parent_id):
         nonexsistent_nets = list()
         for ip,mask in gen_nets(parent_id):
             nonexsistent_nets.append(Network(ip=ip,mask=mask,net_type='EN',decip=ip2dec(ip)))  
-        # nonexsistent_nets.append(Network(ip='194.190.13.4',mask=30,net_type='EN',decip=ip2dec('194.190.13.4')))
-        # nonexsistent_nets.append(Network(ip='194.190.13.24',mask=30,net_type='EN',decip=ip2dec('194.190.13.24')))
         net_list = list(Network.objects.all().filter(parent__pk=parent_id))
         result_list = sorted(
                 chain(net_list, nonexsistent_nets),
@@ -217,6 +204,68 @@ def vlan_edit(request, vlan_id):
 
     return render_to_response('generic/generic_edit.html', {
                                 'header' : header,
+                                'form': form,
+                                'breadcrumbs':breadcrumbs,
+                                'extend': 'index.html',},
+                                context_instance = RequestContext(request)
+                                ) 
+
+# Список всех БС
+@login_required
+def bs_list(request):
+    bs_list = Location.objects.filter(bs_type='B').order_by('pk')
+    return render_to_response('bs_list.html', { 'bs_list': bs_list }, context_instance = RequestContext(request))
+
+
+# Просмотр БС
+@login_required
+def bs_view(request,bs_id):
+    try:
+        bs = Location.objects.get(pk = bs_id)
+    except:
+        raise Http404
+    
+    device_list = Device.objects.filter(location=bs)
+
+    breadcrumbs = [({'url':reverse('bs_list',),'title':'Список БС'})]
+
+    return render_to_response('bs_view.html', 
+                                { 'bs': bs, 
+                                'header' : bs.address,
+                                'breadcrumbs' : breadcrumbs,
+                                'device_list' : device_list }, 
+                                context_instance = RequestContext(request))
+@login_required
+def refresh_radio(request,bs_id):
+    try:
+        bs = Location.objects.get(pk = bs_id)
+    except:
+        raise Http404
+    
+    for device in Device.objects.filter(location=bs):
+        device._refresh_radio()
+    
+    return HttpResponseRedirect(reverse('bs_view',args=[bs_id]))
+
+# Редактирование местоположения
+@login_required
+def bs_edit(request, bs_id):
+    try:
+        bs = Location.objects.get(pk=bs_id)
+    except:
+        bs = Location()
+
+    if request.method == 'POST':
+        form = LocationForm(request.POST,instance=bs)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('bs_list'))
+    else:
+        form = LocationForm(instance=bs)
+
+    breadcrumbs = [({'url':reverse('bs_list',),'title':'Список БС'}),({'url':reverse('bs_view',args=[bs_id]),'title':'Просмотр БС'})]
+
+    return render_to_response('generic/generic_edit.html', {
                                 'form': form,
                                 'breadcrumbs':breadcrumbs,
                                 'extend': 'index.html',},

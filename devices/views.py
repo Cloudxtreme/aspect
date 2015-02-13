@@ -16,7 +16,11 @@ import MySQLdb
 import subprocess
 import datetime
 from datetime import timedelta
+from django.core import serializers
+from django.utils import simplejson
+from devices.aux import dec2ip,get_ubnt_cfg,get_freq_ubnt,get_width_ubnt
 
+@login_required
 def get_iparp(request):
     ip = request.GET['ip']
     vlan = request.GET['vlan']
@@ -29,7 +33,6 @@ def get_iparp(request):
     #                     Version = 2,
     #                     DestHost="192.168.64.1",
     #                     Community="public")
-
     oid = 'iso.3.6.1.2.1.4.22.1.2.%s.%s' % (vlan,ip)
     cmd = 'snmpwalk -v 2c -c %s %s -OXsq %s' % (community, router, oid)
     PIPE = subprocess.PIPE
@@ -42,6 +45,14 @@ def get_iparp(request):
     else:
         result = '<div class="alert alert-danger" role="alert">ARP запись не обнаружена</div>'        
     return HttpResponse(result)
+
+def get_radio_param(request):
+    ip = dec2ip(int(request.GET['ip']))
+    config = get_ubnt_cfg(ip)
+    data = {}
+    data['freq'] = get_freq_ubnt(config)
+    data['width'] = get_width_ubnt(config)
+    return HttpResponse(simplejson.dumps(data))
 
 # @login_required
 def set_state(request):

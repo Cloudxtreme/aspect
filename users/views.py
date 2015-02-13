@@ -15,7 +15,8 @@ from users.forms import  ServiceForm, OrgServiceForm, SearchForm, LoginForm, \
                          PassportForm, DetailForm, ManageForm, AbonentForm, \
                          ServicePlanForm, ServiceEditForm, ServiceInterfaceForm, \
                          ServiceSpeedForm, ServiceStateForm, ServiceVlanForm, \
-                         ServiceEquipForm, SmartSearchForm, ServiceChoiceLocationForm
+                         SmartSearchForm, ServiceLocationForm, \
+                         ServiceDeviceForm
 from journaling.forms import ServiceStatusChangesForm
 from notice.forms import AbonentFilterForm
 from users.models import Abonent, Service, TypeOfService, Plan, Passport, Detail, Interface, Segment
@@ -30,7 +31,7 @@ from pays.models import Payment
 from notes.models import Note
 from vlans.models import Location
 from contacts.models import Contact
-from devices.models import dec2ip,ip2dec
+from devices.aux import dec2ip,ip2dec
 import datetime
 import MySQLdb
 import requests
@@ -456,12 +457,39 @@ def service_location_choice(request, service_id):
         raise Http404
 
     if request.method == 'POST':
-        form = ServiceChoiceLocationForm(request.POST,instance=service)
+        form = ServiceLocationForm(request.POST,instance=service)
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(reverse('abonent_services', args=[abonent.id]))
     else:
-        form = ServiceChoiceLocationForm(instance=service)
+        form = ServiceLocationForm(instance=service)
+
+    breadcrumbs = [({'url':reverse('abonent_services', args=[abonent.id]),'title':'Услуги абонента'})]
+
+    return render_to_response('generic/generic_edit.html', { 
+                                'header' : header,
+                                'abonent' : abonent,
+                                'breadcrumbs' : breadcrumbs,
+                                'form': form,
+                                'extend': 'abonent/main.html', },
+                                 context_instance = RequestContext(request))
+
+# Выбор местоположения услуги
+def service_device_choice(request, service_id):
+    try:
+        service = Service.objects.get(pk=service_id)
+        abonent = service.abon
+        header = 'Выбор абонентского устройства'
+    except:
+        raise Http404
+
+    if request.method == 'POST':
+        form = ServiceDeviceForm(request.POST,instance=service)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('abonent_services', args=[abonent.id]))
+    else:
+        form = ServiceDeviceForm(instance=service)
 
     breadcrumbs = [({'url':reverse('abonent_services', args=[abonent.id]),'title':'Услуги абонента'})]
 

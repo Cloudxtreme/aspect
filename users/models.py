@@ -286,8 +286,8 @@ class Service(models.Model):
     location = models.ForeignKey(Location, blank=True, null=True, verbose_name=u'Местонахождение')
     datestart = models.DateField(auto_now=False, auto_now_add=False, default=datetime.datetime.now(), verbose_name=u'Дата начала')
     datefinish = models.DateField(auto_now=False, auto_now_add=False, blank=True, null= True, verbose_name=u'Дата окончания')
-    user_device = models.ForeignKey(Device, related_name='user_device',verbose_name=u'Абонентское устройство', blank=True, null= True)
-    bs_device = models.ForeignKey(Device, related_name='bs_device', verbose_name=u'Абонентская БС', blank=True, null= True)
+    device = models.ForeignKey(Device, verbose_name=u'Абонентское устройство', blank=True, null= True)
+    # bs_device = models.ForeignKey(Device, related_name='bs_device', verbose_name=u'Абонентская БС', blank=True, null= True)
     # objects = models.Manager()
 
     def set_changestatus_in_plan(self, new_status, date=datetime.datetime.now()):
