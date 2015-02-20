@@ -249,9 +249,9 @@ class Detail(models.Model):
         return "%s - %s" % (self.title, self.inn)
 
 class Interface(models.Model):
-    macvalidator = RegexValidator('[0-9a-fA-F]{2}([-:])[0-9a-fA-F]{2}(\\1[0-9a-fA-F]{2}){4}$', u'Неправильный формат MAC адреса')
+    # macvalidator = RegexValidator('[0-9a-fA-F]{2}([-:])[0-9a-fA-F]{2}(\\1[0-9a-fA-F]{2}){4}$', u'Неправильный формат MAC адреса')
     ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', unique=True)
-    mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=17,validators=[macvalidator])
+    mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=17) #,validators=[macvalidator])
     comment = models.CharField(u'Комментарий', max_length=300, blank=True, null= True)
     for_device = models.BooleanField(u'Для оборудования',default=False,editable=False)
 

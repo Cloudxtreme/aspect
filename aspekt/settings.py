@@ -191,6 +191,9 @@ EMAIL_USERNAME = "albeon@ptls.ru"
 
 EMAIL_PASSWORD = "yfpfgbcm"
 
+SNMP_COMMUNITY = 'haser12UMBUNTU'
+SNMP_SNR_COMMUNITY = 'public'
+
 STATUS_ACTIVE = 'A'
 STATUS_OUT_OF_BALANCE = 'N'
 STATUS_PAUSED = 'S'
@@ -223,4 +226,10 @@ ADM_STATUSES = (
     ('0', 'По состоянию'),
     ('1', 'Включен вручную'),
     ('2', 'Выключен вручную'),
+)
+
+TYPE_OF_DEVICE = (
+    ('R', 'Radio'),
+    ('P', 'SNR Pinger'),
+    ('S', 'Switch'),
 )

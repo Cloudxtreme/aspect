@@ -49,13 +49,12 @@
 </div>
 
 {% if device_list %}
-    <p><a href="{% url 'refresh_radio' bs.pk %}">Обновить параметры радио <span class="glyphicon glyphicon-refresh"></span></a></p>
     <table class="table table-striped table-condensed">
     <thead>
       <tr>
         <th>Устройство</th>
-        <th>Связан</th>
-        <th>Радио</th>
+        <th>Радио <a href="{% url 'refresh_radio' bs.pk %}">Обновить <span class="glyphicon glyphicon-refresh"></span></a></th>
+        <th>Ответные устройства</th>
       </tr>
     </thead>
     <tbody>
@@ -65,16 +64,26 @@
         <p><small>{{ device.comment|safe }}</small></p>
         </td>
         <td>
-            {% for peer in device.peers %}
-                {{ peers }} / {% if peer.location %} {{ peer.location }} {% else %}  {% endif %}
-            {% endfor %}
-        </td>
-        <td>
             {% if device.freqs %}
-                {{ device.freqs }} / {{ device.width }} Mhz
+                <span class="badge">{{ device.freqs }} Mhz </span> / {{ device.width }} Mhz / {{ device.ap|yesno:"Access Point, Station" }} 
             {% endif %}
+        </td>        
+        <td>
+        <ul>
+            <small>
+            {% for peer in device.peers %}
+                <li>
+                {{ peer.ip.ip }} <a href="http://{{ peer.ip.ip }}"><span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span></a> 
+                {% if peer.location %}
+                    / {{ peer.location }}
+                {% elif peer.service_set.all.0.abon %}
+                    / <a href={% url 'abonent_info' peer.service_set.all.0.abon.pk %}>{{ peer.service_set.all|first }}</a>
+                {% endif %}
+                </li>
+            {% endfor %}
+            </small>
+        </ul>
         </td>
-
     </tr>
     {% endfor %}
     </tbody>

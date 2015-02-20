@@ -3,8 +3,70 @@ from django.db import models
 from vlans.models import IPAddr, Vlan, Location
 from tinymce.models import HTMLField
 from django.contrib.auth.models import User
-from devices.aux import get_freq_ubnt,get_width_ubnt,get_ubnt_cfg
+from devices.aux import *
+from django.conf import settings
+import re
 
+# Возвращаем тип устройства по его ОС
+def get_devtype(ip):
+    device_os = get_dev_os(ip)
+    category = 'S'
+    if device_os.find('Linux') != -1: # Это Ubiquiti
+        _model = get_ubnt_model(ip)
+        vendor = 'Ubiquiti'
+        if _model: # Это радио
+            model = [_model]
+            category = 'R'
+        else: # А это свитч
+            model = ['Tough Switch']
+    elif device_os.find('RouterOS') != -1: # Это Mikrotik
+        vendor = 'Mikrotik'
+        model = re.findall('RouterOS (.*)',device_os)
+    elif device_os.find('Cisco') != -1: # Это Cisco
+        vendor = 'Cisco'
+        model = re.findall('Cisco IOS Software, (.*) Software',device_os)
+    elif device_os.find('DES-') != -1: # Это D-Link
+        vendor = 'D-Link'
+        model = re.findall('(DES-.*) Fast Ethernet Switch',device_os)
+    elif device_os.find('ES-2108') != -1: # Это Zyxel ES-2108
+        vendor = 'Zyxel'
+        model = ['ES-2108']
+    elif device_os.find('Fmv') != -1: # Это SNR-pinger
+        vendor = 'SNR'
+        model = ['Pinger']
+        category = 'P'
+    else:
+        vendor = 'Unknown'
+        model = ['Unknown']
+
+    model = model[0] if model else 'Unknown'
+
+    devtype,created = DevType.objects.get_or_create(model=model,
+                                    defaults={'vendor': vendor, 
+                                                'model' : model, 
+                                                'category' : category, })
+
+    return devtype
+
+
+# Многопоточный 
+def get_devince_info(queue):
+    for ip in iter(queue.get, None):
+        get_devtype(ip)
+
+def scan_network(ip_list):
+    queue = Queue()
+    threads = [Thread(target=get_devince_info, args=(queue,)) for _ in range(20)]
+    for t in threads:
+        t.daemon = True
+        t.start()
+
+    # Place work in queue
+    for site in ip_list: queue.put(site)
+    # Put sentinel to signal the end
+    for _ in threads: queue.put(None)
+    # Wait for completion
+    for t in threads: t.join()
 
 def get_config(dev_id):
     try:
@@ -12,7 +74,7 @@ def get_config(dev_id):
     except:
         result = False
     
-    if device.devtype.vendor == 'Ubiquiti' and device.devtype.is_radio:
+    if device.devtype.vendor == 'Ubiquiti':
         config, result = get_ubnt_cfg(device.ip.ip)
     else:
         result = False
@@ -40,19 +102,12 @@ class Application(models.Model):
         return "%s - %s - %s" % (self.date, self.ipaddr, self.author)    
 
 class DevType(models.Model):
-    TYPE_OF_SUPPLY = (
-        ('5V', '5V'),
-        ('12V', '12V'),
-        ('24V', '24V'),
-        ('220V', '220V'),
-    )
-    is_radio = models.BooleanField(u'Радио')
+    # is_radio = models.BooleanField(u'Радио',default=False)
     vendor = models.CharField(max_length=50)
     model = models.CharField(max_length=50)
     description = models.CharField(max_length=200, blank=True, null=True)
-    supply = models.CharField(u'Питание', max_length = 4, 
-                              choices=TYPE_OF_SUPPLY)
-    ports = models.IntegerField(u'Количество портов')
+    category = models.CharField(u'Тип устройства', max_length = 1, 
+                              choices=settings.TYPE_OF_DEVICE, default='S')
 
     class Meta:
         verbose_name = u'Тип устройства'
@@ -82,15 +137,62 @@ class Device(models.Model):
     # Радиопараметры
     freqs = models.CharField(u'Частоты', default='', max_length=200)
     width = models.CharField(u'Полоса', default='', max_length=2)
+    ap = models.BooleanField(u'Access Point', default=False)
+
+    def get_supply_info(self):
+        if self.devtype.category = 'P':
+            if self.ip:
+                voltage = get_snr_supply(self.ip.ip)
+                supply = get_snr_voltage(self.ip.ip)
+                return voltage,supply
+
+    def _get_peer(self):
+        if self.ip:
+            mac = get_ubnt_apmac(self.ip.ip)
+            if mac:
+                self.ap = False
+                peer = Device.objects.filter(interfaces__mac=mac)
+                if peer:
+                    self.peer = peer[0]
+                    self.save()
+
+
+    def _get_macaddr(self):
+        if self.ip:
+            mac = get_ubnt_macaddr(self.ip.ip)
+            if mac:
+                iface = self.ip.interface
+                iface.mac = mac
+                iface.save()
+
+    # Привязать устройство к услуге (Только для физиков)
+    def _attach2srv(self):
+        if self.ip and self.service_set.all().count()==0:
+            devname = get_ubnt_devname(self.ip.ip)
+            if devname:
+               from users.models import Service
+               contract = re.findall('50\d{6}',devname)
+               if contract:
+                    try:
+                        srv = Service.objects.get(abon__contract=contract[0])
+                    except:
+                        pass
+                    else:
+                        srv.device = self
+                        srv.save()
+
+    # Получить модель устройства
+    def _get_model(self):
+        if self.ip:
+            self.devtype=get_devtype(self.ip.ip)
+            self.save()
 
     def _get_main_ip(self):
         "Returns the first IP-address"
-        if self.interfaces.count() == 0:
-            return ''
-        elif self.interfaces.count() == 1:
+        if self.interfaces.count():
             return self.interfaces.all()[0].ip
         else:
-            return self.interfaces.all().order_by('ip')[0].ip
+            return None
 
     def _get_peers(self):
         if self.peer:
@@ -101,11 +203,12 @@ class Device(models.Model):
     def _refresh_radio(self):
         "Returns frequencies"
         result = False
-        if self.devtype.vendor == 'Ubiquiti' and self.devtype.is_radio:
+        if self.devtype.vendor == 'Ubiquiti' and self.devtype.category == 'R':
             config, success = get_ubnt_cfg(self.ip.ip)
             if success:
-                self.freqs = ', '.join(get_freq_ubnt(config))
-                self.width = get_width_ubnt(config)
+                self.freqs = ', '.join(get_ubnt_freq(config))
+                self.width = get_ubnt_width(config)
+                self.ap = get_ubnt_ap(config)
                 self.save()
                 result = True
 
@@ -120,6 +223,7 @@ class Device(models.Model):
 
     def __unicode__(self):
         return u"%s - %s" % (self.devtype, self.ip)
+        # return u"[%s] %s" % (self.pk, self.devtype)
 
 class DeviceStatusEntry(models.Model):
     device = models.ForeignKey(Device, verbose_name=u'Устройство')

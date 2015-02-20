@@ -18,7 +18,7 @@ import datetime
 from datetime import timedelta
 from django.core import serializers
 from django.utils import simplejson
-from devices.aux import dec2ip,get_ubnt_cfg,get_freq_ubnt,get_width_ubnt
+from devices.aux import *
 
 @login_required
 def get_iparp(request):
@@ -85,27 +85,6 @@ def set_state(request):
     else:
         return HttpResponse('Device found')
 
-# Depricated -->
-@login_required
-def devices_all(request):
-    devices_list = Device.objects.all()
-
-    paginator = Paginator(devices_list.distinct(), 50)
-    page = request.GET.get('page')
-    try:
-        devices = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        devices = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        devices = paginator.page(paginator.num_pages)
-
-    return render_to_response('devices/devices_list.html', { 
-                                'devices': devices }, 
-                                context_instance = RequestContext(request))
-# <-- Depricated
-
 @login_required
 def devices_list(request, net_id):
     parent_nets = Network.objects.filter(net_type='EN')
@@ -122,6 +101,33 @@ def devices_list(request, net_id):
                                 'dev_list' : dev_list, 
                                 'parent_nets' : parent_nets }, 
                                 context_instance = RequestContext(request))
+
+@login_required
+def peer_choice(request, device_id):
+    try:
+        device = Device.objects.get(pk = device_id)
+        header = 'Выбор соседнего устройства'
+    except:
+        raise Http404
+
+    if request.method == 'POST':
+        form = ChoiceDeviceBSForm(request.POST)
+        if form.is_valid():
+            # form.save()
+            print form.cleaned_data['peer']
+            return HttpResponseRedirect(rreverse('bs_view',args=[device.location.id]))
+    else:
+        form = ChoiceDeviceBSForm()
+
+    breadcrumbs = [({'url':reverse('bs_view',args=[device.location.id]),'title':'Просмотр БС'})]
+
+    return render_to_response('devices/peer_choice.html', {
+                                'header' : header,
+                                'breadcrumbs' :breadcrumbs,
+                                'form': form,
+                                'extend': 'index.html',},
+                                context_instance = RequestContext(request)
+                                )     
 
 @login_required
 def device_edit(request, device_id):
@@ -396,19 +402,10 @@ def syslog_list(request):
 @login_required
 def apps_all(request):
     app_list = Application.objects.all().order_by('-date')
-
-    # paginator = Paginator(devices_list.distinct(), 50)
-    # page = request.GET.get('page')
-    # try:
-    #     devices = paginator.page(page)
-    # except PageNotAnInteger:
-    #     # If page is not an integer, deliver first page.
-    #     devices = paginator.page(1)
-    # except EmptyPage:
-    #     # If page is out of range (e.g. 9999), deliver last page of results.
-    #     devices = paginator.page(paginator.num_pages)
-
     return render_to_response('devices/applications_list.html', { 'app_list': app_list }, context_instance = RequestContext(request))
+
+def get_devbymac(mac):
+    return Device.objects.filter(interfaces__mac=mac)
 
 @login_required
 def app_edit(request, app_id):

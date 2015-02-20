@@ -32,6 +32,7 @@ from notes.models import Note
 from vlans.models import Location
 from contacts.models import Contact
 from devices.aux import dec2ip,ip2dec
+from devices.models import Device
 import datetime
 import MySQLdb
 import requests
@@ -79,7 +80,7 @@ def aquicksearch(request):
 @login_required
 def feeds_plans_by_tos(request):
     if request.is_ajax():
-        print request.GET['id'], request.GET['seg']
+        # print request.GET['id'], request.GET['seg']
         if request.GET['id'] == '0' or request.GET['seg'] == '0':
             json_subcat = serializers.serialize("json", Plan.objects.none())
         else:
@@ -474,7 +475,7 @@ def service_location_choice(request, service_id):
                                 'extend': 'abonent/main.html', },
                                  context_instance = RequestContext(request))
 
-# Выбор местоположения услуги
+# Выбор устройства услуги
 def service_device_choice(request, service_id):
     try:
         service = Service.objects.get(pk=service_id)
@@ -490,6 +491,10 @@ def service_device_choice(request, service_id):
             return HttpResponseRedirect(reverse('abonent_services', args=[abonent.id]))
     else:
         form = ServiceDeviceForm(instance=service)
+        if service.device:
+            form.fields['device'].queryset=Device.objects.filter(location=None)|Device.objects.filter(pk=service.device.pk)
+        else:
+            form.fields['device'].queryset=Device.objects.filter(location=None)
 
     breadcrumbs = [({'url':reverse('abonent_services', args=[abonent.id]),'title':'Услуги абонента'})]
 

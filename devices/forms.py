@@ -27,7 +27,6 @@ class DeviceChoiceLocationForm(forms.ModelForm):
         fields = ['location']
 
 class DeviceEditForm(forms.ModelForm):
-    
     def __init__(self, *args, **kwargs):
         super(DeviceEditForm, self).__init__(*args, **kwargs)
         # adding css classes to widgets without define the fields:
@@ -37,6 +36,7 @@ class DeviceEditForm(forms.ModelForm):
     class Meta:
         model = Device
         exclude = ['interfaces','last_available','location']
+
 
 class SyslogFilterForm(forms.Form):
     datestart = forms.DateField(
