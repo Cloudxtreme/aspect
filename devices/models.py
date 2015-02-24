@@ -135,15 +135,17 @@ class Device(models.Model):
         blank=True, null=True, verbose_name=u'Последний ответ')
     peer = models.ForeignKey('self',related_name='peer_set', blank=True, null= True,editable=False)
     # Радиопараметры
-    freqs = models.CharField(u'Частоты', default='', max_length=200)
-    width = models.CharField(u'Полоса', default='', max_length=2)
-    ap = models.BooleanField(u'Access Point', default=False)
+    freqs = models.CharField(u'Частоты', default='', max_length=200,editable=False)
+    width = models.CharField(u'Полоса', default='', max_length=2,editable=False)
+    ap = models.BooleanField(u'Access Point', default=False,editable=False)
+    azimuth = models.FloatField(u'Азимут', default=0,editable=False)
+    distance = models.FloatField(u'Дистанция', default=0,editable=False)
 
     def get_supply_info(self):
-        if self.devtype.category = 'P':
+        if self.devtype.category == settings.DEVTYPE_SNR:
             if self.ip:
-                voltage = get_snr_supply(self.ip.ip)
-                supply = get_snr_voltage(self.ip.ip)
+                voltage = get_snr_voltage(self.ip.ip)
+                supply= get_snr_supply(self.ip.ip)
                 return voltage,supply
 
     def _get_peer(self):
@@ -194,16 +196,29 @@ class Device(models.Model):
         else:
             return None
 
+    # Заполняем параметры азимута и дистанции
+    def _refresh_azimuth(self):
+        if self.location:
+            azimuth_list =[]
+            distance_list = []
+            for peer in self.peers:
+                if peer.location:
+                    azimuth,distance = azimuth_distance(self.location.geolocation, peer.location.geolocation)
+                    azimuth_list.append(azimuth)
+                    distance_list.append(distance)
+            self.azimuth, self.distance = sum(azimuth_list)/len(azimuth_list), max(distance_list)
+            self.save()
+
     def _get_peers(self):
         if self.peer:
-            return self.peer
+            return [self.peer]
         else:
             return self.peer_set.all()
 
     def _refresh_radio(self):
         "Returns frequencies"
         result = False
-        if self.devtype.vendor == 'Ubiquiti' and self.devtype.category == 'R':
+        if self.devtype.vendor == 'Ubiquiti' and self.devtype.category == settings.DEVTYPE_RADIO:
             config, success = get_ubnt_cfg(self.ip.ip)
             if success:
                 self.freqs = ', '.join(get_ubnt_freq(config))

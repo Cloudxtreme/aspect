@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django import forms
 from devices.models import Device, Application
-from users.models import Interface
+from users.models import Interface, Service
 from vlans.models import Location
 from bootstrap3_datetime.widgets import DateTimePicker
 
@@ -25,6 +25,14 @@ class DeviceChoiceLocationForm(forms.ModelForm):
     class Meta:
         model = Device
         fields = ['location']
+
+class DeviceChoiceServiceForm(forms.ModelForm):
+    service = forms.ModelChoiceField(queryset=Service.objects.filter(device=None),widget=forms.Select(attrs={'class':'form-control'}), label = u'Услуга')
+    
+    class Meta:
+        model = Device
+        fields = ['service']
+
 
 class DeviceEditForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

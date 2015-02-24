@@ -203,6 +203,9 @@ PAY_CREDIT = 'O'
 PAY_BEFORE = 'R'
 U_TYPE_FIZ = 'F'
 U_TYPE_UR = 'U'
+DEVTYPE_RADIO = 'R'
+DEVTYPE_SWITCH = 'S'
+DEVTYPE_SNR = 'P'
 # Пороговая сумма выключения
 TURNOFFBALANCE = -10
 
@@ -229,7 +232,7 @@ ADM_STATUSES = (
 )
 
 TYPE_OF_DEVICE = (
-    ('R', 'Radio'),
-    ('P', 'SNR Pinger'),
-    ('S', 'Switch'),
+    (DEVTYPE_RADIO, 'Radio'),
+    (DEVTYPE_SNR, 'SNR Pinger'),
+    (DEVTYPE_SWITCH, 'Switch'),
 )

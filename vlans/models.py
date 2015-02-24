@@ -71,6 +71,7 @@ class Node(models.Model):
     class Meta:
         verbose_name = u'Адрес'
         verbose_name_plural = u'Адреса'
+        ordering = ['title']
 
     def __unicode__(self):
         return "%s - %s - %s" % (self.pk, self.title, self.bs_type)

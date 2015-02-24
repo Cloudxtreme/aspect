@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import re, subprocess,shlex,netsnmp
+import re, subprocess,shlex,netsnmp, math
 from django.conf import settings
 
 def dec2ip(ip):
@@ -20,6 +20,58 @@ def run_command(line):
     return proc.stdout.read(), proc.stderr.read()
 # <--
 
+def azimuth_distance(start,end):
+    #pi - число pi, rad - радиус сферы (Земли)
+    rad = 6372795
+
+    llat1,llong1 = start.split(',')
+    llat2,llong2 = end.split(',')
+
+    #координаты двух точек
+    # llat1 = 77.1539
+    # llong1 = -120.398
+
+    # llat2 = 77.1804
+    # llong2 = 129.55
+
+    #в радианах
+    lat1 = float(llat1)*math.pi/180.
+    lat2 = float(llat2)*math.pi/180.
+    long1 = float(llong1)*math.pi/180.
+    long2 = float(llong2)*math.pi/180.
+
+    #косинусы и синусы широт и разницы долгот
+    cl1 = math.cos(lat1)
+    cl2 = math.cos(lat2)
+    sl1 = math.sin(lat1)
+    sl2 = math.sin(lat2)
+    delta = long2 - long1
+    cdelta = math.cos(delta)
+    sdelta = math.sin(delta)
+
+    #вычисления длины большого круга
+    y = math.sqrt(math.pow(cl2*sdelta,2)+math.pow(cl1*sl2-sl1*cl2*cdelta,2))
+    x = sl1*sl2+cl1*cl2*cdelta
+    ad = math.atan2(y,x)
+    dist = ad*rad
+
+    #вычисление начального азимута
+    x = (cl1*sl2) - (sl1*cl2*cdelta)
+    y = sdelta*cl2
+    z = math.degrees(math.atan(-y/x))
+
+    if (x < 0):
+        z = z+180.
+
+    z2 = (z+180.) % 360. - 180.
+    z2 = - math.radians(z2)
+    anglerad2 = z2 - ((2*math.pi)*math.floor((z2/(2*math.pi))) )
+    angledeg = (anglerad2*180.)/math.pi
+
+    # print 'Distance >> %.0f' % dist, ' [meters]'
+    # print 'Initial bearing >> ', angledeg, '[degrees]'
+    return angledeg,dist
+
 # Опеределяем тип устройства
 def get_dev_os(ip):
     oid = 'iso.3.6.1.2.1.1.1.0'
@@ -28,7 +80,7 @@ def get_dev_os(ip):
 # Опеределяем имя устройства
 def get_dev_name(ip):
     oid = 'iso.3.6.1.2.1.1.5.0'
-    return run_snmp(oid,ip)    
+    return run_snmp(oid,ip)
 
 # Опеределяем MAC устройства
 def get_ubnt_macaddr(ip):
@@ -42,7 +94,7 @@ def get_ubnt_macaddr(ip):
 def get_snr_voltage(ip):
     oid = 'iso.3.6.1.4.1.40418.2.2.4.2.0'
     voltage = run_snmp(oid,ip,settings.SNMP_SNR_COMMUNITY)
-    print voltage
+    # print voltage
     return float(voltage)/100 if voltage else 0    
     
 # Определяем наличие внешнего питания

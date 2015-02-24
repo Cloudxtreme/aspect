@@ -22,7 +22,30 @@
           ]);
         chart.draw(dataTable);
       }
-    </script>   
+    </script>
+    {% if snr %}
+    <script type="text/javascript">
+        function get_supply_info()  
+        {  
+            $.getJSON( "/ajax/get_supply_info/", {id:{{snr.pk}}} ,function(data) {
+                    var options = '';
+                    if (data.supply == true){
+                        options = '<span class="label label-success">'+  data.voltage +' В </span>';
+                    }
+                    else {
+                        options += '<span class="label label-danger">Отсутствует внешнее питание, '+ data.voltage +' В </span>';
+                    }
+
+                    $("#supply").html(options);
+                }); 
+        };
+
+        $(document).ready(function(){  
+            get_supply_info();
+            setInterval('get_supply_info()',5000);  
+        }); 
+    </script>
+    {% endif %}
 {% endblock %}
 
 {% block breadcrumb %}
@@ -40,13 +63,29 @@
 
 {% load dict_extras %}
 
+<div id='ad_modal' class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          <h4 class="modal-title" id="myLargeModalLabel">Азимуты и расстояния</h4>
+        </div>
+        <div class="modal-body">
+          <div id='ip_content'>
+          </div>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 <div class="page-header">
     <h2 class="sub-header">{{ bs.title }}
     <a href="{% url 'bs_edit' bs.pk %}"><span class="glyphicon glyphicon-edit"></span></a><p></h2>
-    <h3>{{ bs.address }}</h3>
+    <h3>{{ bs.address }} <div class='pull-right' id='supply'></div></h3>
     <h4>{{ bs.geolocation }}</h4>
     {{ bs.comment }}
 </div>
+
 
 {% if device_list %}
     <table class="table table-striped table-condensed">
@@ -61,7 +100,17 @@
     {% for device in device_list %}
     <tr id='{{ device.pk }}' >
         <td><a href="{% url 'device_edit' device.pk %}">{{ device }}</a>
-        <p><small>{{ device.comment|safe }}</small></p>
+        <small><p>{{ device.comment|safe }}</p>
+        {% if device.devtype.category == 'R' %}
+        <a id='#btn_azimuth{{ device.pk }}' 
+                        onclick="$.get('/devices/get_azimuth_info/?id={{ device.pk }}', 
+                        function( data ) {
+                            $('#ip_content' ).html(data);
+                            $('#ad_modal').modal('show');
+                        });" data-toggle="tooltip" data-placement="left" title="Азимуты и расстояния">Азимуты и расстояния 
+                        <span class="glyphicon glyphicon-resize-full"></span></a>
+        {% endif %}
+        </small>
         </td>
         <td>
             {% if device.freqs %}
@@ -73,11 +122,14 @@
             <small>
             {% for peer in device.peers %}
                 <li>
-                {{ peer.ip.ip }} <a href="http://{{ peer.ip.ip }}"><span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span></a> 
-                {% if peer.location %}
-                    / {{ peer.location }}
-                {% elif peer.service_set.all.0.abon %}
-                    / <a href={% url 'abonent_info' peer.service_set.all.0.abon.pk %}>{{ peer.service_set.all|first }}</a>
+                {{ peer.ip.ip }} <a href="http://{{ peer.ip.ip }}" data-toggle="tooltip" data-placement="left" title="Веб"><span class="glyphicon glyphicon-share-alt"></span></a> 
+                {% if peer.service_set.all.first %}
+                    / <a href="{% url 'abonent_info' peer.service_set.all.0.abon.pk %}">{{ peer.service_set.all|first }}</a>
+                {% elif peer.location %}
+                    / <a href="{% url 'bs_view' peer.location.pk %}">{{ peer.location }}</a>
+                {% else %}
+                    / <a href="{% url 'device_location_edit' peer.id %}">Создать БС <span class="glyphicon glyphicon-edit"></span></a> <a href="{% url 'device_location_choice' peer.id %}">Выбрать БС <span class="glyphicon glyphicon-flag"></span></a>
+                    / <a href="">Привязать к услуге <span class="glyphicon glyphicon-user"></span></a>
                 {% endif %}
                 </li>
             {% endfor %}

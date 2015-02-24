@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
 from devices.models import Device, DevType, DeviceStatusEntry, Application
-from devices.forms import DeviceEditForm, SyslogFilterForm, AppEditForm, DeviceChoiceLocationForm
+from devices.forms import DeviceEditForm, SyslogFilterForm, AppEditForm, DeviceChoiceLocationForm, DeviceChoiceServiceForm
 from users.forms import ServiceInterfaceForm
 from users.models import Interface
 from vlans.models import IPAddr, Network
@@ -26,13 +26,6 @@ def get_iparp(request):
     vlan = request.GET['vlan']
     community = 'haser12UMBUNTU'
     router = '10.64.1.14'
-    # # oid_str = 'iso.3.6.1.2.1.4.22.1.2.%s.%s' % (vlan,ip)
-    # oid_str = 'iso.3.6.1.2.1.4.22.1.2.%s' % (vlan)
-    # oid = netsnmp.Varbind(oid_str)
-    # result = netsnmp.snmpwalk(oid,
-    #                     Version = 2,
-    #                     DestHost="192.168.64.1",
-    #                     Community="public")
     oid = 'iso.3.6.1.2.1.4.22.1.2.%s.%s' % (vlan,ip)
     cmd = 'snmpwalk -v 2c -c %s %s -OXsq %s' % (community, router, oid)
     PIPE = subprocess.PIPE
@@ -45,6 +38,61 @@ def get_iparp(request):
     else:
         result = '<div class="alert alert-danger" role="alert">ARP запись не обнаружена</div>'        
     return HttpResponse(result)
+
+def get_azimuth_info(request):
+    try:
+        device = Device.objects.get(pk=request.GET['id'], devtype__category='R')
+    except:
+        data ={}
+        result = '<div class="alert alert-danger" role="alert">Не поддерживается</div>'
+    else:
+        result = ''
+        if device.location:
+            azimuth_list =[]
+            distance_list = []
+            for peer in device.peers:
+                if peer.location:
+                    azimuth, distance = azimuth_distance(device.location.geolocation, peer.location.geolocation)
+                    azimuth_list.append(azimuth)
+                    distance_list.append(distance)
+
+            data = {}
+            if azimuth_list:
+                data['azimuth_min'] = min(azimuth_list)
+                data['azimuth_max'] = max(azimuth_list)
+                data['azimuth_angl'] = data['azimuth_max'] - data['azimuth_min']
+                data['azimuth_avg'] = sum(azimuth_list)/len(azimuth_list)
+                if len(azimuth_list)==1:
+                    result += """<p>Направление на станцию %0.2f&deg</p>""" % data['azimuth_min']
+                else:
+                    result += """<p>Станции лежат в угле %0.2f&deg - %0.2f&deg</p>
+                                 <p>Дисперсия %0.2f&deg</p>
+                                 <p>Средний угол %0.2f&deg</p>""" % (data['azimuth_min'],data['azimuth_max'],data['azimuth_angl'],data['azimuth_avg'])
+            if distance_list:
+                data['distance_min'] = min(distance_list)
+                data['distance_max'] = max(distance_list)
+                data['distance_avg'] = sum(distance_list)/len(distance_list)
+                if len(distance_list)==1:
+                    result += """<p>Расстояние %0.2f м.</p>""" % data['distance_min']
+                else:
+                    result += """
+                                 <p>Минимальное расстояние %0.2f м</p> 
+                                 <p>Максимальное расстояние %0.2f м</p> 
+                                 <p>Среднее расстояние %0.2f м</p>""" % (data['distance_min'],data['distance_max'],data['distance_avg'])
+
+    return HttpResponse(result)
+
+def get_supply_info(request):
+    try:
+        snr = Device.objects.get(pk=request.GET['id'], devtype__category='P')
+    except:
+        data ={}
+    else:
+        voltage,supply = snr.get_supply_info()
+        data = {}
+        data['voltage'] = voltage
+        data['supply'] = supply
+    return HttpResponse(simplejson.dumps(data))
 
 def get_radio_param(request):
     ip = dec2ip(int(request.GET['ip']))
@@ -262,14 +310,20 @@ def device_location_choice(request, device_id):
         form = DeviceChoiceLocationForm(request.POST,instance=device)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('devices_list', args=[net_id]) + anchortag)
+            url = reverse('devices_list', args=[net_id]) + anchortag
+            breadcrumbs = [({'url':reverse('bs_view', args=[device.location.pk]),'title':'БС'})]
+            message = 'Устройство успешно привязано к БС'
+            #return HttpResponseRedirect(url)
     else:
         form = DeviceChoiceLocationForm(instance=device)
+        breadcrumbs = []
+        message = ''
 
-    breadcrumbs = [({'url':reverse('devices_list', args=[net_id]) + anchortag,'title':'Устройства'})]
+    breadcrumbs.append({'url':reverse('devices_list', args=[net_id]) + anchortag,'title':'Устройства'})
 
     return render_to_response('generic/generic_edit.html', { 
                                 'header' : header,
+                                'message' : message,
                                 'breadcrumbs' : breadcrumbs,
                                 'form': form,
                                 'extend': 'index.html', },
@@ -291,19 +345,26 @@ def device_location_edit(request, device_id):
             location = form.save()
             device.location = location
             device.save()
-            if device.interfaces.all().count():
-               net_id = device.interfaces.all()[0].ip.net_id
-            else:
-                net_id = 1
+            net_id = device.ip.net.id if device.ip else 1
+            # if device.interfaces.all().count():
+            #     net_id = device.interfaces.all()[0].ip.net_id
+            # else:
+            #     net_id = 1
             anchortag = '#%s' % device.pk
-            return HttpResponseRedirect(reverse('devices_list', args=[net_id]) + anchortag)
+            breadcrumbs = [({'url':reverse('bs_view', args=[device.location.pk]),'title':'БС'})]
+            message = 'БС создана успешно'
+            # return HttpResponseRedirect(reverse('devices_list', args=[net_id]) + anchortag)
     else:
         form = LocationForm(instance=device.location)
+        breadcrumbs = []
+        message = ''   
+        net_id = 0
 
-    breadcrumbs = [({'url':reverse('devices_list', args=[0]),'title':'Устройства'})]
+    breadcrumbs.append({'url':reverse('devices_list', args=[net_id]),'title':'Устройства'})
 
     return render_to_response('generic/generic_edit.html', { 
                                 'header' : header,
+                                'message' : message,
                                 'breadcrumbs' : breadcrumbs,
                                 'form': form,
                                 'extend': 'index.html', },

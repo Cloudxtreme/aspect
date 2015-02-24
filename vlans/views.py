@@ -2,6 +2,7 @@
 from django.shortcuts import render_to_response, HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
 from vlans.models import Vlan, IPAddr, Network, Location
@@ -213,9 +214,8 @@ def vlan_edit(request, vlan_id):
 # Список всех БС
 @login_required
 def bs_list(request):
-    bs_list = Location.objects.filter(bs_type='B').order_by('pk')
+    bs_list = Location.objects.filter(bs_type='B').order_by('title')
     return render_to_response('bs_list.html', { 'bs_list': bs_list }, context_instance = RequestContext(request))
-
 
 # Просмотр БС
 @login_required
@@ -226,12 +226,14 @@ def bs_view(request,bs_id):
         raise Http404
     
     device_list = Device.objects.filter(location=bs)
+    snr = device_list.filter(devtype__category=settings.DEVTYPE_SNR).first()
 
     breadcrumbs = [({'url':reverse('bs_list',),'title':'Список БС'})]
 
     return render_to_response('bs_view.html', 
                                 { 'bs': bs, 
                                 'header' : bs.address,
+                                'snr' : snr,
                                 'breadcrumbs' : breadcrumbs,
                                 'device_list' : device_list }, 
                                 context_instance = RequestContext(request))

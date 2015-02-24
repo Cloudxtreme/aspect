@@ -475,6 +475,21 @@ def service_location_choice(request, service_id):
                                 'extend': 'abonent/main.html', },
                                  context_instance = RequestContext(request))
 
+def service_device_release(request, service_id):
+    try:
+        service = Service.objects.get(pk=service_id)
+        abonent = service.abon
+        device = service.device
+    except:
+        raise Http404
+    else:
+        device.location = None
+        device.save()
+        service.device = None
+        service.save()
+
+    return HttpResponseRedirect(reverse('abonent_services', args=[abonent.id]))
+
 # Выбор устройства услуги
 def service_device_choice(request, service_id):
     try:
@@ -488,6 +503,9 @@ def service_device_choice(request, service_id):
         form = ServiceDeviceForm(request.POST,instance=service)
         if form.is_valid():
             form.save()
+            device = service.device
+            device.location = service.location
+            device.save()
             return HttpResponseRedirect(reverse('abonent_services', args=[abonent.id]))
     else:
         form = ServiceDeviceForm(instance=service)

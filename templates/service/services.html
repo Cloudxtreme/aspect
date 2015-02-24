@@ -104,6 +104,7 @@
             <td>
                 {% if service.device %}
                     {{ service.device }}
+                    <a href="{% url 'service_device_release' service.id %}" data-toggle="tooltip" data-placement="left" title="Освободить устройство"><span class="glyphicon glyphicon-remove"></span></a>                    
                 {% endif %}
                 <a href="{% url 'service_device_choice' service.id %}" data-toggle="tooltip" data-placement="left" 
                 title="Выбрать устройство"><span class="glyphicon glyphicon-edit"></span></a>

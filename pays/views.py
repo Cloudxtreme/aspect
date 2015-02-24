@@ -131,6 +131,7 @@ def promisedpays(request, abonent_id):
 @login_required
 def add_quickpayment(request):
     message = ''
+    header = 'Внесение платежа'
     if request.method == 'POST':
         form = QuickPaymentForm(request.POST)
         if form.is_valid():
@@ -144,7 +145,7 @@ def add_quickpayment(request):
             message = "Ошибки в форме"
     else:
         form = QuickPaymentForm()
-        header = 'Данные платежа'
+        
 
     return render_to_response('generic/generic_edit.html', {
                                 'header' : header,
