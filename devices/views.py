@@ -24,20 +24,40 @@ from devices.aux import *
 def get_iparp(request):
     ip = request.GET['ip']
     vlan = request.GET['vlan']
-    community = 'haser12UMBUNTU'
-    router = '10.64.1.14'
-    oid = 'iso.3.6.1.2.1.4.22.1.2.%s.%s' % (vlan,ip)
-    cmd = 'snmpwalk -v 2c -c %s %s -OXsq %s' % (community, router, oid)
-    PIPE = subprocess.PIPE
-    p = subprocess.Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE,
-            stderr=subprocess.STDOUT, close_fds=True, cwd='/home/')
-    s = p.stdout.read()
-    if s.replace(oid,'').find('No')==-1:
-        vlan,ip,mac = s.replace('iso.3.6.1.2.1.4.22.1.2.','').replace('.',' ',1).split(' ',2)
-        result = '<div class="alert alert-success" role="alert"><p>Vlan %s</p> <p>IP %s</p> <p>MAC %s</p></div>' % (vlan,ip,mac.replace('"','').replace(' ',':',5))
+    try:
+        net = IPAddr.objects.get(ip=ip).net
+        device = Device.objects.filter(interfaces__ip__net=net,router=True).first()
+        router = device.ip.ip if device else '10.64.1.14'
+        print device.ip
+    except:
+        result = '<div class="alert alert-danger" role="alert">Маршрутизатор для этой сети не обнаружен</div>'
     else:
-        result = '<div class="alert alert-danger" role="alert">ARP запись не обнаружена</div>'        
+        mac = get_cisco_iparp(ip,vlan,router).upper()
+        if mac:
+            result = '<div class="alert alert-success" role="alert"><p>Vlan %s</p> <p>IP %s</p> <p>MAC %s</p></div>' % (vlan,ip,mac.replace('"','').replace(' ',':',5))
+        else:
+            result = '<div class="alert alert-danger" role="alert">ARP запись не обнаружена</div>'
+
     return HttpResponse(result)
+
+# @login_required
+# def get_iparp(request):
+#     ip = request.GET['ip']
+#     vlan = request.GET['vlan']
+#     community = 'haser12UMBUNTU'
+#     router = '10.64.1.14'
+#     oid = 'iso.3.6.1.2.1.4.22.1.2.%s.%s' % (vlan,ip)
+#     cmd = 'snmpwalk -v 2c -c %s %s -OXsq %s' % (community, router, oid)
+#     PIPE = subprocess.PIPE
+#     p = subprocess.Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE,
+#             stderr=subprocess.STDOUT, close_fds=True, cwd='/home/')
+#     s = p.stdout.read()
+#     if s.replace(oid,'').find('No')==-1:
+#         vlan,ip,mac = s.replace('iso.3.6.1.2.1.4.22.1.2.','').replace('.',' ',1).split(' ',2)
+#         result = '<div class="alert alert-success" role="alert"><p>Vlan %s</p> <p>IP %s</p> <p>MAC %s</p></div>' % (vlan,ip,mac.replace('"','').replace(' ',':',5))
+#     else:
+#         result = '<div class="alert alert-danger" role="alert">ARP запись не обнаружена</div>'        
+#     return HttpResponse(result)
 
 def get_azimuth_info(request):
     try:
@@ -82,6 +102,24 @@ def get_azimuth_info(request):
 
     return HttpResponse(result)
 
+@login_required
+def save_config(request):
+    data = []
+    try:
+        device = Device.objects.get(pk=request.GET['id'])
+    except:
+        pass
+    else:
+        if device._get_config():
+            for config in device.config_set.all()[0:2]:
+                text = {}
+                text['desc'] = "%s" % config.date
+                text['url'] = config.attach.url
+                data.append(text)             
+
+    return HttpResponse(simplejson.dumps(data))
+
+@login_required
 def get_supply_info(request):
     try:
         snr = Device.objects.get(pk=request.GET['id'], devtype__category='P')
@@ -94,6 +132,7 @@ def get_supply_info(request):
         data['supply'] = supply
     return HttpResponse(simplejson.dumps(data))
 
+@login_required
 def get_radio_param(request):
     ip = dec2ip(int(request.GET['ip']))
     config = get_ubnt_cfg(ip)
@@ -102,7 +141,7 @@ def get_radio_param(request):
     data['width'] = get_width_ubnt(config)
     return HttpResponse(simplejson.dumps(data))
 
-# @login_required
+@login_required
 def set_state(request):
     ip = request.GET['ip']
     date = request.GET['date']
@@ -142,40 +181,40 @@ def devices_list(request, net_id):
         dev_list = Device.objects.filter(interfaces=None)
     else:
         net = Network.objects.get(pk=net_id)
-        iface_list = net.ipaddr_set.all().values_list('interface')
-        dev_list = Device.objects.filter(interfaces__in=iface_list).order_by('interfaces')
+        # iface_list = net.ipaddr_set.all().values_list('interface')
+        # dev_list = Device.objects.filter(interfaces__in=iface_list).order_by('interfaces')
+        dev_list = Device.objects.filter(interfaces__ip__net__pk=net_id)
 
-    return render_to_response('devices/dev_list.html', { 
+    return render_to_response('devices/devices_list.html', { 
                                 'dev_list' : dev_list, 
                                 'parent_nets' : parent_nets }, 
                                 context_instance = RequestContext(request))
 
 @login_required
-def peer_choice(request, device_id):
+def device_view(request, device_id):
     try:
         device = Device.objects.get(pk = device_id)
-        header = 'Выбор соседнего устройства'
     except:
         raise Http404
 
-    if request.method == 'POST':
-        form = ChoiceDeviceBSForm(request.POST)
-        if form.is_valid():
-            # form.save()
-            print form.cleaned_data['peer']
-            return HttpResponseRedirect(rreverse('bs_view',args=[device.location.id]))
-    else:
-        form = ChoiceDeviceBSForm()
+    breadcrumbs = [({'url':reverse('devices_list',args=['0']),'title':'Список оборудования'})]
 
-    breadcrumbs = [({'url':reverse('bs_view',args=[device.location.id]),'title':'Просмотр БС'})]
-
-    return render_to_response('devices/peer_choice.html', {
-                                'header' : header,
-                                'breadcrumbs' :breadcrumbs,
-                                'form': form,
-                                'extend': 'index.html',},
+    return render_to_response('devices/device_view.html', {
+                                'device' : device,
+                                'breadcrumbs' : breadcrumbs},
                                 context_instance = RequestContext(request)
-                                )     
+                                )
+
+@login_required
+def device_save_config(request, device_id):
+    try:
+        device = Device.objects.get(pk = device_id)
+    except:
+        raise Http404
+
+    device._get_config()
+    return HttpResponseRedirect(reverse('device_view', args=[device.pk]))
+                                           
 
 @login_required
 def device_edit(request, device_id):
@@ -230,8 +269,8 @@ def device_iface_add(request, device_id):
                net_id = device.interfaces.all()[0].ip.net_id
             else:
                 net_id = 1
-            anchortag = '#%s' % device.pk
-            return HttpResponseRedirect(reverse('devices_list', args=[net_id]) + anchortag)
+            # anchortag = '#%s' % device.pk
+            return HttpResponseRedirect(reverse('device_view', args=[device.pk]))
     else:
         form = ServiceInterfaceForm()
     
@@ -242,7 +281,7 @@ def device_iface_add(request, device_id):
         net_type = ['EN']
         form.fields['ip'].queryset=IPAddr.objects.filter(interface=None).filter(net__net_type__in=net_type).filter(net__vlan=device.mgmt_vlan)
 
-    breadcrumbs = [({'url':reverse('devices_list', args=[1]),'title':'Список устройств без адреса'})]
+    breadcrumbs = [({'url':reverse('device_view', args=[device.pk]),'title':'Просмотр устройства'})]
 
     return render_to_response('generic/generic_edit.html', { 
                                 'header' : header,
@@ -256,12 +295,13 @@ def device_iface_add(request, device_id):
 def device_iface_del(request, iface_id):
     try:
         interface = Interface.objects.get(pk=iface_id)
+        device_pk = interface.device_set.all().first().pk
     except:
         raise Http404
 
     interface.delete()
-
-    return HttpResponseRedirect(reverse('devices_list'), args=[0])
+    url = reverse('device_view', args=[device_pk])
+    return HttpResponseRedirect(url)
 
 # Редактирование интерфейса
 @login_required
@@ -339,6 +379,7 @@ def device_location_edit(request, device_id):
     except:
         raise Http404
 
+    breadcrumbs = []
     if request.method == 'POST':
         form = LocationForm(request.POST,instance=device.location)
         if form.is_valid():
@@ -356,7 +397,6 @@ def device_location_edit(request, device_id):
             # return HttpResponseRedirect(reverse('devices_list', args=[net_id]) + anchortag)
     else:
         form = LocationForm(instance=device.location)
-        breadcrumbs = []
         message = ''   
         net_id = 0
 

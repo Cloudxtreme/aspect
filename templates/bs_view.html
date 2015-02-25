@@ -16,8 +16,11 @@
         dataTable.addColumn({ type: 'date', id: 'Start' });
         dataTable.addColumn({ type: 'date', id: 'End' });
         dataTable.addRows([
-        {% for dev in device_list %}
-          [ '{{ dev.ip.ip }}', new Date(5680-20/2, 1, 1), new Date(5680+20/2, 1, 1) ],
+
+        {% for device in device_list %}
+            {% if device.freqs  %}
+            [ '{{ device.ip.ip }}', new Date({{ device.freqs }}-{{ device.width }}/2, 1, 1), new Date({{ device.freqs }}+{{ device.width }}/2, 1, 1) ],
+          {% endif %}
         {% endfor %}
           ]);
         chart.draw(dataTable);
@@ -27,7 +30,8 @@
     <script type="text/javascript">
         function get_supply_info()  
         {  
-            $.getJSON( "/ajax/get_supply_info/", {id:{{snr.pk}}} ,function(data) {
+            var snr_id = {{snr.pk}};
+            $.getJSON( "/ajax/get_supply_info/", {id:snr_id} ,function(data) {
                     var options = '';
                     if (data.supply == true){
                         options = '<span class="label label-success">'+  data.voltage +' В </span>';
@@ -99,7 +103,7 @@
     <tbody>
     {% for device in device_list %}
     <tr id='{{ device.pk }}' >
-        <td><a href="{% url 'device_edit' device.pk %}">{{ device }}</a>
+        <td><a href="{% url 'device_view' device.pk %}">{{ device }}</a>
         <small><p>{{ device.comment|safe }}</p>
         {% if device.devtype.category == 'R' %}
         <a id='#btn_azimuth{{ device.pk }}' 
@@ -114,7 +118,9 @@
         </td>
         <td>
             {% if device.freqs %}
-                <span class="badge">{{ device.freqs }} Mhz </span> / {{ device.width }} Mhz / {{ device.ap|yesno:"Access Point, Station" }} 
+                <p><span class="badge">{{ device.freqs }} Mhz </span></p>
+                <p>{{ device.width }} Mhz</p>
+                <p>{{ device.ap|yesno:"Access Point, Station" }}</p>
             {% endif %}
         </td>        
         <td>
@@ -141,6 +147,8 @@
     </tbody>
     </table>
 {% endif %}
+
+{# <div id="timeline" style="width: 100%; height: 300px;"></div> #}
     <script type="text/javascript">
     //<![CDATA[
         var map_geolocation;

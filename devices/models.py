@@ -5,7 +5,9 @@ from tinymce.models import HTMLField
 from django.contrib.auth.models import User
 from devices.aux import *
 from django.conf import settings
-import re
+# from django.core.files import File
+from django.core.files.base import ContentFile
+import re, uuid
 
 # Возвращаем тип устройства по его ОС
 def get_devtype(ip):
@@ -126,7 +128,7 @@ class Device(models.Model):
     location = models.ForeignKey(Location, blank=True, null=True, 
                                 verbose_name=u'Местонахождение')
     router = models.BooleanField(u'Роутер?',default=False)
-    mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=20)
+    mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=20) # Надо убрать
     sn = models.CharField(u'Серийный номер', blank=True, 
                                  null=True, max_length=20)
     inv_number = models.CharField(u'Инвентарный номер', blank=True, 
@@ -141,6 +143,7 @@ class Device(models.Model):
     azimuth = models.FloatField(u'Азимут', default=0,editable=False)
     distance = models.FloatField(u'Дистанция', default=0,editable=False)
 
+    # Только для SNR получить информаицю о питании
     def get_supply_info(self):
         if self.devtype.category == settings.DEVTYPE_SNR:
             if self.ip:
@@ -148,6 +151,7 @@ class Device(models.Model):
                 supply= get_snr_supply(self.ip.ip)
                 return voltage,supply
 
+    # Вывести все связи
     def _get_peer(self):
         if self.ip:
             mac = get_ubnt_apmac(self.ip.ip)
@@ -158,7 +162,7 @@ class Device(models.Model):
                     self.peer = peer[0]
                     self.save()
 
-
+    # Получить МАС для UBNT
     def _get_macaddr(self):
         if self.ip:
             mac = get_ubnt_macaddr(self.ip.ip)
@@ -189,10 +193,11 @@ class Device(models.Model):
             self.devtype=get_devtype(self.ip.ip)
             self.save()
 
+    # Получаем первый IP-адрес
     def _get_main_ip(self):
         "Returns the first IP-address"
         if self.interfaces.count():
-            return self.interfaces.all()[0].ip
+            return self.interfaces.all().first().ip
         else:
             return None
 
@@ -215,8 +220,26 @@ class Device(models.Model):
         else:
             return self.peer_set.all()
 
+    # Только сохранить конфиг
+    def _save_config(self,text_config):
+        filename = '%s.cfg' % uuid.uuid4().hex
+        config = Config()
+        config.device = self
+        config.attach.save(filename,ContentFile(text_config))
+        config.save()
+        return config.pk
+
+    # Получить и сохранить конфиг
+    def _get_config(self):
+        result = False
+        if self.devtype.vendor == 'Ubiquiti':
+            config, success = get_ubnt_cfg(self.ip.ip)
+            if success: 
+                result = bool(self._save_config(config))
+        return result
+
+    # Только для UBNT анализ и сохранение конфига
     def _refresh_radio(self):
-        "Returns frequencies"
         result = False
         if self.devtype.vendor == 'Ubiquiti' and self.devtype.category == settings.DEVTYPE_RADIO:
             config, success = get_ubnt_cfg(self.ip.ip)
@@ -224,6 +247,7 @@ class Device(models.Model):
                 self.freqs = ', '.join(get_ubnt_freq(config))
                 self.width = get_ubnt_width(config)
                 self.ap = get_ubnt_ap(config)
+                self._save_config(config)
                 self.save()
                 result = True
 
@@ -265,4 +289,4 @@ class Config(models.Model):
         ordering = ['-date']
 
     def __unicode__(self):
-        return u"[%s] - %s" % (self.date, self.device,)
+        return u"[%s] - %s" % (self.date, self.device)

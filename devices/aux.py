@@ -8,9 +8,11 @@ def dec2ip(ip):
 def ip2dec(ip):
     return sum([int(q) << i * 8 for i, q in enumerate(reversed(ip.split(".")))])
 
-def run_snmp(oid,ip,community=settings.SNMP_COMMUNITY):
+def run_snmp(oid,ip,generic=False,community=settings.SNMP_COMMUNITY):
     result = netsnmp.snmpget(netsnmp.Varbind(oid), Version = 1, DestHost = ip, Community=community)[0]
-    return result if result else netsnmp.snmpget(netsnmp.Varbind(oid), Version = 1, DestHost = ip, Community=settings.SNMP_SNR_COMMUNITY)[0]
+    if generic and not result:
+        result = netsnmp.snmpget(netsnmp.Varbind(oid), Version = 1, DestHost = ip, Community=settings.SNMP_SNR_COMMUNITY)[0]        
+    return result
 
 # Depricated --> Нужно убирать и переписывать под netsnmp
 def run_command(line):
@@ -30,7 +32,6 @@ def azimuth_distance(start,end):
     #координаты двух точек
     # llat1 = 77.1539
     # llong1 = -120.398
-
     # llat2 = 77.1804
     # llong2 = 129.55
 
@@ -75,12 +76,18 @@ def azimuth_distance(start,end):
 # Опеределяем тип устройства
 def get_dev_os(ip):
     oid = 'iso.3.6.1.2.1.1.1.0'
-    return run_snmp(oid,ip)
+    return run_snmp(oid,ip,generic=True)
 
 # Опеределяем имя устройства
 def get_dev_name(ip):
     oid = 'iso.3.6.1.2.1.1.5.0'
-    return run_snmp(oid,ip)
+    return run_snmp(oid,ip,generic=True)
+
+# Получаем с циски arp запрос
+def get_cisco_iparp(ip,vlan,router):
+    oid = 'iso.3.6.1.2.1.4.22.1.2.%s.%s' % (vlan,ip)
+    result = run_snmp(oid,router)
+    return "".join(format(ord(c),"02x") for c in result) if result else ""
 
 # Опеределяем MAC устройства
 def get_ubnt_macaddr(ip):
@@ -93,14 +100,13 @@ def get_ubnt_macaddr(ip):
 # Определяем вольтаж на пинговалке
 def get_snr_voltage(ip):
     oid = 'iso.3.6.1.4.1.40418.2.2.4.2.0'
-    voltage = run_snmp(oid,ip,settings.SNMP_SNR_COMMUNITY)
-    # print voltage
+    voltage = run_snmp(oid,ip,community=settings.SNMP_SNR_COMMUNITY)
     return float(voltage)/100 if voltage else 0    
     
 # Определяем наличие внешнего питания
 def get_snr_supply(ip):
     oid = 'iso.3.6.1.4.1.40418.2.2.3.6.0'
-    supply = run_snmp(oid,ip,settings.SNMP_SNR_COMMUNITY)    
+    supply = run_snmp(oid,ip,community=settings.SNMP_SNR_COMMUNITY)    
     return True if supply == '2' else False
 
 # Опеределяем модель устройства

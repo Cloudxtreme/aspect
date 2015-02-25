@@ -3,15 +3,13 @@
     <script type="text/javascript">
     $(function(){
         $('.panel-collapse').on('show.bs.collapse', function (){
-            if ($(this).attr('val')!='None') {
+            if ($(this).attr('val')!='0') {
             	var spin = '#spinner' + $(this).attr('val');
             	var lstgroup = '#list-group' + $(this).attr('val');
             	$(spin).show();
                 $.getJSON("/ajax/get_ip/",{id:+$(this).attr('val')}, function(j) {
                     var options = '';
                     for (var i = 0; i < j.length; i++) {
-                        if (j[i]['abon_pk']==0) {url=''}
-                        else {url = '/abonent/' + j[i]['abon_pk'] + '/services/'};
                         options += '<a href="' + j[i]['url'] + '" class="list-group-item">';
                         options += '<h4 class="list-group-item-heading">' + j[i]['ip'] + '</h4>';
                         options += '<p class="list-group-item-text">' + j[i]['desc'] + '</p></a>';
@@ -78,7 +76,7 @@
                             {{ net.ip }}/{{ net.mask }} сеть на {{ net.mask|pow_2 }} узлов</a>
                         </h4>
                     </div>
-                    <div id="collapse{{ net.decip }}_{{net.mask}}" class="panel-collapse collapse">
+                    <div id="collapse{{ net.decip }}_{{net.mask}}" class="panel-collapse collapse" val="0">
                         <div class="panel-body">
                             <a href='/vlans/create_network?ip={{net.decip}}&mask={{net.mask}}' type="button" class="btn btn-primary">
                                 Создать сеть {{ net.ip }}/{{ net.mask }}

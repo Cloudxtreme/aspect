@@ -106,14 +106,14 @@ def get_ip(request):
 
             try:
                 if ipaddr.interface.for_device:
-                    device = ipaddr.interface.device_set.all()[0]
+                    device = ipaddr.interface.device_set.first()
                     desc = u'%s  %s' % (device.devtype, device.location)
-                    anchortag = '#%s' % device.pk
-                    url = reverse('devices_list', args=[ipaddr.net.pk]) + anchortag
+                    url = reverse('device_view', args=[device.pk])
                 else:
-                    service = ipaddr.interface.service_set.all()[0]
+                    service = ipaddr.interface.service_set.first()
                     desc = u'%s  %s' % (service.abon, service.location)
-                    url = reverse('abonent_info', args=[service.abon.pk])
+                    anchortag = '#tr-%s' % service.pk
+                    url = reverse('abonent_services', args=[service.abon.pk]) + anchortag
             except:
                 desc = u''
                 url = '#'
