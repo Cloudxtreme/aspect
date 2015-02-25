@@ -143,11 +143,12 @@ def get_ubnt_cfg(ip):
     line = """sshpass -p 'yfxfkj' rsh 
              -o ConnectTimeout=3 
              -o StrictHostKeyChecking=no 
-             -o UserKnownHostsFile=/dev/null 
+             -o UserKnownHostsFile=/dev/null
+             -p 22
              hflbcn@%s 
              'cat /tmp/system.cfg'""" % ip
     config,err = run_command(line)
-    return config, True if err.find('Connection timed out') ==-1 else False
+    return config, True if err.find('ssh: connect to host') ==-1 else False
 
 # Определяем AP или Station
 def get_ubnt_ap(config):
