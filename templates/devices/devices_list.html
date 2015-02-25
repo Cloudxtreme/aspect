@@ -1,0 +1,37 @@
+{% extends "index.html" %}
+
+{% block script %}
+{% endblock %}
+
+{% block main %} 
+
+<div class="page-header">
+    <h2 class="sub-header">Управление оборудованием</h2>
+    <a href="{% url 'device_edit' 0 %}">Добавить новое устройство
+    <span class="glyphicon glyphicon-plus-sign"></span></a>
+</div>
+<div class="row">
+    <div class="col-md-3">
+        <ul class="nav nav-pills nav-stacked">
+            <li><a href="{% url 'devices_list' 1 %}">Без адреса</a></li>
+            {% for item in parent_nets %}
+                {% url 'devices_list' item.id as target_url %}
+                <li {% if request.META.PATH_INFO ==  target_url%} class="active"{% endif %}>
+                    <a href="{{ target_url }}">{{ item }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col-md-9">
+        <div class="list-group">
+            {% for device in dev_list %}
+            <a href="{% url 'device_view' device.pk %}" class="list-group-item">
+            <h4 class="list-group-item-heading">{{ device.ip.ip }} - {{ device.devtype }}</h4>
+            <p class="list-group-item-text">{{ device.comment|safe }}</p>
+            <p class="list-group-item-text">{{ device.location|default_if_none:"<span class='label label-danger'>Местоположение не указано</span>" }}</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
