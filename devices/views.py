@@ -40,25 +40,6 @@ def get_iparp(request):
 
     return HttpResponse(result)
 
-# @login_required
-# def get_iparp(request):
-#     ip = request.GET['ip']
-#     vlan = request.GET['vlan']
-#     community = 'haser12UMBUNTU'
-#     router = '10.64.1.14'
-#     oid = 'iso.3.6.1.2.1.4.22.1.2.%s.%s' % (vlan,ip)
-#     cmd = 'snmpwalk -v 2c -c %s %s -OXsq %s' % (community, router, oid)
-#     PIPE = subprocess.PIPE
-#     p = subprocess.Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE,
-#             stderr=subprocess.STDOUT, close_fds=True, cwd='/home/')
-#     s = p.stdout.read()
-#     if s.replace(oid,'').find('No')==-1:
-#         vlan,ip,mac = s.replace('iso.3.6.1.2.1.4.22.1.2.','').replace('.',' ',1).split(' ',2)
-#         result = '<div class="alert alert-success" role="alert"><p>Vlan %s</p> <p>IP %s</p> <p>MAC %s</p></div>' % (vlan,ip,mac.replace('"','').replace(' ',':',5))
-#     else:
-#         result = '<div class="alert alert-danger" role="alert">ARP запись не обнаружена</div>'        
-#     return HttpResponse(result)
-
 def get_azimuth_info(request):
     try:
         device = Device.objects.get(pk=request.GET['id'], devtype__category='R')
@@ -101,6 +82,21 @@ def get_azimuth_info(request):
                                  <p>Среднее расстояние %0.2f м</p>""" % (data['distance_min'],data['distance_max'],data['distance_avg'])
 
     return HttpResponse(result)
+
+@login_required
+def detail_delete(request):
+    data = {}
+    try:
+        device = Device.objects.get(pk=request.GET['id'])
+        key = request.GET['key']
+    except:
+        pass
+    else:
+        device.details_map.pop(key,None)
+        device.save()
+        data = device.details_map
+
+    return HttpResponse(simplejson.dumps(data))
 
 @login_required
 def save_config(request):

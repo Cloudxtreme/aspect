@@ -178,7 +178,7 @@ def ipaddr_list(request, parent_id):
                 chain(net_list, nonexsistent_nets),
                 key=lambda instance: instance.decip + instance.mask * 0.01 ) 
 
-    return render_to_response('ip.html', { 
+    return render_to_response('resources/ip.html', { 
                                 'net_list' : result_list, 
                                 'parent_nets' : parent_nets }, 
                                 context_instance = RequestContext(request))
@@ -245,7 +245,7 @@ def refresh_radio(request,bs_id):
         raise Http404
     
     for device in Device.objects.filter(location=bs):
-        device._refresh_radio()
+        device._get_config()
     
     return HttpResponseRedirect(reverse('bs_view',args=[bs_id]))
 

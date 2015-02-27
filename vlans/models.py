@@ -42,8 +42,6 @@ class Vlan(models.Model):
 class Location(models.Model):
     title = models.CharField(u'Название', blank=True, null= True, max_length=100)
     address = models.CharField(u'Адрес', blank=True, null= True, max_length=300)
-    # lat = models.FloatField(u'Широта', blank=True, null=True)
-    # lon = models.FloatField(u'Долгота', blank=True, null=True)
     bs_type = models.CharField(u'Тип', max_length = 2, 
                                choices=TYPE_OF_OBJECTS)
     comment  = models.CharField(u'Комментарий', max_length=300, blank=True, null=True, default='')
@@ -77,12 +75,6 @@ class Node(models.Model):
         return "%s - %s - %s" % (self.pk, self.title, self.bs_type)
 
 class Network(models.Model):
-    # TYPE_OF_NETS= (
-    # ('UN','Сеть пользователей'),
-    # ('EN','Сеть оборудование'),
-    # ('DN','Сеть для распределения'),
-    # ('LN','Сеть разделитель'),
-    # )
     parent = models.ForeignKey('self', null=True, blank=True, related_name='children')
     ip = models.IPAddressField(u'Адрес сети')
     mask = models.IntegerField(u'Маска',max_length=2)

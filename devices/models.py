@@ -217,7 +217,7 @@ class Device(models.Model):
             self.devtype=get_devtype(self.ip.ip)
             self.save()
 
-    # Получаем первый IP-адрес
+    # Выдаем первый IP-адрес
     def _get_main_ip(self):
         if self.interfaces.count():
             return self.interfaces.all().first().ip
@@ -225,17 +225,17 @@ class Device(models.Model):
             return None
 
     # Заполняем параметры азимута и дистанции
-    def _refresh_azimuth(self):
-        if self.location:
-            azimuth_list =[]
-            distance_list = []
-            for peer in self.peers:
-                if peer.location:
-                    azimuth,distance = azimuth_distance(self.location.geolocation, peer.location.geolocation)
-                    azimuth_list.append(azimuth)
-                    distance_list.append(distance)
-            self.azimuth, self.distance = sum(azimuth_list)/len(azimuth_list), max(distance_list)
-            self.save()
+    # def _refresh_azimuth(self):
+    #     if self.location:
+    #         azimuth_list =[]
+    #         distance_list = []
+    #         for peer in self.peers:
+    #             if peer.location:
+    #                 azimuth,distance = azimuth_distance(self.location.geolocation, peer.location.geolocation)
+    #                 azimuth_list.append(azimuth)
+    #                 distance_list.append(distance)
+    #         self.azimuth, self.distance = sum(azimuth_list)/len(azimuth_list), max(distance_list)
+    #         self.save()
 
     def _get_peers(self):
         if self.peer:
@@ -253,26 +253,27 @@ class Device(models.Model):
         return config.pk
 
     # Получить и сохранить конфиг
-    def _get_config(self):
+    # def _get_config(self):
+    #     result = False
+    #     if self.devtype.vendor == 'Ubiquiti':
+    #         config, success = get_ubnt_cfg(self.ip.ip)
+    #         if success: 
+    #             result = bool(self._save_config(config))
+    #     return result
+
+    # Только для UBNT получение, анализ и сохранение конфига
+    def _get_config(self):    
+    # def _refresh_radio(self):
         result = False
         if self.devtype.vendor == 'Ubiquiti':
             config, success = get_ubnt_cfg(self.ip.ip)
-            if success: 
-                result = bool(self._save_config(config))
-        return result
-
-    # Только для UBNT анализ и сохранение конфига
-    def _refresh_radio(self):
-        result = False
-        if self.devtype.vendor == 'Ubiquiti' and self.devtype.category == settings.DEVTYPE_RADIO:
-            config, success = get_ubnt_cfg(self.ip.ip)
             if success:
-                self.details_map['freqs'] = ', '.join(get_ubnt_freq(config))
-                self.details_map['width'] = get_ubnt_width(config)
-                self.details_map['mode'] = 'Access Point' if get_ubnt_ap(config) else 'Station'
-                self._save_config(config)
-                self.save()
-                result = True
+                result = bool(self._save_config(config))
+                if self.devtype.category == settings.DEVTYPE_RADIO:
+                    self.details_map['freqs'] = ', '.join(get_ubnt_freq(config))
+                    self.details_map['width'] = get_ubnt_width(config)
+                    self.details_map['mode'] = 'Access Point' if get_ubnt_ap(config) else 'Station'
+                    self.save()
 
         return result
 
