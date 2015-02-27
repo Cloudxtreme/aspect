@@ -5,9 +5,8 @@ from tinymce.models import HTMLField
 from django.contrib.auth.models import User
 from devices.aux import *
 from django.conf import settings
-# from django.core.files import File
 from django.core.files.base import ContentFile
-import re, uuid
+import re, uuid, json
 
 # Возвращаем тип устройства по его ОС
 def get_devtype(ip):
@@ -128,7 +127,7 @@ class Device(models.Model):
     location = models.ForeignKey(Location, blank=True, null=True, 
                                 verbose_name=u'Местонахождение')
     router = models.BooleanField(u'Роутер?',default=False)
-    mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=20) # Надо убрать
+    # mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=20) # Надо убрать
     sn = models.CharField(u'Серийный номер', blank=True, 
                                  null=True, max_length=20)
     inv_number = models.CharField(u'Инвентарный номер', blank=True, 
@@ -137,11 +136,36 @@ class Device(models.Model):
         blank=True, null=True, verbose_name=u'Последний ответ')
     peer = models.ForeignKey('self',related_name='peer_set', blank=True, null= True,editable=False)
     # Радиопараметры
-    freqs = models.CharField(u'Частоты', default='', max_length=200,editable=False)
-    width = models.CharField(u'Полоса', default='', max_length=2,editable=False)
-    ap = models.BooleanField(u'Access Point', default=False,editable=False)
-    azimuth = models.FloatField(u'Азимут', default=0,editable=False)
-    distance = models.FloatField(u'Дистанция', default=0,editable=False)
+    # freqs = models.CharField(u'Частоты', default='', max_length=200,editable=False)
+    # width = models.CharField(u'Полоса', default='', max_length=2,editable=False)
+    # ap = models.BooleanField(u'Access Point', default=False,editable=False)
+    # azimuth = models.FloatField(u'Азимут', default=0,editable=False)
+    # distance = models.FloatField(u'Дистанция', default=0,editable=False)
+
+    details_map_field = models.TextField(editable=False) # since it will not work anyway
+ 
+    def __init__(self, *args, **kw):
+        # here we hold the object. My object is a simple dict, holding some indexed details
+        self.details_map = {}
+        super(Device, self).__init__(*args, **kw)
+        if self.details_map_field:
+            # load object from serialized value in field
+            self.details_map = json.loads(self.details_map_field)
+ 
+    def save(self, *args, **kw):
+        # always add/change values in details_map_field, save() will do the sync with the db
+        self.details_map_field = json.dumps(self.details_map)
+        super(Device, self).save(*args, **kw)
+ 
+    def ppdetails(self):
+        """ Pretty print """
+        # this can be used in templates, as an interface to the actual data in field
+        dets = json.loads(self.details_map_field)
+        if len(dets):
+            ret = ['%s: %s' % (k, v) for (k, v) in dets.items()]
+            return '\n'.join(ret)
+        else:
+            return ''
 
     # Только для SNR получить информаицю о питании
     def get_supply_info(self):
@@ -195,7 +219,6 @@ class Device(models.Model):
 
     # Получаем первый IP-адрес
     def _get_main_ip(self):
-        "Returns the first IP-address"
         if self.interfaces.count():
             return self.interfaces.all().first().ip
         else:
@@ -244,9 +267,9 @@ class Device(models.Model):
         if self.devtype.vendor == 'Ubiquiti' and self.devtype.category == settings.DEVTYPE_RADIO:
             config, success = get_ubnt_cfg(self.ip.ip)
             if success:
-                self.freqs = ', '.join(get_ubnt_freq(config))
-                self.width = get_ubnt_width(config)
-                self.ap = get_ubnt_ap(config)
+                self.details_map['freqs'] = ', '.join(get_ubnt_freq(config))
+                self.details_map['width'] = get_ubnt_width(config)
+                self.details_map['mode'] = 'Access Point' if get_ubnt_ap(config) else 'Station'
                 self._save_config(config)
                 self.save()
                 result = True
@@ -262,7 +285,6 @@ class Device(models.Model):
 
     def __unicode__(self):
         return u"%s - %s" % (self.devtype, self.ip)
-        # return u"[%s] %s" % (self.pk, self.devtype)
 
 class DeviceStatusEntry(models.Model):
     device = models.ForeignKey(Device, verbose_name=u'Устройство')

@@ -117,10 +117,10 @@
         </small>
         </td>
         <td>
-            {% if device.freqs %}
-                <p><span class="badge">{{ device.freqs }} Mhz </span></p>
-                <p>{{ device.width }} Mhz</p>
-                <p>{{ device.ap|yesno:"Access Point, Station" }}</p>
+            {% if device.details_map.freqs %}
+                <p><span class="badge">{{ device.details_map.freqs }} Mhz </span></p>
+                <p>{{ device.details_map.width }} Mhz</p>
+                <p>{{ device.details_map.mode }}</p>
             {% endif %}
         </td>        
         <td>

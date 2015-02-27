@@ -236,3 +236,9 @@ TYPE_OF_DEVICE = (
     (DEVTYPE_SNR, 'SNR Pinger'),
     (DEVTYPE_SWITCH, 'Switch'),
 )
+
+TYPE_LOG = (
+    ('E', 'Ошибка'),
+    ('W', 'Внимание'),
+    ('C', 'Изменения'),
+)

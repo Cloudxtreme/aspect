@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+# Вычисление расстояния и азимута по паре координат
+# Опеределение тип устройства
+# Опеределяем имя устройства
+# CISCO iparp запрос
+# UBNT Опеределяем MAC устройства 
+# SNR Определяем вольтаж на пинговалке
+# SNR Определяем наличие внешнего питания
+# UBNT Опеределяем модель устройства
+# UBNT Получаем MAC Access Point'a
+# UBNT Получаем MAC'и подключенных клиентов
+# UBNT Получаем конфиг клиента
+# UBNT Определяем AP или Station
+# UBNT Определяем частоту антенны
+# UBNT Определяем полосу
+
 import re, subprocess,shlex,netsnmp, math
 from django.conf import settings
 
@@ -22,6 +37,7 @@ def run_command(line):
     return proc.stdout.read(), proc.stderr.read()
 # <--
 
+# Вычисление расстояния и азимута по паре координат
 def azimuth_distance(start,end):
     #pi - число pi, rad - радиус сферы (Земли)
     rad = 6372795

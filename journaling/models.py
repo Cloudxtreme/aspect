@@ -1,11 +1,22 @@
 ﻿# -*- coding: utf-8 -*-
 from django.db import models
-from devices.models import Device
-from datetime import datetime
 from django.conf import settings
-# import datetime
+from django.contrib.auth.models import User
+from datetime import datetime
+from devices.models import Device
 
-# Create your models here.
+class Log(models.Model):
+    user = models.ForeignKey(User, verbose_name=u'Пользователь', blank=True, null= True)
+    description = models.TextField(u'Описание', blank=True, null=True)
+    date = models.DateTimeField(u'Дата', default=datetime.now,auto_now_add=True)
+    level = models.CharField(u'Тип запись', max_length=1, choices = settings.TYPE_LOG, default='C')
+
+    class Meta:
+        verbose_name = u'Запись Журнала'
+        verbose_name_plural = u'Записи Журнала'
+
+    def __unicode__(self):
+        return u'[%s] %s - %s' % (self.date.ctime(), self.user.get_full_name(), self.level)
 
 class SomeEntityWithReason(models.Model):
     comment = models.CharField(u'Комментарий', max_length=30, blank=True, null=True)
@@ -20,7 +31,6 @@ class SomeEntityWithReason(models.Model):
 
     class Meta:
         abstract = True
-
 
 class ServiceStatusChanges(SomeEntityWithReason):
     service = models.ForeignKey('users.Service', verbose_name=u'Услуга')

@@ -97,7 +97,8 @@
                             <td>{{ iface.mac|default_if_none:"" }}</td>
                             <td>{{ iface.comment|default_if_none:"" }}</td>
                             <td>
-                                <a href={% url 'device_iface_del' iface.id %} ><span class="glyphicon glyphicon-remove"></span></a
+{#                                 <a href={% url 'device_iface_edit' iface.id %} data-toggle="tooltip" data-placement="left" title="Изменить"><span class="glyphicon glyphicon-remove"></span></a> #}
+                                <a href={% url 'device_iface_del' iface.id %} data-toggle="tooltip" data-placement="left" title="Удалить"><span class="glyphicon glyphicon-remove"></span></a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -106,6 +107,16 @@
         </div>
     </div>
     <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">Дополнительные параметры</div>
+
+            <ul class="list-group">
+                {% for key, value in device.details_map.items %}
+                    <li class="list-group-item small">{{ key }} - {{value}}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
         <div class="panel panel-default">
             <div class="panel-heading">Cохраненные конфигурации</div>
             <div class="panel-body">
@@ -120,7 +131,6 @@
             {% endfor %}
             </ul>
         </div>
-
     </div>
 </div>
 
