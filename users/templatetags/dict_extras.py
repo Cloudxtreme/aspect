@@ -7,6 +7,19 @@ import re
 register = template.Library()
 
 @register.filter
+def div( value, arg ):
+    '''
+    Divides the value; argument is the divisor.
+    Returns empty string on any error.
+    '''
+    try:
+        value = float( value )
+        arg = float( arg )
+        if arg: return value / arg
+    except: pass
+    return ''
+
+@register.filter
 def sms_status(value):
     return smsru.SEND_STATUS.get(int(value), "Unknown status")
 

@@ -40,6 +40,7 @@ def get_iparp(request):
 
     return HttpResponse(result)
 
+@login_required
 def get_azimuth_info(request):
     try:
         device = Device.objects.get(pk=request.GET['id'], devtype__category='R')
@@ -95,6 +96,51 @@ def detail_delete(request):
         device.details_map.pop(key,None)
         device.save()
         data = device.details_map
+
+    return HttpResponse(simplejson.dumps(data))
+
+@login_required
+def get_clients(request):
+    data = []
+    try:
+        device = Device.objects.get(pk=request.GET['id'])
+        ip = device.ip.ip
+        peer_list = device.peers
+    except:
+        pass
+    else:
+        data = []
+        for mac,signal in get_ubnt_clients(ip):
+            text = {}
+            try:
+                dev = Device.objects.get(interfaces__mac=mac)
+            except:
+                text['ip'] = ''
+                text['url'] = '#'
+                text['devname'] = ''
+                text['class'] = 'warning'
+            else:
+                peer_list = peer_list.exclude(pk=dev.pk) if peer_list else []
+                ip = dev.ip.ip
+                text['devname'] = get_dev_name(ip)
+                text['class'] = 'success'
+                text['ip'] = ip
+                text['url'] = reverse('device_view', args=[dev.pk])
+           
+            text['mac'] = mac.upper()
+            text['signal'] = signal
+            data.append(text)    
+
+        for peer in peer_list:
+            text = {}
+            ip = peer.ip.ip
+            text['ip'] = ip
+            text['devname'] = get_dev_name(ip)
+            text['mac'] = peer.ip.interface.mac
+            text['signal'] = '?'
+            text['class'] = 'info'
+            text['url'] = reverse('device_view', args=[peer.pk])
+            data.append(text)
 
     return HttpResponse(simplejson.dumps(data))
 

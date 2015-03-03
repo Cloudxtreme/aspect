@@ -1,14 +1,12 @@
 {% extends "index.html" %}
 
 {% block script %}
-
     <script type="text/javascript">
         var dev_id = {{ device.pk }};
 
         function get_supply_info()  
-        {  
-            var snr_id = {{device.pk}};
-            $.getJSON( "/ajax/get_supply_info/", {id:snr_id} ,function(data) {
+        {
+            $.getJSON( "/ajax/get_supply_info/", {id:dev_id} ,function(data) {
                     var options = '';
                     if (data.supply == true){
                         options = '<span class="label label-success">'+  data.voltage +' В </span>';
@@ -16,7 +14,6 @@
                     else {
                         options += '<span class="label label-danger">Отсутствует внешнее питание, '+ data.voltage +' В </span>';
                     }
-
                     $("#supply").html(options);
                 }); 
         };
@@ -49,11 +46,31 @@
                     }); 
         };
 
+        function get_clients()
+        {
+            $('#spinner-clients').show();        
+            $.getJSON("/ajax/get_clients/",{id:dev_id}, function(j) {
+                var options = '';
+                for (var i = 0; i < j.length; i++) {
+                    options += '<tr class=' + j[i]['class'] + '>';
+                    options += '<td>'+ j[i]['devname'] + '</td>' ;
+                    options += '<td><a href="' + j[i]['url'] + '">' + j[i]['ip'] + '</a></td>' ;
+                    options += '<td>' + j[i]['mac'] + '</td>' ;
+                    options += '<td>' + j[i]['signal'] + '</td>' ;
+                    options += '</tr>';
+                    }
+                        $('#clients').html(options);
+                        $('#spinner-clients').hide(); 
+                    }); 
+        };
+
         $(document).ready(function(){  
             {% if device.devtype.category == 'P' %}
                 get_supply_info();
                 setInterval('get_supply_info()',5000);  
             {% endif %}
+            
+            get_clients();
 
             $('#detail-group').on('click','.detail_delete',function(){
                 get_details($(this).attr('val'));
@@ -103,32 +120,49 @@
     <div class="col-md-6">
         <div class="panel panel-default">
             <div class="panel-heading">Интерфейсы</div>
-                <div class="panel-body">
-                    <a href={% url 'device_iface_add' device.id %} >Добавить интерфейс <span class="glyphicon glyphicon-plus"></span></a>
-                
-            <table class="table table-striped table-condensed">
-                <thead>
-                  <tr>
-                    <th>IP</th>
-                    <th>MAC</th>
-                    <th>Комментарий</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                    {% for iface in device.interfaces.all %}
-                        <tr>
-                            <td>{{ iface.ip }}</td>
-                            <td>{{ iface.mac|default_if_none:"" }}</td>
-                            <td>{{ iface.comment|default_if_none:"" }}</td>
-                            <td>
-{#                                 <a href={% url 'device_iface_edit' iface.id %} data-toggle="tooltip" data-placement="left" title="Изменить"><span class="glyphicon glyphicon-remove"></span></a> #}
-                                <a href={% url 'device_iface_del' iface.id %} data-toggle="tooltip" data-placement="left" title="Удалить"><span class="glyphicon glyphicon-remove"></span></a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table></div>
+            <div class="panel-body">
+                <a href={% url 'device_iface_add' device.id %} >Добавить интерфейс <span class="glyphicon glyphicon-plus"></span></a>
+            
+                <table class="table table-striped table-condensed">
+                    <thead>
+                      <tr>
+                        <th>IP</th>
+                        <th>MAC</th>
+                        <th>Комментарий</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for iface in device.interfaces.all %}
+                            <tr>
+                                <td>{{ iface.ip }}</td>
+                                <td>{{ iface.mac|default_if_none:"" }}</td>
+                                <td>{{ iface.comment|default_if_none:"" }}</td>
+                                <td>
+                                    <a href={% url 'device_iface_del' iface.id %} data-toggle="tooltip" data-placement="left" title="Удалить"><span class="glyphicon glyphicon-remove"></span></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">Подключенные клиенты&nbsp;<img id="spinner-clients" style="display:none;" src="/media/images/spinner2.gif" alt="Loading"/></div>
+            <div class="panel-body">
+                <table class="table table-striped table-condensed">
+                    <thead>
+                      <tr>
+                        <th>Имя устройства</th>
+                        <th>IP</th>
+                        <th>MAC</th>
+                        <th>Сигнал</th>
+                      </tr>
+                    </thead>
+                    <tbody id="clients">
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
     <div class="col-md-6">

@@ -239,7 +239,8 @@ class Device(models.Model):
 
     def _get_peers(self):
         if self.peer:
-            return [self.peer]
+            # return self.peer
+            return Device.objects.filter(pk=self.peer.pk)
         else:
             return self.peer_set.all()
 

@@ -36,7 +36,7 @@ def report_sumbymonth(request):
 										}).values('month','year').order_by('year','month').annotate(dcount=Count('date'),dsum=Sum('summ'))
 	return render_to_response('stat/report_sumbymonth.html', { 'data' : data }, context_instance = RequestContext(request))
 
-@login_required	
-def report_thrp(request):
-	data = Service.objects.extra({'segment': "segment" }).values('plan__speed_in').filter(plan__tos__id=1).order_by('plan__speed_in').annotate(Count('plan__speed_in'))
-	return render_to_response('stat/report_thrp.html', { 'data' : data }, context_instance = RequestContext(request))
+# @login_required	
+# def report_thrp(request):
+# 	data = Service.objects.extra({'segment': "segment" }).values('plan__speed_in').filter(plan__tos__id=1).order_by('plan__speed_in').annotate(Count('plan__speed_in'))
+# 	return render_to_response('stat/report_thrp.html', { 'data' : data }, context_instance = RequestContext(request))

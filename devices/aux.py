@@ -143,16 +143,17 @@ def get_ubnt_apmac(ip):
     mac = re.findall(oid_template,result)    
     return mac[0].replace(' ','') if mac else ''
 
-# Получаем MAC'и подключенных клиентов
+# Получаем MAC'и уровни сигнала подключенных клиентов
 def get_ubnt_clients(ip):
-    line = """snmpwalk -v1 -c %s %s 1.3.6.1.4.1.14988.1.1.1""" % (settings.SNMP_COMMUNITY,ip)
-    oid_template = 'iso.3.6.1.4.1.14988.1.1.1.2.1.3.(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3})'
+    line = """snmpwalk -v1 -c %s %s 1.3.6.1.4.1.14988.1.1.1.2.1.3""" % (settings.SNMP_COMMUNITY,ip)
+    p = re.compile('(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}).\d+ = INTEGER: (-\d+)')
     result,err = run_command(line)
-    macs = []
-    for mac in re.findall(oid_template,result):
-        macs.append(''.join(map(lambda x: hex(int(x)).split('x')[1].rjust(2,'0'), mac.split('.'))))
+    # macs = []
+    mac_signal = []
+    for entry in p.findall(result):
+        mac_signal.append((''.join(map(lambda x: hex(int(x)).split('x')[1].rjust(2,'0'), entry[0].split('.'))),entry[1]))
 
-    return macs
+    return mac_signal
 
 # Получаем конфиг клиента
 def get_ubnt_cfg(ip):

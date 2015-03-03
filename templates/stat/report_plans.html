@@ -23,11 +23,13 @@
 {% endblock %}
 
 {% block main %} 
+{% load dict_extras %}
   <div class="page-header">
     <div class="sub-header">
       <h2>Распределение абонентов по скоростям</h2>
-      <h3>Всего активных услуг: {{ service_count }}</h3>
-      <h3>Общая полоса активных услуг: {{ total_band }} Мбит/с</h3>
+      <h4>Всего активных услуг: {{ service_count }}</h4>
+      <h4>Общая полоса активных услуг: {{ total_band }} Мбит/с</h4>
+      <h4>Коэфициент переподписки: {{ total_band|div:250 }}</h4>
     </div>
   </div>
   <div class="col-lg-6">
