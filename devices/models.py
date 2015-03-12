@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from devices.aux import *
 from django.conf import settings
 from django.core.files.base import ContentFile
-import re, uuid, json
+import re, uuid, json, datetime
 
 # Возвращаем тип устройства по его ОС
 def get_devtype(ip):
@@ -44,31 +44,12 @@ def get_devtype(ip):
 
     devtype,created = DevType.objects.get_or_create(model=model,
                                     defaults={'vendor': vendor, 
-                                                'model' : model, 
-                                                'category' : category, })
+                                              'model' : model, 
+                                              'category' : category, })
 
     return devtype
 
-
-# Многопоточный 
-def get_devince_info(queue):
-    for ip in iter(queue.get, None):
-        get_devtype(ip)
-
-def scan_network(ip_list):
-    queue = Queue()
-    threads = [Thread(target=get_devince_info, args=(queue,)) for _ in range(20)]
-    for t in threads:
-        t.daemon = True
-        t.start()
-
-    # Place work in queue
-    for site in ip_list: queue.put(site)
-    # Put sentinel to signal the end
-    for _ in threads: queue.put(None)
-    # Wait for completion
-    for t in threads: t.join()
-
+# Скачиваем конфиг
 def get_config(dev_id):
     try:
         device = Device.objects.get(pk=dev_id)
@@ -135,13 +116,6 @@ class Device(models.Model):
     last_available = models.DateTimeField(auto_now=False, auto_now_add=False, 
         blank=True, null=True, verbose_name=u'Последний ответ')
     peer = models.ForeignKey('self',related_name='peer_set', blank=True, null= True,editable=False)
-    # Радиопараметры
-    # freqs = models.CharField(u'Частоты', default='', max_length=200,editable=False)
-    # width = models.CharField(u'Полоса', default='', max_length=2,editable=False)
-    # ap = models.BooleanField(u'Access Point', default=False,editable=False)
-    # azimuth = models.FloatField(u'Азимут', default=0,editable=False)
-    # distance = models.FloatField(u'Дистанция', default=0,editable=False)
-
     details_map_field = models.TextField(editable=False) # since it will not work anyway
  
     def __init__(self, *args, **kw):

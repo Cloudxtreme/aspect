@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*- 
 from django.db import models
-# from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 from vlans.fields import LocationField
 from devices.aux import ip2dec,dec2ip
-
-# Create your models here.
 
 TYPE_OF_OBJECTS = (
     ('C', 'Клиент'),
@@ -124,9 +121,9 @@ class IPAddr(models.Model):
     def clean(self):
 #	if IPAddr.objects.filter(net=self.net).count() >= pow(2,32-self.net.mask)-2 :
 #		raise ValidationError('Нет свободных адресов в этой подсети')
-	self.decip = sum([int(q) << i * 8 for i, q in enumerate(reversed(self.ip.split(".")))])
-	if not self.decip in range(self.net.decip+1, self.net.decip+pow(2,32-self.net.mask)-1):
-		raise ValidationError('Адрес не пренадлежит выбранной подсети')
+        self.decip = sum([int(q) << i * 8 for i, q in enumerate(reversed(self.ip.split(".")))])
+        if not self.decip in range(self.net.decip+1, self.net.decip+pow(2,32-self.net.mask)-1):
+            raise ValidationError('Адрес не пренадлежит выбранной подсети')
 
 #    def save(self, force_insert=False, force_update=False):
 #        self.decip = sum([int(q) << i * 8 for i, q in enumerate(reversed(self.ip.split(".")))])

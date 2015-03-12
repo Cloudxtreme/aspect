@@ -215,6 +215,20 @@ def set_state(request):
         return HttpResponse('Device found')
 
 @login_required
+def devtype_list(request, dt_id):
+    devtype_list = DevType.objects.all().order_by('vendor')
+
+    if dt_id == '0':
+        dev_list = Device.objects.none()
+    else:
+        dev_list = Device.objects.filter(devtype=dt_id)
+
+    return render_to_response('devices/devtype_list.html', { 
+                                'dev_list' : dev_list, 
+                                'devtype_list' : devtype_list }, 
+                                context_instance = RequestContext(request))
+
+@login_required
 def devices_list(request, net_id):
     parent_nets = Network.objects.filter(net_type='EN')
     if net_id == '0':
@@ -222,9 +236,7 @@ def devices_list(request, net_id):
     elif net_id=='1':
         dev_list = Device.objects.filter(interfaces=None)
     else:
-        net = Network.objects.get(pk=net_id)
-        # iface_list = net.ipaddr_set.all().values_list('interface')
-        # dev_list = Device.objects.filter(interfaces__in=iface_list).order_by('interfaces')
+        # net = Network.objects.get(pk=net_id)
         dev_list = Device.objects.filter(interfaces__ip__net__pk=net_id)
 
     return render_to_response('devices/devices_list.html', { 

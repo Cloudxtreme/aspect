@@ -69,8 +69,10 @@
                 get_supply_info();
                 setInterval('get_supply_info()',5000);  
             {% endif %}
-            
-            get_clients();
+
+            {% if device.devtype.category == 'R' %}
+                get_clients();
+            {% endif %}
 
             $('#detail-group').on('click','.detail_delete',function(){
                 get_details($(this).attr('val'));
@@ -147,6 +149,7 @@
                 </table>
             </div>
         </div>
+        {% if device.devtype.category == 'R' %}
         <div class="panel panel-default">
             <div class="panel-heading">Подключенные клиенты&nbsp;<img id="spinner-clients" style="display:none;" src="/media/images/spinner2.gif" alt="Loading"/></div>
             <div class="panel-body">
@@ -164,6 +167,7 @@
                 </table>
             </div>
         </div>
+        {% endif %}
     </div>
     <div class="col-md-6">
         <div class="panel panel-default">

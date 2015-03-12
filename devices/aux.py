@@ -2,6 +2,8 @@
 # Вычисление расстояния и азимута по паре координат
 # Опеределение тип устройства
 # Опеределяем имя устройства
+# Получаем список IP адресов устройства, для Cisco и Mikrotik
+# Получить маску IP-адреса
 # CISCO iparp запрос
 # UBNT Опеределяем MAC устройства 
 # SNR Определяем вольтаж на пинговалке
@@ -26,8 +28,14 @@ def ip2dec(ip):
 def run_snmp(oid,ip,generic=False,community=settings.SNMP_COMMUNITY):
     result = netsnmp.snmpget(netsnmp.Varbind(oid), Version = 1, DestHost = ip, Community=community)[0]
     if generic and not result:
-        result = netsnmp.snmpget(netsnmp.Varbind(oid), Version = 1, DestHost = ip, Community=settings.SNMP_SNR_COMMUNITY)[0]        
-    return result
+        result = netsnmp.snmpget(netsnmp.Varbind(oid), Version = 1, DestHost = ip, Community=settings.SNMP_SNR_COMMUNITY)[0]
+        if not result: 
+            result = netsnmp.snmpget(netsnmp.Varbind(oid), Version = 1, DestHost = ip, Community='yfpfgbcm')[0]       
+    return result or ''
+
+def run_snmpwalk(oid,ip,community=settings.SNMP_COMMUNITY):
+    result = netsnmp.snmpwalk(netsnmp.Varbind(oid), Version = 1, DestHost = ip, Community=community)
+    return result or ''
 
 # Depricated --> Нужно убирать и переписывать под netsnmp
 def run_command(line):
@@ -99,6 +107,16 @@ def get_dev_name(ip):
     oid = 'iso.3.6.1.2.1.1.5.0'
     return run_snmp(oid,ip,generic=True)
 
+# Получаем список IP адресов устройства, для Cisco и Mikrotik
+def get_ip_list(ip):
+    oid = 'iso.3.6.1.2.1.4.20.1.1'
+    return run_snmpwalk(oid,ip)
+
+# Получить маску IP-адреса, для Cisco и Mikrotik
+def get_mask(ip):
+    oid = 'iso.3.6.1.2.1.4.20.1.3.%s' % ip
+    return run_snmp(oid,ip)
+
 # Получаем с циски arp запрос
 def get_cisco_iparp(ip,vlan,router):
     oid = 'iso.3.6.1.2.1.4.22.1.2.%s.%s' % (vlan,ip)
@@ -117,12 +135,12 @@ def get_ubnt_macaddr(ip):
 def get_snr_voltage(ip):
     oid = 'iso.3.6.1.4.1.40418.2.2.4.2.0'
     voltage = run_snmp(oid,ip,community=settings.SNMP_SNR_COMMUNITY)
-    return float(voltage)/100 if voltage else 0    
+    return float(voltage)/100 if voltage else 0 
     
 # Определяем наличие внешнего питания
 def get_snr_supply(ip):
     oid = 'iso.3.6.1.4.1.40418.2.2.3.6.0'
-    supply = run_snmp(oid,ip,community=settings.SNMP_SNR_COMMUNITY)    
+    supply = run_snmp(oid,ip,community=settings.SNMP_SNR_COMMUNITY)
     return True if supply == '2' else False
 
 # Опеределяем модель устройства

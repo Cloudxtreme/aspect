@@ -1,0 +1,62 @@
+{% extends "index.html" %}
+
+{% block script %}
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $( ".voltage" ).each(
+                function get_supply_info()
+                {
+                    var dev_id = $(this).attr('val');
+                    $.getJSON( "/ajax/get_supply_info/", {id:dev_id} ,function(data) {
+                        var options = '';
+                        var voltage = '#voltage' + dev_id;
+                        if (data.supply == true){
+                            options = '<h4><span class="label label-success pull-right">'+  data.voltage +' В </span></h4>';
+                        }
+                        else {
+                            options += '<h4><span class="label label-danger pull-right">Отсутствует внешнее питание, '+ data.voltage +' В </span></h4>';
+                        }
+                        $(voltage).html(options);
+                    }) 
+                }
+            );
+        }); 
+    </script>
+
+{% endblock %}
+
+{% block main %} 
+
+<div class="page-header">
+    <h2 class="sub-header">Оборудование по типам устройств</h2>
+</div>
+<div class="row">
+    <div class="col-md-3">
+        <ul class="nav nav-pills nav-stacked">
+            {% for item in devtype_list %}
+                {% url 'devtype_list' item.id as target_url %}
+                <li {% if request.META.PATH_INFO ==  target_url%} class="active"{% endif %}>
+                    <a href="{{ target_url }}">{{ item }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col-md-9">
+        <div class="page-header">
+            <h3 class="sub-header">Устройств такого типа: {{ dev_list.count }}</h3>
+        </div>
+        
+        <div class="list-group">
+            {% for device in dev_list %}
+            <a href="{% url 'device_view' device.pk %}" class="list-group-item{% if device.devtype.category == 'P' %} voltage{% endif %}" val="{{ device.pk }}">
+            <h4 class="list-group-item-heading">{{ device.ip.ip }} - {{ device.devtype }}</h4>
+            <p class="list-group-item-text">{{ device.comment|safe }}</p>
+            <p class="list-group-item-text" id="voltage{{ device.pk }}"></p>
+            <p class="list-group-item-text">{{ device.location|default_if_none:"<span class='label label-danger'>Местоположение не указано</span>" }}</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
