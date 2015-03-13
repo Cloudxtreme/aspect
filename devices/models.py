@@ -6,41 +6,73 @@ from django.contrib.auth.models import User
 from devices.aux import *
 from django.conf import settings
 from django.core.files.base import ContentFile
-import re, uuid, json, datetime
+import re, uuid, json, datetime,requests
+from requests.auth import HTTPDigestAuth
+
 
 # Возвращаем тип устройства по его ОС
-def get_devtype(ip):
-    device_os = get_dev_os(ip)
+def get_devtype(ip,ping=True):
+    line = """ ping -c 1 -W 1 %s""" % ip
     category = 'S'
-    if device_os.find('Linux') != -1: # Это Ubiquiti
-        _model = get_ubnt_model(ip)
-        vendor = 'Ubiquiti'
-        if _model: # Это радио
-            model = [_model]
-            category = 'R'
-        else: # А это свитч
-            model = ['Tough Switch']
-    elif device_os.find('RouterOS') != -1: # Это Mikrotik
-        vendor = 'Mikrotik'
-        model = re.findall('RouterOS (.*)',device_os)
-    elif device_os.find('Cisco') != -1: # Это Cisco
-        vendor = 'Cisco'
-        model = re.findall('Cisco IOS Software, (.*) Software',device_os)
-    elif device_os.find('DES-') != -1: # Это D-Link
-        vendor = 'D-Link'
-        model = re.findall('(DES-.*) Fast Ethernet Switch',device_os)
-    elif device_os.find('ES-2108') != -1: # Это Zyxel ES-2108
-        vendor = 'Zyxel'
-        model = ['ES-2108']
-    elif device_os.find('Fmv') != -1: # Это SNR-pinger
-        vendor = 'SNR'
-        model = ['Pinger']
-        category = 'P'
-    else:
-        vendor = 'Unknown'
-        model = ['Unknown']
 
-    model = model[0] if model else 'Unknown'
+    if not (ping and run_command(line)[0].find('100% packet loss') != -1): # Если пингуется, то продолжаем
+        device_os = get_dev_os(ip)
+
+        if device_os.find('Linux') != -1: # Это Ubiquiti
+            _model = get_ubnt_model(ip)
+            vendor = 'Ubiquiti'
+            if _model: # Это радио
+                model = [_model]
+                category = 'R'
+            else: # А это свитч
+                s = requests.Session()
+                line = 'https://%s' % ip
+                try:
+                    r = s.get(line,timeout=1, verify=False)
+                except:
+                    model = ['Tough Switch PoE-5']
+                else:
+                    if r.content.find('tough-switch-pro')!=-1:
+                        model = ['Tough Switch PoE Pro-8']
+                    else:
+                        model = ['Tough Switch PoE-5']
+        elif device_os.find('RouterOS') != -1: # Это Mikrotik
+            vendor = 'Mikrotik'
+            model = re.findall('RouterOS (.*)',device_os)
+        elif device_os.find('Cisco') != -1: # Это Cisco
+            vendor = 'Cisco'
+            model = re.findall('Cisco IOS Software, (.*) Software',device_os)
+        elif device_os.find('DES-') != -1: # Это D-Link
+            vendor = 'D-Link'
+            model = re.findall('(DES-.*) Fast Ethernet Switch',device_os)
+        elif device_os.find('ES-2108') != -1: # Это Zyxel ES-2108
+            vendor = 'Zyxel'
+            model = ['ES-2108']
+        elif device_os.find('Fmv') != -1: # Это SNR-pinger
+            vendor = 'SNR'
+            model = ['Pinger']
+            category = 'P'
+        else:
+            s = requests.Session()
+            line = 'http://%s' % ip
+            try:
+                r = s.get(line,timeout=1)
+            except:
+                vendor = 'Unknown'
+                model = ['Unknown']            
+            else:
+                if r.content.find('bsc_dev_manage')!=-1:
+                    vendor = 'D-Link'
+                    model = ['Dir-100']
+                else:    
+                    vendor = 'Unknown'
+                    model = ['Unknown']
+
+        model = model[0] if model else 'Unknown'
+
+    else:
+        model = 'Unaccessable'
+        vendor = 'Unaccessable'
 
     devtype,created = DevType.objects.get_or_create(model=model,
                                     defaults={'vendor': vendor, 

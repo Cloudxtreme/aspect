@@ -15,7 +15,6 @@ ubnt_dev = DevType.objects.filter(vendor='Ubiquiti')
 
 
 def run_command(command):
-    
     p = subprocess.Popen(command, shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,

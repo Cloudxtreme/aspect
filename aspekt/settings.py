@@ -232,7 +232,7 @@ ADM_STATUSES = (
 )
 
 TYPE_OF_DEVICE = (
-    (DEVTYPE_RADIO, 'Radio'),
+    (DEVTYPE_RADIO, 'Ubiquiti Radio'),
     (DEVTYPE_SNR, 'SNR Pinger'),
     (DEVTYPE_SWITCH, 'Switch'),
 )

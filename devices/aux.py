@@ -29,8 +29,8 @@ def run_snmp(oid,ip,generic=False,community=settings.SNMP_COMMUNITY):
     result = netsnmp.snmpget(netsnmp.Varbind(oid), Version = 1, DestHost = ip, Community=community)[0]
     if generic and not result:
         result = netsnmp.snmpget(netsnmp.Varbind(oid), Version = 1, DestHost = ip, Community=settings.SNMP_SNR_COMMUNITY)[0]
-        if not result: 
-            result = netsnmp.snmpget(netsnmp.Varbind(oid), Version = 1, DestHost = ip, Community='yfpfgbcm')[0]       
+        # if not result: 
+        #     result = netsnmp.snmpget(netsnmp.Varbind(oid), Version = 1, DestHost = ip, Community='yfpfgbcm')[0]       
     return result or ''
 
 def run_snmpwalk(oid,ip,community=settings.SNMP_COMMUNITY):
@@ -106,6 +106,11 @@ def get_dev_os(ip):
 def get_dev_name(ip):
     oid = 'iso.3.6.1.2.1.1.5.0'
     return run_snmp(oid,ip,generic=True)
+
+# Опеределяем расположение устройства
+def get_location(ip):
+    oid = 'iso.3.6.1.2.1.1.6.0'
+    return run_snmp(oid,ip)
 
 # Получаем список IP адресов устройства, для Cisco и Mikrotik
 def get_ip_list(ip):

@@ -1,29 +1,27 @@
 {% extends "index.html" %}
 
 {% block script %}
-
-    <script type="text/javascript">
-        $(document).ready(function(){
-            $( ".voltage" ).each(
-                function get_supply_info()
-                {
-                    var dev_id = $(this).attr('val');
-                    $.getJSON( "/ajax/get_supply_info/", {id:dev_id} ,function(data) {
-                        var options = '';
-                        var voltage = '#voltage' + dev_id;
-                        if (data.supply == true){
-                            options = '<h4><span class="label label-success pull-right">'+  data.voltage +' В </span></h4>';
-                        }
-                        else {
-                            options += '<h4><span class="label label-danger pull-right">Отсутствует внешнее питание, '+ data.voltage +' В </span></h4>';
-                        }
-                        $(voltage).html(options);
-                    }) 
-                }
-            );
-        }); 
-    </script>
-
+<script type="text/javascript">
+    $(document).ready(function(){
+        $( ".voltage" ).each(
+            function get_supply_info()
+            {
+                var dev_id = $(this).attr('val');
+                $.getJSON( "/ajax/get_supply_info/", {id:dev_id} ,function(data) {
+                    var options = '';
+                    var voltage = '#voltage' + dev_id;
+                    if (data.supply == true){
+                        options = '<h4><span class="label label-success pull-right">'+  data.voltage +' В </span></h4>';
+                    }
+                    else {
+                        options += '<h4><span class="label label-danger pull-right">Отсутствует внешнее питание, '+ data.voltage +' В </span></h4>';
+                    }
+                    $(voltage).html(options);
+                }) 
+            }
+        );
+    }); 
+</script>
 {% endblock %}
 
 {% block main %} 

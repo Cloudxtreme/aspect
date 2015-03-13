@@ -277,8 +277,6 @@ class Service(models.Model):
     tos = models.ForeignKey(TypeOfService,verbose_name=u'Тип услуги')
     plan = models.ForeignKey(Plan,verbose_name=u'Тарифный план')
     ifaces = models.ManyToManyField(Interface, verbose_name=u'Интерфейсы', blank=True, null= True)
-    # Deprecated field
-    # ip = models.OneToOneField(IPAddr, verbose_name=u'IP адрес', blank=True, null= True)
     vlan_list = models.ManyToManyField(Vlan, verbose_name=u'Список Vlan', blank=True, null= True,related_name='vlan_list')
     adm_status = models.CharField(u'Административный статус', max_length=1, choices=settings.ADM_STATUSES, default='0')
     status = models.CharField(u'Статус', max_length=1, choices=settings.STATUSES, default=settings.STATUS_NEW)

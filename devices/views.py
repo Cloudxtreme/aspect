@@ -19,6 +19,22 @@ from datetime import timedelta
 from django.core import serializers
 from django.utils import simplejson
 from devices.aux import *
+from devices.scanner import scan_network
+from multiprocessing import Process, Queue
+import time
+
+def get_ipscanner_state(request):
+    counter = request.session.get('ip_scanner_counter', 0)
+    return HttpResponse(simplejson.dumps({"counter":round(float(counter))}), mimetype='application/javascript' )
+
+def run_ipscanner(request):
+    try:
+        net_id = request.GET['id'] # Передан номер подсети для сканирования
+        ip_list = [ipaddr.ip for ipaddr in Network.objects.get(pk=net_id).ipaddr_set.all()]
+    except: pass
+    else:
+        scan_network(request.session,ip_list)
+    return HttpResponse(simplejson.dumps({"done":True}), mimetype='application/javascript')
 
 @login_required
 def get_iparp(request):
@@ -90,14 +106,13 @@ def detail_delete(request):
     try:
         device = Device.objects.get(pk=request.GET['id'])
         key = request.GET['key']
-    except:
-        pass
+    except: pass
     else:
         device.details_map.pop(key,None)
         device.save()
         data = device.details_map
 
-    return HttpResponse(simplejson.dumps(data))
+    return HttpResponse(simplejson.dumps(data), mimetype='application/javascript')
 
 @login_required
 def get_clients(request):
@@ -142,7 +157,7 @@ def get_clients(request):
             text['url'] = reverse('device_view', args=[peer.pk])
             data.append(text)
 
-    return HttpResponse(simplejson.dumps(data))
+    return HttpResponse(simplejson.dumps(data), mimetype='application/javascript')
 
 @login_required
 def save_config(request):
@@ -159,7 +174,7 @@ def save_config(request):
                 text['url'] = config.attach.url
                 data.append(text)             
 
-    return HttpResponse(simplejson.dumps(data))
+    return HttpResponse(simplejson.dumps(data), mimetype='application/javascript')
 
 @login_required
 def get_supply_info(request):
@@ -181,7 +196,7 @@ def get_radio_param(request):
     data = {}
     data['freq'] = get_freq_ubnt(config)
     data['width'] = get_width_ubnt(config)
-    return HttpResponse(simplejson.dumps(data))
+    return HttpResponse(simplejson.dumps(data), mimetype='application/javascript')
 
 @login_required
 def set_state(request):
