@@ -238,7 +238,7 @@ def devtype_list(request, dt_id):
     if dt_id == '0':
         dev_list = Device.objects.filter(devtype = DevType.objects.all().order_by('vendor').first())
     else:
-        dev_list = Device.objects.filter(devtype=dt_id).order_by('interfaces')
+        dev_list = Device.objects.filter(devtype=dt_id) # Тут проблемы с сортировкой, поэтому её убрали
 
     return render_to_response('devices/devtype_list.html', { 
                                 'dev_list' : dev_list, 
@@ -268,7 +268,8 @@ def device_view(request, device_id):
     except:
         raise Http404
 
-    breadcrumbs = [({'url':reverse('devices_list',args=['0']),'title':'Список оборудования'})]
+    breadcrumbs = [({'url':reverse('devtype_list', args=[device.devtype.id]),'title':device.devtype})]
+    if device.ip: breadcrumbs.append({'url':reverse('devices_list', args=[device.ip.net.id]),'title':device.ip.net})
 
     return render_to_response('devices/device_view.html', {
                                 'device' : device,
@@ -292,6 +293,8 @@ def device_edit(request, device_id):
     try:
         device = Device.objects.get(pk = device_id)
         header = 'Редактирование устройства'
+        breadcrumbs = [({'url':reverse('devices_list', args=[device.ip.net.id]),'title':device.ip.net}),
+                    ({'url':reverse('devtype_list', args=[device.devtype.id]),'title':device.devtype})]
     except:
         device = Device()
         header = 'Добавление нового устройства'
@@ -310,7 +313,8 @@ def device_edit(request, device_id):
     else:
         form = DeviceEditForm(instance=device)
 
-    breadcrumbs = [({'url':reverse('devices_list', args=[0]),'title':'Список устройств'})]
+    breadcrumbs = [({'url':reverse('devices_list', args=[0]),'title':'Список подсетей'}),
+                    ({'url':reverse('devtype_list', args=[0]),'title':'Список устройств'})]
 
     return render_to_response('generic/generic_edit.html', {
                                 'header' : header,

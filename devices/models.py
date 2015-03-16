@@ -13,7 +13,7 @@ from requests.auth import HTTPDigestAuth
 # Возвращаем тип устройства по его ОС
 def get_devtype(ip,ping=True):
     line = """ ping -c 1 -W 1 %s""" % ip
-    category = 'S'
+    category = 'S'                                                                                                                                              
 
     if not (ping and run_command(line)[0].find('100% packet loss') != -1): # Если пингуется, то продолжаем
         device_os = get_dev_os(ip)
@@ -181,15 +181,15 @@ class Device(models.Model):
                 supply= get_snr_supply(self.ip.ip)
                 return voltage,supply
 
-    # Вывести все связи
+    # Заполнить связи устройств
     def _get_peer(self):
         if self.ip:
             mac = get_ubnt_apmac(self.ip.ip)
             if mac:
                 self.ap = False
-                peer = Device.objects.filter(interfaces__mac=mac)
+                peer = Device.objects.filter(interfaces__mac=mac).first()
                 if peer:
-                    self.peer = peer[0]
+                    self.peer = peer
                     self.save()
 
     # Получить МАС для UBNT

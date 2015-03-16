@@ -9,11 +9,12 @@ import time
 
 # Сканирование подсети
 def scan_network(session,ips):
+# def scan_network(ips):
     startTime = time.time()
     # logging.basicConfig(filename='report.log',format='%(levelname)s:%(message)s',level=logging.WARNING)
     amount = len(ips)
     counter = 0
-    unknown_list = [] # 
+    unknown_list = []
     created_list = []
     for ip in ips:
         counter += 1.0
@@ -33,6 +34,7 @@ def scan_network(session,ips):
         if devtype.vendor == 'Unknown':                         # Проверяем можно ли его получить его модель
             msg = u'> %s - Невозможно определить тип устройства' % ip
             unknown_list.append(ip)
+            # print msg
             # logging.warning(msg)
         elif devtype.vendor == 'Unaccessable':                  # Это значит не пингуется, скорее всего его просто нет
             msg = u'> %s - не пингуется' % ip
@@ -52,7 +54,7 @@ def scan_network(session,ips):
 
                     if device and _device and (device is not _device): # Cуществуют два разных объекта для одного устройства
                         _device.interfaces.add(iface)             # Перекидываем текущий интерфейс на первый объект
-                        _device.router = True
+                        # _device.router = True
                         _device.devtype = devtype
                         _device.save()
                         device.interfaces.remove(iface)
@@ -72,7 +74,7 @@ def scan_network(session,ips):
                             if _iface: _device.interfaces.add(_iface)
                         _device.details_map['explored'] = '%s' % datetime.datetime.now().today()
                         _device.devtype = devtype
-                        _device.router = True
+                        # _device.router = True
                         _device.save()
                         msg = u'> %s - уже привязан к существующему устройству' % ip
                     elif not device and not _device:              # Объекта с таким адресом не существует, создаем

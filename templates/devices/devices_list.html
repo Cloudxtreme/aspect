@@ -1,6 +1,7 @@
 {% extends "index.html" %}
 
 {% block script %}
+<script src="/media/js/alert.js"></script>
 <script type="text/javascript">
     $(document).ready(function(){
 
@@ -12,10 +13,11 @@
                         $('.progress-bar').removeClass('active');
                         // $('.progress-bar').html(options);
                     }
+                    var list = '';
                     for (var i = 0; i < data.unknown_list.length; i++) {
-                        html = '<li><a href="http://'+ data.unknown_list[i] +'">' + data.unknown_list[i] + '</li>'
-                        $('#unknown').html(html);
+                         list += '<li><a href="http://'+ data.unknown_list[i] +'">' + data.unknown_list[i] + '</li>'
                         }
+                    $('#unknown').html(list);
                 });
         };
 
@@ -37,10 +39,10 @@
                     }
                 }); 
         };        
-        
-        $("#reload").click(function() {
-                        location.reload();
-                    });
+        $('.close').on('closed.bs.alert', function () {
+            alert('ok');
+            location.reload();
+        })   
 
         $("#scan").click(function() {
                         $(this).hide();
@@ -75,15 +77,14 @@
         <h4 class="sub-header">
             <a id="scan" href="#">Сканировать подсеть</a>
         </h4>
-        <div class="alert alert-info alert-dismissible fade in" role="alert" id="progress" >
+        <div class="alert alert-info alert-dismissible fade in" role="alert" id="progress" hidden='true'>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <div class="progress" >
+            <div class="progress">
                 <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
                     0 %
                 </div>
             </div>
             <ul id='unknown'>
-            <li></li>
             </ul>
             <ul id='created'>
             </ul>
