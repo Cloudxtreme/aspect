@@ -204,7 +204,7 @@ class Device(models.Model):
     # Привязать устройство к услуге (Только для физиков)
     def _attach2srv(self):
         if self.ip and self.service_set.all().count()==0:
-            devname = get_ubnt_devname(self.ip.ip)
+            devname = get_dev_name(self.ip.ip)
             if devname:
                from users.models import Service
                contract = re.findall('50\d{6}',devname)
@@ -250,6 +250,12 @@ class Device(models.Model):
         else:
             return self.peer_set.all()
 
+    def _get_location(self):
+        if self.location:
+            return self.location
+        else:
+            return self.service_set.all().first()
+
     # Только сохранить конфиг
     def _save_config(self,text_config):
         filename = '%s.cfg' % uuid.uuid4().hex
@@ -286,6 +292,7 @@ class Device(models.Model):
 
     ip = property(_get_main_ip)
     peers = property(_get_peers)
+    place = property(_get_location)
 
     class Meta:
         verbose_name = u'Устройство'

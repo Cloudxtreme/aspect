@@ -47,11 +47,11 @@
         
         <div class="list-group">
             {% for device in dev_list %}
-            <a href="{% url 'device_view' device.pk %}" class="list-group-item{% if device.devtype.category == 'P' %} voltage{% endif %}" val="{{ device.pk }}">
+            <a href="{% url 'device_view' device.pk %}" class="list-group-item{% if device.devtype.category == 'P' %} voltage{% endif %}{% if device.router %} list-group-item-success{% endif %}" val="{{ device.pk }}">
             <h4 class="list-group-item-heading">{{ device.ip.ip }} - {{ device.devtype }}</h4>
             <p class="list-group-item-text">{{ device.comment|safe }}</p>
             <p class="list-group-item-text" id="voltage{{ device.pk }}"></p>
-            <p class="list-group-item-text">{{ device.location|default_if_none:"<span class='label label-danger'>Местоположение не указано</span>" }}</p>
+            <p class="list-group-item-text">{{ device.place|default_if_none:"<span class='label label-danger'>Местоположение не указано</span>" }}</p>
             </a>
             {% endfor %}
         </div>

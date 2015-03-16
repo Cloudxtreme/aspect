@@ -28,12 +28,12 @@ def get_ipscanner_state(request):
     return HttpResponse(simplejson.dumps({"counter":round(float(counter))}), mimetype='application/javascript' )
 
 def run_ipscanner(request):
-    unknown_list = []
-    created_list = []
     try:
         net_id = request.GET['id'] # Передан номер подсети для сканирования
         ip_list = [ipaddr.ip for ipaddr in Network.objects.get(pk=net_id).ipaddr_set.all()]
-    except: pass
+    except: 
+        unknown_list = []
+        created_list = []
     else:
         unknown_list,created_list = scan_network(request.session,ip_list)
     return HttpResponse(simplejson.dumps({"done":True, 'unknown_list' : unknown_list ,'created_list' : created_list }), mimetype='application/javascript')
@@ -236,9 +236,9 @@ def devtype_list(request, dt_id):
     devtype_list = DevType.objects.all().order_by('vendor')
 
     if dt_id == '0':
-        dev_list = Device.objects.none()
+        dev_list = Device.objects.filter(devtype = DevType.objects.all().order_by('vendor').first())
     else:
-        dev_list = Device.objects.filter(devtype=dt_id)
+        dev_list = Device.objects.filter(devtype=dt_id).order_by('interfaces')
 
     return render_to_response('devices/devtype_list.html', { 
                                 'dev_list' : dev_list, 
