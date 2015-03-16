@@ -11,8 +11,11 @@
                         var options = 'Сканирование завершено';
                         $('.progress-bar').html(options); 
                         $('.progress-bar').removeClass('active');
-                        
                     }
+                    for (var i = 0; i < data.unknown_list.length; i++) {
+                        html = '<li><a href="http://'+ data.unknown_list[i] +'">' + data.unknown_list[i] + '</li>'
+                        $('#unknown').html(html);
+                        }
                 });
         };
 
@@ -30,6 +33,7 @@
                     }
                 }); 
         };        
+        
         $("#reload").click(function() {
                         location.reload();
                     });
@@ -66,10 +70,17 @@
         <h4 class="sub-header">
             <a id="scan" href="#">Сканировать подсеть</a>
         </h4>
-        <div class="progress" id="progress" hidden='true'>
-            <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
-                0 %
-            </div>
+        <div class="alert alert-info alert-dismissible fade in" role="alert" id="progress" hidden='true'>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <div class="progress" >
+                <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                    0 %
+                </div>
+            </div>            
+            <ul id='unknown'>
+            </ul>
+            <ul id='created'>
+            </ul>
         </div>
         <div class="list-group">
             {% for device in dev_list %}

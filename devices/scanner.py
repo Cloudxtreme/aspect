@@ -13,6 +13,8 @@ def scan_network(session,ips):
     # logging.basicConfig(filename='report.log',format='%(levelname)s:%(message)s',level=logging.WARNING)
     amount = len(ips)
     counter = 0
+    unknown_list = [] # 
+    created_list = []
     for ip in ips:
         counter += 1.0
         state =  '%0.2f' % (counter * 100 /amount) 
@@ -30,6 +32,7 @@ def scan_network(session,ips):
 
         if devtype.vendor == 'Unknown':                         # Проверяем можно ли его получить его модель
             msg = u'> %s - Невозможно определить тип устройства' % ip
+            unknown_list.append(ip)
             # logging.warning(msg)
         elif devtype.vendor == 'Unaccessable':                  # Это значит не пингуется, скорее всего его просто нет
             msg = u'> %s - не пингуется' % ip
@@ -47,7 +50,7 @@ def scan_network(session,ips):
                 if ip_list:                                       # У устройства несколько адресов
                     _device = Device.objects.filter(interfaces__ip__ip__in=ip_list).first()
 
-                    if device and _device and (device !=_device): # Cуществуют два разных объекта для одного устройства
+                    if device and _device and (device is not _device): # Cуществуют два разных объекта для одного устройства
                         _device.interfaces.add(iface)             # Перекидываем текущий интерфейс на первый объект
                         _device.router = True
                         _device.devtype = devtype
@@ -57,7 +60,7 @@ def scan_network(session,ips):
                         if device.interfaces.count == 0:
                             device.delete()                       # Удаляем лишний экземпляр
                         msg = u'> %s - перепривязан к другому устройству' % ip
-                    elif device and (not _device or device ==_device): # Объект существует проводим обследование
+                    elif device and (not _device or device is _device): # Объект существует проводим обследование
                         for _iface in [Interface.objects.filter(ip__ip=ipaddr).first() for ipaddr in ip_list]:
                             if _iface: device.interfaces.add(_iface)
                         device.devtype = devtype
@@ -75,6 +78,7 @@ def scan_network(session,ips):
                     elif not device and not _device:              # Объекта с таким адресом не существует, создаем
                         _device = Device(devtype=devtype,mgmt_vlan=iface.ip.net.vlan)
                         _device.save()
+                        created_list.append(ip)
                         for _iface in [Interface.objects.filter(ip__ip=ipaddr).first() for ipaddr in ip_list]:
                             if _iface: _device.interfaces.add(_iface)
                         _device.interfaces.add(iface)
@@ -88,6 +92,7 @@ def scan_network(session,ips):
                     if not device:                                
                         _device = Device(devtype=devtype,mgmt_vlan=iface.ip.net.vlan) # Создаем устройство, т.к. его не было
                         _device.save()
+                        created_list.append(ip)
                         _device.interfaces.add(iface)
                         _device.details_map['explored'] = '%s' % datetime.datetime.now().today()
                         _device.save()
@@ -99,3 +104,4 @@ def scan_network(session,ips):
                         msg = u'> %s - без изменений' % ip
                 # logging.info(msg)
     # print "Время выполнения: {:.3f} sec".format(time.time() - startTime)
+    return unknown_list,created_list
