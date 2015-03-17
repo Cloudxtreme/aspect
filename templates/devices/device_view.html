@@ -99,8 +99,12 @@
 
 {% block pages %}
 <div class="page-header">
-    <h2 class="sub-header">{{ device }} <a href="http://{{ device.ip.ip }}" data-toggle="tooltip" data-placement="left" title="Веб"><span class="glyphicon glyphicon-share-alt"></span></a> 
-    <a href="{% url 'device_edit' device.pk %}"><span class="glyphicon glyphicon-edit"></span></a><div class='pull-right' id='supply'></div></h2>
+    <h2 class="sub-header">{{ device }} 
+        <a href="http://{{ device.ip.ip }}" data-toggle="tooltip" data-placement="left" title="Веб"><span class="glyphicon glyphicon-share-alt"></span></a> 
+        <a href="{% url 'device_edit' device.pk %}"><span class="glyphicon glyphicon-edit"></span></a>
+        <a href="{% url 'device_del' device.pk %}"><span class="glyphicon glyphicon-remove"></span></a>
+        <div class='pull-right' id='supply'></div>
+    </h2>
     <h4>{{ device.mgmt_vlan|default_if_none:"Vlan управления не задан" }}</h4>
     {% if device.location %}
         <h4><a href="{% url 'bs_view' device.location.pk %}">{{ device.location }}</a>

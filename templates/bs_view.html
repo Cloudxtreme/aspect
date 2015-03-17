@@ -128,7 +128,8 @@
             <small>
             {% for peer in device.peers %}
                 <li>
-                {{ peer.ip.ip }} <a href="http://{{ peer.ip.ip }}" data-toggle="tooltip" data-placement="left" title="Веб"><span class="glyphicon glyphicon-share-alt"></span></a> 
+                <a href="{% url 'device_view' peer.pk %}">{{ peer.ip.ip }}</a>
+                <a href="http://{{ peer.ip.ip }}" data-toggle="tooltip" data-placement="left" title="Веб"><span class="glyphicon glyphicon-share-alt"></span></a> 
                 {% if peer.service_set.all.first %}
                     / <a href="{% url 'abonent_info' peer.service_set.all.0.abon.pk %}">{{ peer.service_set.all|first }}</a>
                 {% elif peer.location %}

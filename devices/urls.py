@@ -5,6 +5,7 @@ from django.conf import settings
 urlpatterns = patterns('',
     url(r'^(?P<device_id>\d+)/edit/$','devices.views.device_edit', name='device_edit'),
     url(r'^(?P<device_id>\d+)/view/$','devices.views.device_view', name='device_view'),
+    url(r'^(?P<device_id>\d+)/del/$','devices.views.device_del', name='device_del'),
     url(r'^(?P<device_id>\d+)/save_cfg/$','devices.views.device_save_config', name='device_save_config'),
     url(r'^app/(?P<app_id>\d+)/edit/$','devices.views.app_edit', name='app_edit'),
     url(r'^app/all/$', 'devices.views.apps_all', name='apps_all'),

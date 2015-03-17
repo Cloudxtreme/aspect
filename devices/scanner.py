@@ -7,6 +7,72 @@ import datetime
 import logging
 import time
 
+# Сканирование одного устройства
+def device_explore(ip,nonexisting_only=True):
+    try:
+        device = Device.objects.get(interfaces__ip__ip=ip)
+        if nonexisting_only:
+            return 'Device already existed'
+    except: 
+        device  = None
+    
+    devtype = get_devtype(ip)                               # Проверяем, что за тип устройства
+    if devtype.vendor == 'Unknown':                         # Проверяем можно ли его получить его модель
+        return 'Unable to define model'
+    elif devtype.vendor == 'Unaccessable':                  # Это значит не пингуется, скорее всего его просто нет
+        return 'Unable to ping'
+    else:                                                   # Модель получена
+        try:
+            ipaddr = IPAddr.objects.get(ip=ip)              # Пробуем получить объект IP-адреса
+        except: 
+            return 'Network is not exist'                   # Упс! Объект IP не создан, надо решать вопрос
+        else:
+            iface, created = Interface.objects.get_or_create(ip__ip=ip, defaults={'ip': ipaddr,'for_device':True})
+            if devtype.category == 'R':                     # Для радио заполним мак адрес   
+                iface.mac = get_ubnt_macaddr(ip)            
+                iface.save()   
+
+            ip_list = get_ip_list(ip)
+            msg = ''
+
+            if len(ip_list) > 1:
+                device_list = Device.objects.filter(interfaces__ip__ip__in=ip_list).distinct()
+
+                if len(device_list) == 1:
+                    if not device:
+                        device = device_list.first()
+                elif len(device_list) == 0:
+                    device = Device(devtype=devtype,mgmt_vlan=iface.ip.net.vlan)
+                    device.save()
+                    msg = 'Device created'
+                else:
+                    if device:
+                        another_device = device_list.exclude(pk=device.pk).first()
+                        device.interfaces.remove(iface)
+                        device.save()
+                        another_device.interfaces.add(iface)
+                        another_device.save()
+                        return 'IP moved to exsiting device'
+                    else:
+                        return 'There are two or more devices with same IP list'
+
+                for _iface in [Interface.objects.filter(ip__ip=ipaddr).first() for ipaddr in ip_list]:
+                    if _iface: device.interfaces.add(_iface)
+            else:                                               # У устройства только один адрес
+                if not device:                                
+                    device = Device(devtype=devtype,mgmt_vlan=iface.ip.net.vlan) # Создаем устройство, т.к. его не было
+                    device.save()
+                    device.interfaces.add(iface)
+                    device._get_peer()
+                    device._get_macaddr()
+                    msg = 'Device created'
+                else:                                         
+                    device.devtype = devtype                   # Просто проверяем актуальность
+
+            device.details_map['explored'] = '%s' % datetime.datetime.now().today()
+            device.save()
+    return msg
+
 # Сканирование подсети
 def scan_network(session,ips):
 # def scan_network(ips):

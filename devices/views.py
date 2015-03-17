@@ -19,7 +19,7 @@ from datetime import timedelta
 from django.core import serializers
 from django.utils import simplejson
 from devices.aux import *
-from devices.scanner import scan_network
+from devices.scanner import device_explore
 from multiprocessing import Process, Queue
 import time
 
@@ -28,15 +28,29 @@ def get_ipscanner_state(request):
     return HttpResponse(simplejson.dumps({"counter":round(float(counter))}), mimetype='application/javascript' )
 
 def run_ipscanner(request):
+    unknown_list = []
+    created_list = []           
     try:
         net_id = request.GET['id'] # Передан номер подсети для сканирования
         ip_list = [ipaddr.ip for ipaddr in Network.objects.get(pk=net_id).ipaddr_set.all()]
-    except: 
-        unknown_list = []
-        created_list = []
+    except: pass
     else:
-        unknown_list,created_list = scan_network(request.session,ip_list)
-    return HttpResponse(simplejson.dumps({"done":True, 'unknown_list' : unknown_list ,'created_list' : created_list }), mimetype='application/javascript')
+        amount = len(ip_list)
+        counter = 0
+        result_list = {}
+        for ip in ip_list:
+            counter += 1.0
+            result = device_explore(ip)
+            # print ip, result
+            if result_list.get(result):
+                result_list[result].append(ip)
+            else:
+                result_list[result] = [ip]
+            state =  '%0.2f' % (counter * 100 /amount)
+            request.session['ip_scanner_counter'] = state
+            request.session.save()
+
+    return HttpResponse(simplejson.dumps({"result_list":[result_list],'done':True }), mimetype='application/javascript')
 
 @login_required
 def get_iparp(request):
@@ -262,6 +276,18 @@ def devices_list(request, net_id):
                                 context_instance = RequestContext(request))
 
 @login_required
+def device_del(request, device_id):
+    try:
+        device = Device.objects.get(pk = device_id)
+    except:
+        raise Http404
+    else:
+        device.delete()
+
+    return HttpResponseRedirect(reverse('devices_list', args=['0']))
+
+
+@login_required
 def device_view(request, device_id):
     try:
         device = Device.objects.get(pk = device_id)
@@ -413,10 +439,10 @@ def device_location_choice(request, device_id):
     try:
         device = Device.objects.get(pk=device_id)
         header = 'Выбор узла связи'
-        if device.interfaces.all().count():
-           net_id = device.interfaces.all()[0].ip.net_id
-        else:
-            net_id = 1
+        # if device.interfaces.all().count():
+        #    net_id = device.interfaces.all()[0].ip.net_id
+        # else:
+        #     net_id = 1
         anchortag = '#%s' % device.pk
     except:
         raise Http404
@@ -425,8 +451,8 @@ def device_location_choice(request, device_id):
         form = DeviceChoiceLocationForm(request.POST,instance=device)
         if form.is_valid():
             form.save()
-            url = reverse('devices_list', args=[net_id]) + anchortag
-            breadcrumbs = [({'url':reverse('bs_view', args=[device.location.pk]),'title':'БС'})]
+            # url = reverse('devices_list', args=[net_id]) + anchortag
+            breadcrumbs = [({'url':reverse('bs_view', args=[device.location.pk]),'title':device.location})]
             message = 'Устройство успешно привязано к БС'
             #return HttpResponseRedirect(url)
     else:
@@ -434,7 +460,8 @@ def device_location_choice(request, device_id):
         breadcrumbs = []
         message = ''
 
-    breadcrumbs.append({'url':reverse('devices_list', args=[net_id]) + anchortag,'title':'Устройства'})
+    breadcrumbs.append({'url':reverse('devtype_list', args=[device.devtype.id]),'title':device.devtype})
+    breadcrumbs.append({'url':reverse('devices_list', args=[device.ip.net.id]) + anchortag,'title':device.ip.net})
 
     return render_to_response('generic/generic_edit.html', { 
                                 'header' : header,

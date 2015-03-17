@@ -9,7 +9,6 @@ from django.core.files.base import ContentFile
 import re, uuid, json, datetime,requests
 from requests.auth import HTTPDigestAuth
 
-
 # Возвращаем тип устройства по его ОС
 def get_devtype(ip,ping=True):
     line = """ ping -c 1 -W 1 %s""" % ip
@@ -245,7 +244,6 @@ class Device(models.Model):
 
     def _get_peers(self):
         if self.peer:
-            # return self.peer
             return Device.objects.filter(pk=self.peer.pk)
         else:
             return self.peer_set.all()
@@ -265,25 +263,16 @@ class Device(models.Model):
         config.save()
         return config.pk
 
-    # Получить и сохранить конфиг
-    # def _get_config(self):
-    #     result = False
-    #     if self.devtype.vendor == 'Ubiquiti':
-    #         config, success = get_ubnt_cfg(self.ip.ip)
-    #         if success: 
-    #             result = bool(self._save_config(config))
-    #     return result
-
     # Только для UBNT получение, анализ и сохранение конфига
     def _get_config(self):    
-    # def _refresh_radio(self):
         result = False
         if self.devtype.vendor == 'Ubiquiti':
             config, success = get_ubnt_cfg(self.ip.ip)
+            self._get_peer()
             if success:
                 result = bool(self._save_config(config))
                 if self.devtype.category == settings.DEVTYPE_RADIO:
-                    self.details_map['freqs'] = ', '.join(get_ubnt_freq(config))
+                    self.details_map['freqs'] = get_ubnt_freq(config)
                     self.details_map['width'] = get_ubnt_width(config)
                     self.details_map['mode'] = 'Access Point' if get_ubnt_ap(config) else 'Station'
                     self.save()

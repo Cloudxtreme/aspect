@@ -197,12 +197,14 @@ def get_ubnt_ap(config):
 
 # Определяем частоту антенны
 def get_ubnt_freq(config):
-    frq_list = 'wireless.1.scan_list.channels=(\d{4})(,\d{4})*'
+    frq_list = 'wireless.1.scan_list.channels=(.+)'
     frq_str = 'radio.1.freq=(\d{4})'
     if not re.findall(frq_str,config) and re.findall(frq_list,config):
-        freqs = [x.strip(',') for x in re.findall(frq_list,config)[0] if x]
+        freqs = re.findall(frq_list,config)[0]
+    elif re.findall(frq_str,config):
+        freqs = re.findall(frq_str,config)[0]
     else:
-        freqs = re.findall(frq_str,config)
+        freqs = ''
     return freqs
 
 # Определяем полосу
@@ -216,9 +218,13 @@ def get_ubnt_width(config):
         ('2','2',False):'8',
         ('0','1',False):'20',
     }
+    width = '0';
     clksel_str = 'radio.1.clksel=(\d?)'
     chanbw_str = 'radio.1.chanbw=(\d{1,2})'
-    clksel = re.findall(clksel_str,config)[0]
-    chanbw = re.findall(chanbw_str,config)[0]
-    width = d[chanbw,clksel,bool(re.findall('radio.1.ieee_mode=11naht40',config))]
+    clksel = re.findall(clksel_str,config)
+    chanbw = re.findall(chanbw_str,config)
+    if clksel and chanbw:
+        bw = chanbw[0]
+        sel= clksel[0]
+        width = d[bw,sel,bool(re.findall('radio.1.ieee_mode=11naht40',config))]
     return width
