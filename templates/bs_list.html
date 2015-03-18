@@ -43,7 +43,7 @@
   {% for bs in bs_list %}
   <tr id='{{ bs.number }}' >
     <td><strong>{{ bs.pk }}</strong></td>
-    <td><a href="{% url 'bs_view' bs.pk %}">{{ bs.title }}</a>
+    <td><a href="{% url 'bs_view' bs.pk %}">{% if bs.bs_type == 'CP' %}<span class="glyphicon glyphicon-flash"></span>{% endif %} {{ bs.title }}</a><small></small>
     <small>{{ bs.address }}</small></td>
     <td><small>{{ bs.device_set.count }}</small></td>
     <td>{{ bs.comment }}</td>

@@ -215,7 +215,7 @@ def vlan_edit(request, vlan_id):
 # Список всех БС
 @login_required
 def bs_list(request):
-    bs_list = Location.objects.filter(bs_type='B').order_by('title')
+    bs_list = Location.objects.filter(bs_type__in=['B','CP']).order_by('title')
     return render_to_response('bs_list.html', { 'bs_list': bs_list }, context_instance = RequestContext(request))
 
 # Просмотр БС
