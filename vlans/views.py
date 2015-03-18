@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*- 
 from django.shortcuts import render_to_response, HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Sum
 from django.http import Http404
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
 from vlans.models import Vlan, IPAddr, Network, Location
 from vlans.forms import VlanEditForm, NetworkForm, LocationForm
-from users.models import Segment
+from users.models import Segment, Service
 from django.core import serializers
 from django.utils import simplejson
 from devices.aux import dec2ip,ip2dec
@@ -228,12 +229,19 @@ def bs_view(request,bs_id):
     device_list = Device.objects.filter(location=bs)
     snr = device_list.filter(devtype__category=settings.DEVTYPE_SNR).first()
 
+    srv_list = Service.objects.filter(device__peer__location__pk=bs_id)
+    active_srv_list = srv_list.filter(status=settings.STATUS_ACTIVE)
+
+    profit = srv_list.aggregate(Sum('plan__price'))['plan__price__sum']
+    active_profit = active_srv_list.aggregate(Sum('plan__price'))['plan__price__sum']
     breadcrumbs = [({'url':reverse('bs_list',),'title':'Список БС'})]
 
     return render_to_response('bs_view.html', 
                                 { 'bs': bs, 
                                 'header' : bs.address,
                                 'snr' : snr,
+                                'profit' : profit,
+                                'active_profit' : active_profit,
                                 'breadcrumbs' : breadcrumbs,
                                 'device_list' : device_list }, 
                                 context_instance = RequestContext(request))

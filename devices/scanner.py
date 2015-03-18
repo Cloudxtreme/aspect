@@ -63,7 +63,7 @@ def device_explore(ip,nonexisting_only=True):
                     device = Device(devtype=devtype,mgmt_vlan=iface.ip.net.vlan) # Создаем устройство, т.к. его не было
                     device.save()
                     device.interfaces.add(iface)
-                    device._get_peer()
+                    device.fill_namemac()
                     device._get_macaddr()
                     msg = 'Device created'
                 else:                                         

@@ -3,29 +3,6 @@
 {% block script %}
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>    
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    <script type="text/javascript">
-      google.load("visualization", "1", {packages:["timeline"]});
-      google.setOnLoadCallback(drawChart);
-
-      function drawChart() {
-        var container = document.getElementById('timeline');
-        var chart = new google.visualization.Timeline(container);
-        var dataTable = new google.visualization.DataTable();
-
-        dataTable.addColumn({ type: 'string', id: 'Устройство' });
-        dataTable.addColumn({ type: 'date', id: 'Start' });
-        dataTable.addColumn({ type: 'date', id: 'End' });
-        dataTable.addRows([
-
-        {% for device in device_list %}
-            {% if device.freqs  %}
-            [ '{{ device.ip.ip }}', new Date({{ device.freqs }}-{{ device.width }}/2, 1, 1), new Date({{ device.freqs }}+{{ device.width }}/2, 1, 1) ],
-          {% endif %}
-        {% endfor %}
-          ]);
-        chart.draw(dataTable);
-      }
-    </script>
     {% if snr %}
     <script type="text/javascript">
         function get_supply_info()  
@@ -82,14 +59,19 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-<div class="page-header">
-    <h2 class="sub-header">{{ bs.title }}
-    <a href="{% url 'bs_edit' bs.pk %}"><span class="glyphicon glyphicon-edit"></span></a><p></h2>
-    <h3>{{ bs.address }} <div class='pull-right' id='supply'></div></h3>
-    <h4>{{ bs.geolocation }}</h4>
-    {{ bs.comment }}
+<div class="row">
+    <div class="col-md-6">
+        <h2>{{ bs.title }} <a href="{% url 'bs_edit' bs.pk %}"> <span class="glyphicon glyphicon-edit"></span></a></h2>
+        <h3>{{ bs.address }}</h3>
+        <h4>{{ bs.geolocation }}</h4>
+        <h4>{{ bs.comment }}</h4>
+        <p id='supply'></p>     
+    </div>
+    <div class="col-md-6">
+        <h4 class='pull-right'>Доход с БС <small>(активный/всего)</small>: 
+        {{ active_profit|default_if_none:'0' }} руб. / {{profit|default_if_none:'0'}} руб.</h4>
+    </div>
 </div>
-
 
 {% if device_list %}
     <table class="table table-striped table-condensed">
@@ -105,6 +87,7 @@
     <tr id='{{ device.pk }}' >
         <td><a href="{% url 'device_view' device.pk %}">{{ device }}</a>
         <small><p>{{ device.comment|safe }}</p>
+               <p>{{ device.details_map.devname|default_if_none:'' }}</p>
         {% if device.devtype.category == 'R' %}
         <a id='#btn_azimuth{{ device.pk }}' 
                         onclick="$.get('/devices/get_azimuth_info/?id={{ device.pk }}', 
@@ -135,8 +118,8 @@
                 {% elif peer.location %}
                     / <a href="{% url 'bs_view' peer.location.pk %}">{{ peer.location }}</a>
                 {% else %}
-                    / <a href="{% url 'device_location_edit' peer.id %}">Создать БС <span class="glyphicon glyphicon-edit"></span></a> <a href="{% url 'device_location_choice' peer.id %}">Выбрать БС <span class="glyphicon glyphicon-flag"></span></a>
-                    / <a href="">Привязать к услуге <span class="glyphicon glyphicon-user"></span></a>
+                    / <a href="{% url 'device_location_edit' peer.id %}">Создать БС <span class="glyphicon glyphicon-edit"></span></a> <a href="{% url 'device_location_choice' peer.id 0 %}">Выбрать БС <span class="glyphicon glyphicon-flag"></span></a>
+                    / <a href="{% url 'device_location_choice' peer.id 1 %}">Привязать к услуге <span class="glyphicon glyphicon-user"></span></a>
                 {% endif %}
                 </li>
             {% endfor %}

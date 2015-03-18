@@ -438,28 +438,37 @@ def device_iface_edit(request, device_id, iface_id):
                                  context_instance = RequestContext(request))
 
 @login_required
-def device_location_choice(request, device_id):
+def device_location_drop(request, device_id):
     try:
         device = Device.objects.get(pk=device_id)
-        header = 'Выбор узла связи'
-        # if device.interfaces.all().count():
-        #    net_id = device.interfaces.all()[0].ip.net_id
-        # else:
-        #     net_id = 1
+    except:
+        raise Http404
+
+    device.location = None
+    device.save()
+    return HttpResponseRedirect(reverse('device_view', args=[device.pk]))
+
+@login_required
+def device_location_choice(request, device_id, bs):
+    try:
+        device = Device.objects.get(pk=device_id)
+        header = 'Выбор узла связи' if bs=='0' else 'Выбор услуги'
         anchortag = '#%s' % device.pk
     except:
         raise Http404
 
     if request.method == 'POST':
-        form = DeviceChoiceLocationForm(request.POST,instance=device)
+        form = DeviceChoiceLocationForm(request.POST,instance=device) if bs=='0' else DeviceChoiceServiceForm(request.POST,instance=device)
         if form.is_valid():
+            if not bs=='0':
+                service = form.cleaned_data['service']
+                service.device = device
+                service.save()
             form.save()
-            # url = reverse('devices_list', args=[net_id]) + anchortag
-            breadcrumbs = [({'url':reverse('bs_view', args=[device.location.pk]),'title':device.location})]
-            message = 'Устройство успешно привязано к БС'
-            #return HttpResponseRedirect(url)
+            breadcrumbs = [({'url':reverse('bs_view', args=[device.location.pk]),'title':device.location})] if bs=='0' else []
+            message = 'Устройство успешно привязано к БС' if bs=='0' else 'Устройство успешно привязано к услуге'
     else:
-        form = DeviceChoiceLocationForm(instance=device)
+        form = DeviceChoiceLocationForm(instance=device) if bs=='0' else DeviceChoiceServiceForm(instance=device)
         breadcrumbs = []
         message = ''
 

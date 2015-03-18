@@ -181,15 +181,17 @@ class Device(models.Model):
                 return voltage,supply
 
     # Заполнить связи устройств
-    def _get_peer(self):
+    def fill_namemac(self):
         if self.ip:
-            mac = get_ubnt_apmac(self.ip.ip)
-            if mac:
-                self.ap = False
-                peer = Device.objects.filter(interfaces__mac=mac).first()
-                if peer:
-                    self.peer = peer
-                    self.save()
+            if self.devtype.category == 'R': # Делаем только для радио
+                mac = get_ubnt_apmac(self.ip.ip)
+                self.details_map['devname'] = get_dev_name(self.ip.ip)
+                if mac:
+                    self.ap = False
+                    peer = Device.objects.filter(interfaces__mac=mac).first()
+                    if peer:
+                        self.peer = peer
+                self.save()
 
     # Получить МАС для UBNT
     def _get_macaddr(self):
@@ -271,7 +273,7 @@ class Device(models.Model):
             if success:
                 result = bool(self._save_config(config))
                 if self.devtype.category == settings.DEVTYPE_RADIO:
-                    self._get_peer()
+                    self.fill_namemac()
                     self.details_map['freqs'] = get_ubnt_freq(config)
                     self.details_map['width'] = get_ubnt_width(config)
                     self.details_map['mode'] = 'Access Point' if get_ubnt_ap(config) else 'Station'
