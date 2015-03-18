@@ -86,9 +86,10 @@ def get_azimuth_info(request):
             distance_list = []
             for peer in device.peers:
                 if peer.location:
-                    azimuth, distance = azimuth_distance(device.location.geolocation, peer.location.geolocation)
-                    azimuth_list.append(azimuth)
-                    distance_list.append(distance)
+                    if peer.location.geolocation:
+                        azimuth, distance = azimuth_distance(device.location.geolocation, peer.location.geolocation)
+                        azimuth_list.append(azimuth)
+                        distance_list.append(distance)
 
             data = {}
             if azimuth_list:
