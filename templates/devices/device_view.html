@@ -122,6 +122,8 @@
         <span class="glyphicon glyphicon-edit"></span></a>
         <a href="{% url 'device_location_choice' device.id 0 %}">Выбрать
         <span class="glyphicon glyphicon-flag"></span></a>
+        <a href="{% url 'device_location_choice' device.id 1 %}">Привязать к услуге 
+        <span class="glyphicon glyphicon-user"></span></a>
      {% endif %}
     <h4>{{ device.comment|safe }}</h4>
     <h4>{% if device.router %}<span class="label label-danger">Router</span>{% endif %}</h4>
