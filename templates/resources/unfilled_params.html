@@ -1,0 +1,35 @@
+{% extends "index.html" %}
+
+{% block script %}
+{% endblock %}
+{% block main %} 
+<div class="page-header">
+    <h2 class="sub-header">Незаполненые технические параметры</h2>
+</div>
+<div class="row">
+    <div class="col-md-3">
+        <ul class="nav nav-pills nav-stacked">
+            {% for item_id,item_title in menu.items %}
+                {% url 'unfilled_params' item_id as target_url %}
+                <li {% if request.META.PATH_INFO ==  target_url%} class="active" {% endif %}>
+                    <a href="{{ target_url }}">{{ item_title }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col-md-9">
+        <div class="page-header">
+            <h3 class="sub-header">{{ header }}: {{ item_list|length }}</h3>
+        </div>
+        
+        <div class="list-group">
+            {% for item in item_list %}
+            <a href="{{ item.url }}" class="list-group-item">
+            <h4 class="list-group-item-heading">{{ item.title }}</h4>
+            <p class="list-group-item-text">{{ item.comment|safe }}</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

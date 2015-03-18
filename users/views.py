@@ -33,10 +33,8 @@ from vlans.models import Location
 from contacts.models import Contact
 from devices.aux import dec2ip,ip2dec
 from devices.models import Device
-import datetime
-import MySQLdb
-import requests
-import re
+import datetime, MySQLdb, requests, re
+
 
 def zapret(request):
     return render_to_response('zapret.html')
@@ -95,26 +93,44 @@ def feeds_ip_by_seg(request):
     if request.GET['id'] == '0':
         json_subcat = serializers.serialize("json", IPAddr.objects.none())
     else:
-        # data = IPAddr.objects.filter(net__segment__pk=request.GET['id'])
         data = IPAddr.objects.filter(net__segment__pk=request.GET['id']).filter(net__net_type='UN').filter(Q(interface=None))|IPAddr.objects.filter(service__pk=request.GET['id'])
         json_subcat = serializers.serialize("json", data)
     return HttpResponse(json_subcat, mimetype="application/javascript")
 
-@login_required
-def service_analysis(request):
-    internet_services = Service.objects.filter(tos__pk=1,ifaces=None,status__in=['A','N'])
-    external_channel = Service.objects.filter(tos__pk=3,vlan_list=None,status__in=['A','N'])
-    internal_channel = Service.objects.filter(tos__pk=5)
-    # internet_pptp = Service.objects.filter(tos__pk=4)|Service.objects.filter(tos__pk=4,ip=None)
 
-    return render_to_response('service/analysis.html', {
-                                'internet_services': internet_services,
-                                'external_channel': external_channel,
-                                'internal_channel' : internal_channel,
-                                # 'internet_pptp' : internet_pptp,
-                                },
-                                context_instance = RequestContext(request)
-                                )  
+@login_required
+def unfilled_params(request,param):
+    def zero():
+        return []
+
+    def dev_wo_location():
+        result = []
+        for device in Device.objects.filter(location=None):
+            result.append({'url':reverse('device_view', args=[device.pk]),'title': device.__unicode__() })
+        return result
+
+    def srv_wo_location():
+        result = []
+        for service in Service.objects.filter(location__geolocation=None):
+            result.append({'url':reverse('abonent_services', args=[service.abon.pk]),'title': service.__unicode__() }) 
+        return result
+
+    def srv_wo_iface():
+        result = []
+        for service in Service.objects.filter(tos__pk=1,ifaces=None,status__in=['A','N']):
+            result.append({'url':reverse('abonent_services', args=[service.abon.pk]),'title': service.__unicode__() }) 
+        return result     
+
+    switch = {'1': dev_wo_location, '2': srv_wo_location, '3':srv_wo_iface, '0':zero }
+    menu = {'1': 'Устройства без объекта','2':'Услуги без объекта','3':'Услуги без IP-адреса'}
+    item_list = switch[param]()
+    header = menu.get(param)
+
+    return render_to_response('resources/unfilled_params.html', {
+                                'menu' : menu,
+                                'header' : header,
+                                'item_list' : item_list,
+                                },context_instance = RequestContext(request))
 
 @login_required
 def abonent_add(request,abonent_id=0):

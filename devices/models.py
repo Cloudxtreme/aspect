@@ -268,10 +268,10 @@ class Device(models.Model):
         result = False
         if self.devtype.vendor == 'Ubiquiti':
             config, success = get_ubnt_cfg(self.ip.ip)
-            self._get_peer()
             if success:
                 result = bool(self._save_config(config))
                 if self.devtype.category == settings.DEVTYPE_RADIO:
+                    self._get_peer()
                     self.details_map['freqs'] = get_ubnt_freq(config)
                     self.details_map['width'] = get_ubnt_width(config)
                     self.details_map['mode'] = 'Access Point' if get_ubnt_ap(config) else 'Station'

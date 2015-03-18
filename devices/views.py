@@ -137,8 +137,7 @@ def get_clients(request):
         device = Device.objects.get(pk=request.GET['id'])
         ip = device.ip.ip
         peer_list = device.peers
-    except:
-        pass
+    except:  pass
     else:
         data = []
         for mac,signal in get_ubnt_clients(ip):
@@ -245,6 +244,7 @@ def set_state(request):
     else:
         return HttpResponse('Device found')
 
+# Список устройств по типам
 @login_required
 def devtype_list(request, dt_id):
     devtype_list = DevType.objects.all().order_by('vendor')
@@ -259,6 +259,7 @@ def devtype_list(request, dt_id):
                                 'devtype_list' : devtype_list }, 
                                 context_instance = RequestContext(request))
 
+# Список устройств по подсетям
 @login_required
 def devices_list(request, net_id):
     parent_nets = Network.objects.filter(net_type='EN')
@@ -267,14 +268,13 @@ def devices_list(request, net_id):
     elif net_id=='1':
         dev_list = Device.objects.filter(interfaces=None)
     else:
-        # net = Network.objects.get(pk=net_id)
         dev_list = Device.objects.filter(interfaces__ip__net__pk=net_id)
 
     return render_to_response('devices/devices_list.html', { 
                                 'dev_list' : dev_list, 
                                 'parent_nets' : parent_nets }, 
                                 context_instance = RequestContext(request))
-
+# Удаление устройства
 @login_required
 def device_del(request, device_id):
     try:
@@ -286,7 +286,7 @@ def device_del(request, device_id):
 
     return HttpResponseRedirect(reverse('devices_list', args=['0']))
 
-
+# Просмотр устройства
 @login_required
 def device_view(request, device_id):
     try:
@@ -303,6 +303,7 @@ def device_view(request, device_id):
                                 context_instance = RequestContext(request)
                                 )
 
+# Сохранение конфига для устройства
 @login_required
 def device_save_config(request, device_id):
     try:
@@ -314,6 +315,7 @@ def device_save_config(request, device_id):
     return HttpResponseRedirect(reverse('device_view', args=[device.pk]))
                                            
 
+# Редактирование устройства
 @login_required
 def device_edit(request, device_id):
     try:
@@ -434,6 +436,7 @@ def device_iface_edit(request, device_id, iface_id):
                                 'form': form, 
                                 'extend': 'index.html',},
                                  context_instance = RequestContext(request))
+
 @login_required
 def device_location_choice(request, device_id):
     try:
@@ -462,6 +465,7 @@ def device_location_choice(request, device_id):
 
     breadcrumbs.append({'url':reverse('devtype_list', args=[device.devtype.id]),'title':device.devtype})
     breadcrumbs.append({'url':reverse('devices_list', args=[device.ip.net.id]) + anchortag,'title':device.ip.net})
+    breadcrumbs.append({'url':reverse('device_view', args=[device.id]),'title':'Просмотр'})
 
     return render_to_response('generic/generic_edit.html', { 
                                 'header' : header,

@@ -4,6 +4,7 @@
 <script src="/media/js/alert.js"></script>
 <script type="text/javascript">
     $(document).ready(function(){
+        jQuery.fn.exists = function(){return this.length>0;}
 
         function start_scanner(net_id)  
         {
@@ -15,8 +16,8 @@
                     }
                     var list = '';
                     for (var i = 0; i < data.result_list.length; i++) {
-                         list += '<li> Невозможно определить модель: '+ data.result_list[i]['Unable to define model'] + '</li>'
-                         list += '<li> Созданы устройства: '+ data.result_list[i]['Device created'] + '</li>'
+                        list += '<li>Невозможно определить модель: '+ data.result_list[i]['Unable to define model'] + '</li>'
+                        list += '<li>Созданы устройства: '+ data.result_list[i]['Device created'] + '</li>'
                         }
                     $('#unknown').html(list);
                 });
