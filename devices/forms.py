@@ -20,7 +20,7 @@ class AppEditForm(forms.ModelForm):
             }
 
 class DeviceChoiceLocationForm(forms.ModelForm):
-    location = forms.ModelChoiceField(queryset=Location.objects.filter(bs_type='B'),widget=forms.Select(attrs={'class':'form-control'}), label = u'Местоположение')
+    location = forms.ModelChoiceField(queryset=Location.objects.filter(bs_type__in=['B','CP']),widget=forms.Select(attrs={'class':'form-control'}), label = u'Местоположение')
     
     class Meta:
         model = Device
