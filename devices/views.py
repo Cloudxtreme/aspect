@@ -464,6 +464,13 @@ def device_location_choice(request, device_id, bs):
                 service = form.cleaned_data['service']
                 service.device = device
                 service.save()
+                if not service.location:
+                    location = Location(bs_type='С',title=service.__unicode__())
+                    location.save()
+                    service.location = location
+                    service.save()
+                device.location = service.location
+                device.save()
             form.save()
             breadcrumbs = [({'url':reverse('bs_view', args=[device.location.pk]),'title':device.location})] if bs=='0' else []
             message = 'Устройство успешно привязано к БС' if bs=='0' else 'Устройство успешно привязано к услуге'

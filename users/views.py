@@ -520,6 +520,11 @@ def service_device_choice(request, service_id):
         if form.is_valid():
             form.save()
             device = service.device
+            if not service.location:
+                location = Location(bs_type='С',title=service.__unicode__())
+                location.save()
+                service.location = location
+                service.save()
             device.location = service.location
             device.save()
             return HttpResponseRedirect(reverse('abonent_services', args=[abonent.id]))
