@@ -38,8 +38,8 @@
             <th class="col-md-1">Начало</th>
             <th>Тариф</th>
             <th class="col-md-1">Скорость</th>
-            <th class="col-md-3">Параметры</th>
-            <th class="col-md-1">Оборудование</th>
+            <th class="col-md-2">Параметры</th>
+            <th class="col-md-2">Оборудование</th>
             <th>Статус</th>
           </tr>
         </thead>
@@ -54,6 +54,7 @@
                 <span class="glyphicon glyphicon-edit"></span></a>
                 <a href="{% url 'service_location_choice' service.id %}" data-toggle="tooltip" data-placement="left" title="Выбрать местоположение">
                 <span class="glyphicon glyphicon-folder-open"></span></a>
+                <a href="{% url 'service_location_release' service.id %}" data-toggle="tooltip" data-placement="left" title="Отвязать"><span class="glyphicon glyphicon-remove"></span></a>
                 <p><small>{{ service.location.comment }}</small></p>
             </td>
             <td>{{ service.datestart|date:'Y-M-d' }}</td>
@@ -103,11 +104,11 @@
             </td>
             <td>
                 {% if service.device %}
-                    {{ service.device }}
+                    <a href="{% url 'device_view' service.device.id %}">{{ service.device }}</a>
                     <a href="{% url 'service_device_release' service.id %}" data-toggle="tooltip" data-placement="left" title="Освободить устройство"><span class="glyphicon glyphicon-remove"></span></a>                    
                 {% endif %}
                 <a href="{% url 'service_device_choice' service.id %}" data-toggle="tooltip" data-placement="left" 
-                title="Выбрать устройство"><span class="glyphicon glyphicon-edit"></span></a>
+                title="Выбрать устройство"><span class="glyphicon glyphicon-folder-open"></span></a>
             </td>
             <td>
                 {% ifequal service.adm_status '0' %}

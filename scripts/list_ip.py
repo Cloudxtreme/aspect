@@ -26,7 +26,7 @@ if arg:
             pipes_script.write(line) 
 
 
-for srv in Service.objects.filter(status='A').exclude(adm_status='2')|Service.objects.filter(adm_status='1'):
+for srv in Service.objects_active.all().exclude(adm_status='2')|Service.objects.filter(adm_status='1'):
     for iface in srv.ifaces.all():
         if arg:
             pipe_id = srv.plan.speed.id if not srv.speed else srv.speed.id

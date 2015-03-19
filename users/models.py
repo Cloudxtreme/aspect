@@ -271,6 +271,14 @@ def get_1stdaynextmonth(sourcedate,months):
     day = min(sourcedate.day,calendar.monthrange(year,month)[1])
     return datetime.date(year,month,1)
 
+class ServiceEnabledManager(models.Manager):
+    def get_queryset(self):
+        return super(ServiceEnabledManager, self).get_queryset().filter(status__in=[settings.STATUS_ACTIVE,settings.STATUS_OUT_OF_BALANCE])
+
+class ServiceActiveManager(models.Manager):
+    def get_queryset(self):
+        return super(ServiceActiveManager, self).get_queryset().filter(status=settings.STATUS_ACTIVE)
+
 class Service(models.Model):
     abon = models.ForeignKey(Abonent,verbose_name=u'Абонент')
     segment = models.ForeignKey(Segment,verbose_name=u'Сегмент')
@@ -286,7 +294,9 @@ class Service(models.Model):
     datefinish = models.DateField(auto_now=False, auto_now_add=False, blank=True, null= True, verbose_name=u'Дата окончания')
     device = models.ForeignKey('devices.Device', verbose_name=u'Абонентское устройство', blank=True, null= True)
     # bs_device = models.ForeignKey(Device, related_name='bs_device', verbose_name=u'Абонентская БС', blank=True, null= True)
-    # objects = models.Manager()
+    objects = models.Manager()
+    objects_active = ServiceActiveManager()
+    objects_enabled = ServiceEnabledManager()
 
     def set_changestatus_in_plan(self, new_status, date=datetime.datetime.now()):
         ssc = ServiceStatusChanges(

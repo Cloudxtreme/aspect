@@ -229,7 +229,7 @@ def bs_view(request,bs_id):
     device_list = Device.objects.filter(location=bs)
     snr = device_list.filter(devtype__category=settings.DEVTYPE_SNR).first()
 
-    srv_list = Service.objects.filter(device__peer__location__pk=bs_id)
+    srv_list = Service.objects.filter(device__peer__location__pk=bs_id)|Service.objects.filter(device__location__pk=bs_id)
     active_srv_list = srv_list.filter(status=settings.STATUS_ACTIVE)
 
     profit = srv_list.aggregate(Sum('plan__price'))['plan__price__sum']

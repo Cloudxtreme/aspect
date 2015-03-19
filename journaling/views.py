@@ -9,8 +9,8 @@ from pays.models import Payment
 @login_required	
 def report_plans(request):
 	data = Service.objects.values('plan__speed__speed_in').filter(plan__tos__id=1).order_by('plan__speed__speed_in').annotate(Count('plan__speed__speed_in'))
-	total_band = Service.objects.filter(status=settings.STATUS_ACTIVE).aggregate(Sum('plan__speed__speed_in'))['plan__speed__speed_in__sum'] / 1024
-	service_count = Service.objects.filter(status=settings.STATUS_ACTIVE).count()
+	total_band = Service.objects_active.all().aggregate(Sum('plan__speed__speed_in'))['plan__speed__speed_in__sum'] / 1024
+	service_count =  Service.objects_active.all().count()
 	return render_to_response('stat/report_plans.html', { 'data' : data, 'total_band': total_band, 'service_count' : service_count }, context_instance = RequestContext(request))
 
 @login_required	

@@ -21,7 +21,7 @@ this_month = today.strftime('%B %Y')
 last_month = yesterday.strftime('%B %Y')
 descr = 'Абонентская плата за '
 
-for item in Service.objects.filter(status='A')|Service.objects.filter(status='N',abon__is_credit='O'):
+for item in Service.objects_active.all()|Service.objects.filter(status='N',abon__is_credit='O'):
     # Проверяем тип оплаты, если предоплата, то списываем за следующий месяц, если постоплата, то за предыдущий
     summ = item.plan.price
 

@@ -116,6 +116,12 @@
                 {% include "includes/device_location_mgmt.html" with device=peer request=request only %}
                 </li>
             {% endfor %}
+            {% for service in device.service_set.all %}
+                <li>
+                    <a href="{% url 'abonent_services' service.abon.pk %}">{{ service }}</a>
+                    <a href="{% url 'service_device_release' service.id %}" data-toggle="tooltip" data-placement="left" title="Освободить"><span class="glyphicon glyphicon-remove"></span></a>
+                </li>
+            {% endfor %}
             </small>
         </ul>
         </td>

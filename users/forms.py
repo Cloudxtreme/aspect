@@ -161,23 +161,28 @@ class PipeEditForm(forms.ModelForm):
 
 class ServiceLocationForm(forms.ModelForm):
     location = forms.ModelChoiceField(
-            queryset=Location.objects.all(),
+            queryset=Location.objects.filter(bs_type='CP'),
             widget=forms.Select(attrs={'class':'form-control'}), 
             label = u'Местоположение')
-    
+
     class Meta:
         model = Service
         fields = ['location']
 
 class ServiceDeviceForm(forms.ModelForm):
     device = forms.ModelChoiceField(
-            queryset=Device.objects.filter(location=None,service=None),
+            queryset=Device.objects.all(),
             widget=forms.Select(attrs={'class':'form-control'}), 
             label = u'Устройство')
-    
+
+    change_location = forms.BooleanField(
+            required=False,
+            widget=forms.CheckboxInput(attrs={'class':'form-control'}),
+            label = u'Это персональное конечное устройство')
+
     class Meta:
         model = Service
-        fields = ['device']
+        fields = ['device','change_location']
 
 class ServiceSpeedForm(GenericServiceForm):
     class Meta(GenericServiceForm.Meta):

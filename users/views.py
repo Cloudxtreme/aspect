@@ -111,18 +111,24 @@ def unfilled_params(request,param):
 
     def srv_wo_location():
         result = []
-        for service in Service.objects.filter(location__geolocation=None):
+        for service in Service.objects_enabled.filter(location__geolocation=None):
             result.append({'url':reverse('abonent_services', args=[service.abon.pk]),'title': service.__unicode__() }) 
         return result
 
     def srv_wo_iface():
         result = []
-        for service in Service.objects.filter(tos__pk=1,ifaces=None,status__in=['A','N']):
+        for service in Service.objects_enabled.filter(tos__pk=1,ifaces=None):
             result.append({'url':reverse('abonent_services', args=[service.abon.pk]),'title': service.__unicode__() }) 
-        return result     
+        return result    
 
-    switch = {'1': dev_wo_location, '2': srv_wo_location, '3':srv_wo_iface, '0':zero }
-    menu = {'1': 'Устройства без объекта','2':'Услуги без объекта','3':'Услуги без IP-адреса'}
+    def srv_wo_device():
+        result = []
+        for service in Service.objects_enabled.filter(device=None):
+            result.append({'url':reverse('abonent_services', args=[service.abon.pk]),'title': service.__unicode__() }) 
+        return result   
+
+    switch = {'1': dev_wo_location, '2': srv_wo_location, '3':srv_wo_iface, '4':srv_wo_device, '0':zero }
+    menu = {'1': 'Устройства без объекта','2':'Услуги без объекта','3':'Услуги без IP-адреса','4':'Услуги без устройства'}
     item_list = switch[param]()
     header = menu.get(param)
 
@@ -494,17 +500,29 @@ def service_location_choice(request, service_id):
 def service_device_release(request, service_id):
     try:
         service = Service.objects.get(pk=service_id)
-        abonent = service.abon
         device = service.device
     except:
         raise Http404
     else:
-        device.location = None
-        device.save()
+        if device.service_set.all().count()==1:
+            device.location = None
+            device.save()
         service.device = None
         service.save()
 
-    return HttpResponseRedirect(reverse('abonent_services', args=[abonent.id]))
+    return HttpResponseRedirect(reverse('abonent_services', args=[service.abon.id]))
+
+def service_location_release(request, service_id):
+    try:
+        service = Service.objects.get(pk=service_id)
+        location = service.location
+    except:
+        raise Http404
+    else:
+        service.location = None
+        service.save()
+
+    return HttpResponseRedirect(reverse('abonent_services', args=[service.abon.id]))
 
 # Выбор устройства услуги
 def service_device_choice(request, service_id):
@@ -525,15 +543,17 @@ def service_device_choice(request, service_id):
                 location.save()
                 service.location = location
                 service.save()
-            device.location = service.location
-            device.save()
+            if form.cleaned_data['change_location']:
+                device.location = service.location
+                device.save()
             return HttpResponseRedirect(reverse('abonent_services', args=[abonent.id]))
     else:
         form = ServiceDeviceForm(instance=service)
+        form.fields['device'].queryset=Device.objects.filter(devtype__category='R',location=None)|Device.objects.filter(devtype__category='S',location__bs_type='CP')
         if service.device:
-            form.fields['device'].queryset=Device.objects.filter(location=None)|Device.objects.filter(pk=service.device.pk)
-        else:
-            form.fields['device'].queryset=Device.objects.filter(location=None)
+            form.fields['device'].queryset = form.fields['device'].queryset|Device.objects.filter(pk=service.device.pk)
+        # else:
+        #     form.fields['device'].queryset=Device.objects.filter(location=None)
 
     breadcrumbs = [({'url':reverse('abonent_services', args=[abonent.id]),'title':'Услуги абонента'})]
 
