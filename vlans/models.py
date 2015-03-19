@@ -36,12 +36,24 @@ class Vlan(models.Model):
     def __unicode__(self):
         return "%s - %s" % (self.number, self.description)
 
+class Rent(models.Model):
+    title = models.CharField(u'Название',max_length=100)
+    cost = models.FloatField(u'Арендная плата',default=0)
+    
+    class Meta:
+        verbose_name = u'Тариф аренды'
+        verbose_name_plural = u'Тарифы аренды'
+
+    def __unicode__(self):
+        return u"%s - %s руб/мес" % (self.title, self.cost)
+
 class Location(models.Model):
     title = models.CharField(u'Название', blank=True, null= True, max_length=100)
     address = models.CharField(u'Адрес', blank=True, null= True, max_length=300)
     bs_type = models.CharField(u'Тип', max_length = 2, 
                                choices=TYPE_OF_OBJECTS)
     comment  = models.CharField(u'Комментарий', max_length=300, blank=True, null=True, default='')
+    rent = models.ForeignKey(Rent, null=True, blank=True)
     geolocation = LocationField(u'Карта', max_length=100, blank=True, null=True)
     # geolocation = models.CharField(u'Карта', max_length=100, blank=True, null=True) # Заглушка для South
    

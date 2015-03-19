@@ -68,8 +68,16 @@
         <p id='supply'></p>     
     </div>
     <div class="col-md-6">
-        <h4 class='pull-right'>Доход с БС <small>(активный/всего)</small>: 
-        {{ active_profit|default_if_none:'0' }} руб. / {{profit|default_if_none:'0'}} руб.</h4>
+        <ul class="list-group">
+            <li class="list-group-item list-group-item-success">
+                <h4 class="list-group-item-heading">Доход с БС <small>(активный/общий)</small></h4>
+                <p class="list-group-item-text">{{ active_profit|default_if_none:'0' }} руб./ {{ profit|default_if_none:'0' }} руб.</p>
+            </li>
+            <li class="list-group-item list-group-item-danger">
+                <h4 class="list-group-item-heading">Расходы на аренду БС</h4>
+                <p class="list-group-item-text">{{ bs.rent.cost }} руб.</p>
+            </li>
+        </ul>
     </div>
 </div>
 
