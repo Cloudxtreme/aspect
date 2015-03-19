@@ -46,7 +46,7 @@ def importosmp1cdb(cursor,clients,period):
                 payment.save()
             # except IntegrityError as e:
             except:
-                msg =  '%s Дублированный платеж %s' % payment
+                msg =  '%s Дублированный платеж' % payment
                 syslog.syslog(syslog.LOG_ERR, msg)
             else:
                 msg = '%s Платеж зачислен' % payment
