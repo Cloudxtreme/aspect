@@ -231,19 +231,6 @@ class Device(models.Model):
         else:
             return None
 
-    # Заполняем параметры азимута и дистанции
-    # def _refresh_azimuth(self):
-    #     if self.location:
-    #         azimuth_list =[]
-    #         distance_list = []
-    #         for peer in self.peers:
-    #             if peer.location:
-    #                 azimuth,distance = azimuth_distance(self.location.geolocation, peer.location.geolocation)
-    #                 azimuth_list.append(azimuth)
-    #                 distance_list.append(distance)
-    #         self.azimuth, self.distance = sum(azimuth_list)/len(azimuth_list), max(distance_list)
-    #         self.save()
-
     def _get_peers(self):
         if self.peer:
             return Device.objects.filter(pk=self.peer.pk)

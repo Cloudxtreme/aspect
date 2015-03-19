@@ -387,7 +387,8 @@ class Service(models.Model):
         verbose_name_plural = u'Услуги'
 
     def __unicode__(self):
-        return "[%s] %s : %s - %s" % (self.pk, self.abon.title, self.plan.title, self.get_status_display())
+        title = self.abon.title if self.abon.utype == 'U' else self.abon.contract
+        return "[%s] %s : %s - %s" % (self.pk, title, self.plan.title, self.get_status_display())
 
 class ServiceSuspension(models.Model):
     service = models.ForeignKey(Service, verbose_name=u'Услуга')

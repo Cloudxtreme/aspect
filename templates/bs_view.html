@@ -113,14 +113,7 @@
                 <li>
                 <a href="{% url 'device_view' peer.pk %}">{{ peer.ip.ip }}</a>
                 <a href="http://{{ peer.ip.ip }}" data-toggle="tooltip" data-placement="left" title="Веб"><span class="glyphicon glyphicon-share-alt"></span></a> 
-                {% if peer.service_set.all.first %}
-                    / <a href="{% url 'abonent_info' peer.service_set.all.0.abon.pk %}">{{ peer.service_set.all|first }}</a>
-                {% elif peer.location %}
-                    / <a href="{% url 'bs_view' peer.location.pk %}">{{ peer.location }}</a>
-                {% else %}
-                    / <a href="{% url 'device_location_edit' peer.id %}">Создать БС <span class="glyphicon glyphicon-edit"></span></a> <a href="{% url 'device_location_choice' peer.id 0 %}">Выбрать БС <span class="glyphicon glyphicon-flag"></span></a>
-                    / <a href="{% url 'device_location_choice' peer.id 1 %}">Привязать к услуге <span class="glyphicon glyphicon-user"></span></a>
-                {% endif %}
+                {% include "includes/device_location_mgmt.html" with device=peer request=request only %}
                 </li>
             {% endfor %}
             </small>
@@ -132,66 +125,65 @@
     </table>
 {% endif %}
 
-{# <div id="timeline" style="width: 100%; height: 300px;"></div> #}
-    <script type="text/javascript">
-    //<![CDATA[
-        var map_geolocation;
+<script type="text/javascript">
+//<![CDATA[
+    var map_geolocation;
+    
+    function savePosition_geolocation(point)
+    {
+        var input = document.getElementById("id_geolocation");
+        input.value = point.lat().toFixed(6) + "," + point.lng().toFixed(6);
+        map_geolocation.panTo(point);
+    }
+    
+    function load_geolocation() {
+        var point = new google.maps.LatLng(0,0);
+
+        var options = {
+            zoom: 9,
+            center: point,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+            // mapTypeControl: true,
+            // navigationControl: true
+        };
         
-        function savePosition_geolocation(point)
-        {
-            var input = document.getElementById("id_geolocation");
-            input.value = point.lat().toFixed(6) + "," + point.lng().toFixed(6);
-            map_geolocation.panTo(point);
-        }
-        
-        function load_geolocation() {
-            var point = new google.maps.LatLng(0,0);
+        map_geolocation = new google.maps.Map(document.getElementById("map_geolocation"), options);
 
-            var options = {
-                zoom: 9,
-                center: point,
-                mapTypeId: google.maps.MapTypeId.ROADMAP
-                // mapTypeControl: true,
-                // navigationControl: true
-            };
-            
-            map_geolocation = new google.maps.Map(document.getElementById("map_geolocation"), options);
+        var markersBounds = new google.maps.LatLngBounds();
 
-            var markersBounds = new google.maps.LatLngBounds();
+        var markerPosition = new google.maps.LatLng({{ bs.geolocation }});
 
-            var markerPosition = new google.maps.LatLng({{ bs.geolocation }});
+        markersBounds.extend(markerPosition);
 
-            markersBounds.extend(markerPosition);
+        var contentString = '{{bs.comment|safe}}';
 
-            var contentString = '{{bs.comment|safe}}';
-
-            var infowindow = new google.maps.InfoWindow({
-                content: contentString
-            });
-
-            var marker = new google.maps.Marker({
-                    map: map_geolocation,
-                    position: markerPosition,
-                    draggable: false,
-                    title:'{{bs.address}}'
-            
-            });
-
-            google.maps.event.addListener(marker, 'click', function() {
-                infowindow.open(map_geolocation,marker);
-            });
-            
-            map_geolocation.setCenter(markersBounds.getCenter());
-            
-        }
-        
-        $(document).ready(function(){
-            load_geolocation();
+        var infowindow = new google.maps.InfoWindow({
+            content: contentString
         });
 
-    //]]>
-    </script>
+        var marker = new google.maps.Marker({
+                map: map_geolocation,
+                position: markerPosition,
+                draggable: false,
+                title:'{{bs.address}}'
+        
+        });
 
-    <div id="map_geolocation" style="width: 100%; height: 600px"></div>
+        google.maps.event.addListener(marker, 'click', function() {
+            infowindow.open(map_geolocation,marker);
+        });
+        
+        map_geolocation.setCenter(markersBounds.getCenter());
+        
+    }
+    
+    $(document).ready(function(){
+        load_geolocation();
+    });
+
+//]]>
+</script>
+
+<div id="map_geolocation" style="width: 100%; height: 600px"></div>
 
 {% endblock %}

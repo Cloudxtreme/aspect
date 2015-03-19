@@ -219,8 +219,6 @@ class OrgServiceForm(forms.ModelForm):
     class Meta:
         model = Service
         fields = {'segment','tos',}
-        # exclude = {'abon', 'plan','status', 'datestart','datefinish','speed_in','speed_out', 'ip','vlan','vlan_list','adm_status','mac','user_device','bs_device' }
-
 
 class LoginForm(forms.Form):
     username = forms.CharField(label=u'Имя пользователя', widget=forms.TextInput(attrs={'class':'form-control', 'placeholder' : "Имя пользователя" } ))

@@ -105,26 +105,8 @@
         <a href="{% url 'device_del' device.pk %}"><span class="glyphicon glyphicon-remove"></span></a>
         <div class='pull-right' id='supply'></div>
     </h2>
-    <h4>{{ device.mgmt_vlan|default_if_none:"Vlan управления не задан" }}</h4>
-    {% if device.service_set.first %}
-        <h4><a href="{% url 'abonent_services' device.service_set.first.abon.pk %}">{{ device.service_set.first }}</a>
-        <a href="{% url 'service_device_release' device.service_set.first.id %}" data-toggle="tooltip" data-placement="left" title="Освободить"> 
-        <span class="glyphicon glyphicon-remove"></span></a></h4>
-    {% elif device.location %}
-        <h4><a href="{% url 'bs_view' device.location.pk %}">{{ device.location }}</a>
-        <a href="{% url 'device_location_choice' device.id 0 %}" data-toggle="tooltip" data-placement="left" title="Переместить">
-        <span class="glyphicon glyphicon-move"></span></a>
-        <a href="{% url 'device_location_drop' device.id %}" data-toggle="tooltip" data-placement="left" title="Скинуть">
-        <span class="glyphicon glyphicon-remove"></span></a></h4>
-    {% else %}
-        Местоположение: 
-        <a href="{% url 'device_location_edit' device.id %}">Создать
-        <span class="glyphicon glyphicon-edit"></span></a>
-        <a href="{% url 'device_location_choice' device.id 0 %}">Выбрать
-        <span class="glyphicon glyphicon-flag"></span></a>
-        <a href="{% url 'device_location_choice' device.id 1 %}">Привязать к услуге 
-        <span class="glyphicon glyphicon-user"></span></a>
-     {% endif %}
+    <h6>{{ device.mgmt_vlan|default_if_none:"Vlan управления не задан" }}</h6>
+    <h4>{% include "includes/device_location_mgmt.html" with device=device request=request only %}</h4>
     <h4>{{ device.comment|safe }}</h4>
     <h4>{% if device.router %}<span class="label label-danger">Router</span>{% endif %}</h4>
 </div>

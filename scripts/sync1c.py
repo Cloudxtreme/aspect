@@ -16,6 +16,7 @@ db = MySQLdb.connect(host="10.255.0.10", user="d.sitnikov",
                          passwd="Aa12345", db="radius", charset='utf8')
 
 cursor = db.cursor()
+
 sql = """SELECT s.tarif, s.FIO, s.SubscriberID, s.State, s.AddressOfService, s.PasportS, s.PasportN, s.PasportWhon, s.PasportWhen, s.Address FROM Subscribers AS s, Tarifs as t WHERE s.tarif=t.tarifid AND s.SubscriberID LIKE '50______' AND s.tarif > 1 AND s.FIO!='<b>Фамилия Имя отчество</b>';"""
 cursor.execute(sql)
 data = cursor.fetchall()

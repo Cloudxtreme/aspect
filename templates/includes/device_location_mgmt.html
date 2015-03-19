@@ -1,0 +1,18 @@
+{% if device.service_set.first %}
+    <a href="{% url 'abonent_services' device.service_set.first.abon.pk %}">{{ device.service_set.first }}</a>
+    <a href="{% url 'service_device_release' device.service_set.first.id %}" data-toggle="tooltip" data-placement="left" title="Освободить"><span class="glyphicon glyphicon-remove"></span></a>
+{% elif device.location %}
+    <a href="{% url 'bs_view' device.location.pk %}">{{ device.location }}</a>
+    <a href="{% url 'device_location_choice' device.id 0 %}" data-toggle="tooltip" data-placement="left" title="Переместить">
+    <span class="glyphicon glyphicon-move"></span></a>
+    <a href="{% url 'device_location_drop' device.id %}" data-toggle="tooltip" data-placement="left" title="Скинуть">
+    <span class="glyphicon glyphicon-remove"></span></a>
+{% else %}
+    Местоположение: 
+    <a href="{% url 'device_location_edit' device.id %}">Создать новое
+    <span class="glyphicon glyphicon-edit"></span></a>
+    <a href="{% url 'device_location_choice' device.id 0 %}">Привязать к БС
+    <span class="glyphicon glyphicon-flag"></span></a>
+    <a href="{% url 'device_location_choice' device.id 1 %}">Привязать к услуге 
+    <span class="glyphicon glyphicon-user"></span></a>
+{% endif %}

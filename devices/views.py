@@ -472,9 +472,10 @@ def device_location_choice(request, device_id, bs):
                     service.save()
                 device.location = service.location
                 device.save()
+                return HttpResponseRedirect(reverse('devices_view', args=[device.pk]))
             form.save()
-            breadcrumbs = [({'url':reverse('bs_view', args=[device.location.pk]),'title':device.location})] if bs=='0' else []
-            message = 'Устройство успешно привязано к БС' if bs=='0' else 'Устройство успешно привязано к услуге'
+            breadcrumbs = [({'url':reverse('bs_view', args=[device.location.pk]),'title':device.location})] # if bs=='0' else []
+            message = 'Устройство успешно привязано к БС' # if bs=='0' else 'Устройство успешно привязано к услуге'
     else:
         form = DeviceChoiceLocationForm(instance=device) if bs=='0' else DeviceChoiceServiceForm(instance=device)
         breadcrumbs = []
