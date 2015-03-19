@@ -22,6 +22,6 @@ urlpatterns = patterns('',
     url(r'^get_iparp/$', 'devices.views.get_iparp'),
     url(r'^get_azimuth_info/$', 'devices.views.get_azimuth_info'),
     url(r'^syslog_list/$', 'devices.views.syslog_list', name='syslog_list'),
-    url(r'^zapret_info_log/$', 'devices.views.zapret_info_log', name='zapret_info_log'),
+    url(r'^syslog/(?P<app>\d+)$', 'devices.views.syslog', name='syslog'),
     url(r'^syslog_host/(?P<iface_id>\d+)/$', 'devices.views.syslog_host', name='syslog_host'),
 )

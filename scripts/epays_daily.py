@@ -185,7 +185,7 @@ def check_clients(clients,cursor):
 if __name__ == '__main__':
     clients = '50______'
     # clients = '50600007'
-    period = (datetime.now() - timedelta(hours=24000)).date()
+    period = (datetime.now() - timedelta(hours=24)).date()
     db = MySQLdb.connect(host="10.255.0.10", user="d.sitnikov", 
                          passwd="Aa12345", db="radius", charset='utf8')
     cursor = db.cursor()

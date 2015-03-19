@@ -545,12 +545,13 @@ def get_application_entries(request):
     return render_to_response('devices/applications_list.html', { 'app_list': app_list }, context_instance = RequestContext(request))
 
 @login_required
-def zapret_info_log(request):
+def syslog(request,app):
+    switch = {'1':('zapret_checker.',u'Журнал получения списка запрещенных сайтов'),'2':('epays_daily.py',u'Журнал сообщения системы')}
     log_list = []
     db = MySQLdb.connect(host="192.168.64.6", user="syslog", \
                          passwd="yfpfgbcm", db="syslog", charset='utf8')
     cursor = db.cursor()
-    sql = """SELECT * from logs WHERE program='zapret_checker.' order by `seq` desc limit 150;"""
+    sql = """SELECT * from logs WHERE program='%s' order by `seq` desc limit 150;""" % switch[app][0]
     cursor.execute(sql)
     data = cursor.fetchall()
     for rec in data:
@@ -558,8 +559,8 @@ def zapret_info_log(request):
         entry = {'host':host, 'msg':msg, 'seq' :seq, 'facility':facility, 'priority':priority, 'level':level, 'tag':tag, 'date':date, 'program':program }
         log_list.append(entry)
     db.close()
-    header = u'Журнал получения списка запрещенных сайтов'
 
+    header = '%s' % switch[app][1]
     return render_to_response('resources/syslog_list.html', { 'log_list': log_list, 'header' : header },
                                  context_instance = RequestContext(request))
 
