@@ -19,7 +19,7 @@ from users.forms import  ServiceForm, OrgServiceForm, SearchForm, LoginForm, \
                          ServiceDeviceForm
 from journaling.forms import ServiceStatusChangesForm
 from notice.forms import AbonentFilterForm
-from users.models import Abonent, Service, TypeOfService, Plan, Passport, Detail, Interface, Segment
+from users.models import Abonent, Service, TypeOfService, Plan, Passport, Detail, Interface, Segment,Tag
 from tt.models import TroubleTicket, TroubleTicketComment
 from journaling.models import ServiceStatusChanges, AbonentStatusChanges
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -33,6 +33,7 @@ from vlans.models import Location
 from contacts.models import Contact
 from devices.aux import dec2ip,ip2dec
 from devices.models import Device
+from users.aux import abonent_filter
 import datetime, MySQLdb, requests, re
 
 
@@ -41,39 +42,41 @@ def zapret(request):
 
 def balance(request):
     ip = request.META.get('REMOTE_ADDR', '') or request.META.get('HTTP_X_FORWARDED_FOR', '')
-    
     try:
-        balance = '%s руб.' % round((IPAddr.objects.get(ip=ip).interface.service_set.all()[0].abon.balance),2)
+        balance = '%s руб.' % round(Abonent.objects.get(service__ifaces__ip__ip=ip).balance,2)
     except:
         balance = 'неизвестен'
+    return render_to_response('balance.html', { 'balance': balance })
 
-    return render_to_response('balance.html', {'balance': balance})
 
 @login_required 
 def aquicksearch(request):
-    data = request.GET
-    abonent_list = Abonent.objects.filter(contract__icontains=data['q'])|Abonent.objects.filter(title__icontains=data['q'])|Abonent.objects.filter(detail__title__icontains=data['q'])
+    data = request.GET['q']
+    abonent_list = abonent_filter(data)
     paginator = Paginator(abonent_list, 10)
 
     page = request.GET.get('page')
     try:
         abonents = paginator.page(page)
     except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
         abonents = paginator.page(1)
     except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
         abonents = paginator.page(paginator.num_pages)
 
     if abonent_list.count() == 1:
-        return redirect('abonent_info', abonent_id = abonent_list[0].pk) 
+        return HttpResponseRedirect(reverse('abonent_info', 
+            args=[abonent_list.first().pk]))
     elif abonent_list.count() == 0:
-        return render_to_response('deadend.html', { 'message' : u'Абоненты не найдены', 'previous_page' : request.META['HTTP_REFERER'] }  , context_instance = RequestContext(request))
+        return render_to_response('deadend.html', 
+            { 'message' : u'Абоненты не найдены', 
+               'previous_page' : request.META['HTTP_REFERER'] 
+            }  , context_instance = RequestContext(request))
     else:
-        return render_to_response('aqsearch_result.html', { 'abonents' : abonents, 'abonent_list_count' : len(abonent_list), 'previous_request' : data['q'] } , context_instance = RequestContext(request))            
-        #     return render_to_response('aqsearch_result.html', { 'abonents' : abonents } , context_instance = RequestContext(request))
-        
-    #return redirect(request.META['HTTP_REFERER'])  
+        return render_to_response('aqsearch_result.html', 
+            { 'abonents' : abonents, 
+              'abonent_list_count' : len(abonent_list), 
+              'previous_request' : data } , 
+              context_instance = RequestContext(request))            
 
 @login_required
 def feeds_plans_by_tos(request):
@@ -127,42 +130,53 @@ def unfilled_params(request,param):
             result.append({'url':reverse('abonent_services', args=[service.abon.pk]),'title': service.__unicode__() }) 
         return result   
 
-    switch = {'1': dev_wo_location, '2': srv_wo_location, '3':srv_wo_iface, '4':srv_wo_device, '0':zero }
-    menu = {'1': 'Устройства без объекта','2':'Услуги без объекта','3':'Услуги без IP-адреса','4':'Услуги без устройства'}
+    def arch_srv_w_device():
+        result = []
+        for service in Service.objects.filter(status=settings.STATUS_ARCHIVED,device__isnull=False):
+            result.append({'url':reverse('abonent_services', args=[service.abon.pk]),'title': service.__unicode__() }) 
+        return result   
+
+    def arch_srv_w_ip():
+        result = []
+        for service in Service.objects.filter(status=settings.STATUS_ARCHIVED,ifaces__isnull=False):
+            result.append({'url':reverse('abonent_services', args=[service.abon.pk]),'title': service.__unicode__() }) 
+        return result           
+
+    switch = {'1': dev_wo_location, 
+              '2': srv_wo_location, 
+              '3':srv_wo_iface, 
+              '4':srv_wo_device, 
+              '5':arch_srv_w_device,
+              '6':arch_srv_w_ip,
+              '0':zero }
+
+    menu = {'1': 'Устройства без объекта',
+            '2':'Услуги без объекта',
+            '3':'Услуги без IP-адреса',
+            '4':'Услуги без устройства',
+            '5':'Архивные услуги с устройством',
+            '6':'Архивные услуги с IP',
+            }
     item_list = switch[param]()
     header = menu.get(param)
 
     return render_to_response('resources/unfilled_params.html', {
-                                'menu' : menu,
+                                'menu' : sorted(menu.iteritems()),
                                 'header' : header,
                                 'item_list' : item_list,
                                 },context_instance = RequestContext(request))
 
 @login_required
-def abonent_add(request,abonent_id=0):
-    if abonent_id != '0' :
-        message = u'Изменение параметров абонента [%s]' % (abonent_id)
-        new = False
-        try:
-            abonent = Abonent.objects.get(pk = abonent_id)
-        except:
-            # abonent = Abonent()
-            raise Http404
-    else:
-        message = u'Добавление нового абонента'
-        new = True
-        abonent = Abonent()
+def abonent_add(request):
+    message = u'Добавление нового абонента'
+    new = True
+    abonent = Abonent()
 
     if request.method == 'POST':
         form = AbonentForm(request.POST, instance=abonent)
         if form.is_valid():
             newabonent = form.save()
-            # form.save(commit=False)
-            # service.abon=abonent
-            # service.save()
             return HttpResponseRedirect(reverse('abonent_info', args=[newabonent.pk]))
-        else:
-            print form.errors
     else:
         form = AbonentForm(instance=abonent)
 
@@ -175,27 +189,17 @@ def abonent_add(request,abonent_id=0):
 @login_required
 def smart_search(request):
     abonent_list = Abonent.objects.none()
+
     if request.method == 'POST': 
         form = SmartSearchForm(request.POST) 
         if form.is_valid():
             string = form.cleaned_data['string']
             request.session['string'] = string
-            abonent_list = Abonent.objects.filter(contract__icontains=string)|\
-            Abonent.objects.filter(title__icontains=string)|\
-            Abonent.objects.filter(detail__title__icontains=string)|\
-            Abonent.objects.filter(service__in=Service.objects.filter(location__address__icontains=string))|\
-            Abonent.objects.filter(contact__in=Contact.objects.filter(first_name__icontains=string))|\
-            Abonent.objects.filter(contact__in=Contact.objects.filter(surname__icontains=string))|\
-            Abonent.objects.filter(contact__in=Contact.objects.filter(mobile__icontains=string))
+            abonent_list = abonent_filter(string)
+
     elif request.GET.get('page'): 
-        string = request.session['string']           
-        abonent_list = Abonent.objects.filter(contract__icontains=string)|\
-        Abonent.objects.filter(title__icontains=string)|\
-        Abonent.objects.filter(detail__title__icontains=string)|\
-        Abonent.objects.filter(service__in=Service.objects.filter(location__address__icontains=string))|\
-        Abonent.objects.filter(contact__in=Contact.objects.filter(first_name__icontains=string))|\
-        Abonent.objects.filter(contact__in=Contact.objects.filter(surname__icontains=string))|\
-        Abonent.objects.filter(contact__in=Contact.objects.filter(mobile__icontains=string))
+        string = request.session['string']  
+        abonent_list = abonent_filter(string)
         form = SmartSearchForm()
         form.string = string
     else:
@@ -206,13 +210,15 @@ def smart_search(request):
     try:
         abonents = paginator.page(page)
     except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
         abonents = paginator.page(1)
     except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
         abonents = paginator.page(paginator.num_pages)
 
-    return render_to_response('smart_search.html', { 'abonents' : abonents, 'form': form, 'abonent_list_count' : len(abonent_list.distinct()) }, context_instance = RequestContext(request))
+    return render_to_response('smart_search.html', 
+                { 'abonents' : abonents, 
+                 'form': form, 
+                 'abonent_list_count' : len(abonent_list.distinct()) }, 
+                 context_instance = RequestContext(request))
 
 @login_required
 def abonent_search(request):
@@ -748,9 +754,13 @@ def abonent_manage(request, abonent_id):
     if request.method == 'POST':
         form = ManageForm(request.POST,instance=abonent)
         if form.is_valid():
+            tags =  form.cleaned_data['extratag'].split(',')
+            abonent.tag = [Tag.objects.get_or_create(title=tag,defaults={'title':tag})[0] for tag in tags]
+            # map(lambda tag: abonent.tag.add(Tag.objects.get_or_create(title=tag,defaults={'title':tag})[0]),tags)
             form.save()
     else:
-        form = ManageForm(instance=abonent)
+        tag_list = ','.join([tag.title for tag in abonent.tag.all()])
+        form = ManageForm(instance=abonent,initial={'extratag': tag_list})
 
     return render_to_response('generic/generic_edit.html', { 
                                 'header' : 'Настройки абонента',

@@ -53,7 +53,7 @@ class Location(models.Model):
     bs_type = models.CharField(u'Тип', max_length = 2, 
                                choices=TYPE_OF_OBJECTS)
     comment  = models.CharField(u'Комментарий', max_length=300, blank=True, null=True, default='')
-    rent = models.ForeignKey(Rent, null=True, blank=True)
+    rent = models.ForeignKey(Rent, null=True, blank=True,verbose_name=u'Тариф аренды')
     geolocation = LocationField(u'Карта', max_length=100, blank=True, null=True)
     # geolocation = models.CharField(u'Карта', max_length=100, blank=True, null=True) # Заглушка для South
    
@@ -65,6 +65,7 @@ class Location(models.Model):
     class Meta:
         verbose_name = u'Местонахождение'
         verbose_name_plural = u'Местонахождения'
+        ordering = ['title']
 
     def __unicode__(self):
         return "[%s] %s" % (self.pk, self.title)

@@ -18,7 +18,7 @@
 {% if abonents %}
     {% load dict_extras %}
     <div class="page-header">
-        <h2 class="sub-header" id="pager">Найдено абонентов: {{ abonent_list_count }}</h2>
+        <h2 class="sub-header" id="pager">Найдено абонентов: {{ abonents|length }}</h2>
         <ul class="pagination pagination-lg">
             {% if abonents.has_previous %}
                <li class="previous"><a href="?page={{ abonents.previous_page_number }}#pager">&laquo;</a><li>

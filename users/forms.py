@@ -24,16 +24,22 @@ class AbonentForm(forms.ModelForm):
         }
 
 class ManageForm(forms.ModelForm):
+
+    extratag = forms.CharField(
+            required=False,
+            widget=forms.TextInput(attrs={'class':'form-control multiple select2-multiple'}),
+            label = u'Метки для поиска')
+
     class Meta:
         model = Abonent
-        fields = ['title','notice_email','notice_mobile', 'is_credit', 'status','tag','vip']
+        fields = ['title','notice_email','notice_mobile', 'is_credit', 'status','vip', 'extratag']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Доп.название' }),
             'notice_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'E-Mail'}),
             'notice_mobile': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Телефон' }),
             'is_credit': forms.Select(attrs={'class': 'form-control', }),
             'status': forms.Select(attrs={'class': 'form-control', }),
-            'tag': forms.SelectMultiple(attrs={'class' : 'form-control multiple select2-multiple',}),
+            # 'tag': forms.TextInput(attrs={'class' : 'form-control multiple select2-multiple',}),
             'vip': forms.CheckboxInput(attrs={}),
         }
 

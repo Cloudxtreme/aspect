@@ -30,7 +30,7 @@ def device_explore(ip,nonexisting_only=True):
             iface, created = Interface.objects.get_or_create(ip__ip=ip, defaults={'ip': ipaddr,'for_device':True})
             if devtype.category == 'R':                     # Для радио заполним мак адрес   
                 iface.mac = get_ubnt_macaddr(ip)            
-                iface.save()   
+                iface.save()
 
             ip_list = get_ip_list(ip)
             msg = ''

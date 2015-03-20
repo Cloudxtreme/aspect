@@ -5,7 +5,10 @@
     <link rel="stylesheet" href="/media/js/select2-bootstrap.css">
     <script src="/media/js/select2.js"></script>
     <script>
-        $(document).ready(function() { $("select").select2(); });
+        $(document).ready(function() { 
+            $("select").select2();
+            $("#id_extratag").select2({tags:[""],tokenSeparators: [",",]});
+        });
     </script>
     {{ form.media }}
 {% endblock %}

@@ -286,8 +286,18 @@ def device_del(request, device_id):
         for iface in device.interfaces.all():
             iface.delete()
         device.delete()
-
     return HttpResponseRedirect(reverse('devices_list', args=['0']))
+
+# Обследовать устройство заново
+@login_required
+def device_reexplore(request, device_id):
+    try:
+        device = Device.objects.get(pk = device_id)
+    except:
+        raise Http404
+    else:
+        device_explore(device.ip.ip,nonexisting_only=False)
+    return HttpResponseRedirect(reverse('device_view', args=[device.pk]))
 
 # Просмотр устройства
 @login_required
