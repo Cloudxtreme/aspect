@@ -15,12 +15,12 @@
 
 {% block breadcrumb %}
     {% if breadcrumbs %}
-                <ol class="breadcrumb">
-                    {% for item in breadcrumbs %}
-                        <li><a href="{{ item.url }}">{{ item.title }}</a></li>
-                    {% endfor %}
-                    <li class="active">Редактирование</li>
-                </ol>
+        <ol class="breadcrumb">
+            {% for item in breadcrumbs %}
+                <li><a href="{{ item.url }}">{{ item.title }}</a></li>
+            {% endfor %}
+            <li class="active">Редактирование</li>
+        </ol>
     {% endif %}
 {% endblock %}
 

@@ -15,4 +15,6 @@
     <span class="glyphicon glyphicon-flag"></span></a>
     <a href="{% url 'device_location_choice' device.id 1 %}">Привязать к услуге 
     <span class="glyphicon glyphicon-user"></span></a>
+    <a href="{% url 'device_auto_attach' device.id %}">Найти услугу 
+    <span class="glyphicon glyphicon-repeat"></span></a>    
 {% endif %}

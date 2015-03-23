@@ -318,6 +318,19 @@ def device_view(request, device_id):
 
 # Сохранение конфига для устройства
 @login_required
+def device_auto_attach(request, device_id):
+    try:
+        device = Device.objects.get(pk = device_id)
+    except:
+        raise Http404
+        
+    device.fill_namemac()
+    device._attach2srv()
+
+    return HttpResponseRedirect(reverse('device_view', args=[device.pk]))
+
+# Сохранение конфига для устройства
+@login_required
 def device_save_config(request, device_id):
     try:
         device = Device.objects.get(pk = device_id)

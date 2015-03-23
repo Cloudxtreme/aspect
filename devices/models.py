@@ -130,8 +130,8 @@ class DevType(models.Model):
         return "%s - %s" % (self.vendor, self.model)
 
 class Device(models.Model):
-    interfaces = models.ManyToManyField('users.Interface', verbose_name=u'Интерфейсы',
-                                        blank=True, null=True)
+    interfaces = models.ManyToManyField('users.Interface', 
+        verbose_name=u'Интерфейсы',blank=True, null=True)
     devtype = models.ForeignKey(DevType, verbose_name=u'Модель')
     mgmt_vlan = models.ForeignKey(Vlan, related_name=u'mgmt_vlan',
         verbose_name=u'VLAN управления', blank=True, null= True)
@@ -139,14 +139,16 @@ class Device(models.Model):
     location = models.ForeignKey(Location, blank=True, null=True, 
                                 verbose_name=u'Местонахождение')
     router = models.BooleanField(u'Роутер?',default=False)
-    mac = models.CharField(u'MAC адрес', default = '', blank=True, null= True, max_length=17) # Надо убрать
+    mac = models.CharField(u'MAC адрес', default = '', 
+        blank=True, null= True, max_length=17)
     sn = models.CharField(u'Серийный номер', blank=True, 
                                  null=True, max_length=20)
     inv_number = models.CharField(u'Инвентарный номер', blank=True, 
                                  null=True, max_length=20)
     last_available = models.DateTimeField(auto_now=False, auto_now_add=False, 
         blank=True, null=True, verbose_name=u'Последний ответ')
-    peer = models.ForeignKey('self',related_name='peer_set', blank=True, null= True,editable=False)
+    peer = models.ForeignKey('self',related_name='peer_set',
+        blank=True, null= True,editable=False)
     details_map_field = models.TextField(editable=False) # since it will not work anyway
  
     def __init__(self, *args, **kw):
@@ -188,7 +190,7 @@ class Device(models.Model):
                 self.details_map['devname'] = get_dev_name(self.ip.ip)
                 if mac:
                     self.ap = False
-                    peer = Device.objects.filter(interfaces__mac=mac).first()
+                    peer = Device.objects.filter(mac=mac).first()
                     if peer:
                         self.peer = peer
                 self.save()
@@ -201,6 +203,8 @@ class Device(models.Model):
                 iface = self.ip.interface
                 iface.mac = mac
                 iface.save()
+                device.mac = mac
+                device.save()
 
     # Привязать устройство к услуге (Только для физиков)
     def _attach2srv(self):

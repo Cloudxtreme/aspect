@@ -138,6 +138,7 @@ def check_clients(clients,cursor):
     sql = """SELECT s.tarif, s.FIO, s.SubscriberID, s.State, s.AddressOfService, s.PasportS, s.PasportN, s.PasportWhon, s.PasportWhen, s.Address FROM Subscribers AS s, Tarifs as t WHERE s.tarif=t.tarifid AND s.SubscriberID LIKE '%s' AND s.tarif > 1 AND s.FIO!='<b>Фамилия Имя отчество</b>';""" % clients
     cursor.execute(sql)
     data = cursor.fetchall()
+    created_list = []
     for rec in data:
         plan_id, title, contract, state, address, pass_ser, pass_num, pass_who, pass_when, pass_addr = rec
         abonent, created = Abonent.objects.get_or_create(contract=contract, defaults={
@@ -151,6 +152,7 @@ def check_clients(clients,cursor):
         if created:
             msg = 'Создан абонент %s' % abonent
             syslog.syslog(syslog.LOG_INFO, msg)          
+            created_list.append(abonent.contract)
 
             try:
                 plan = Plan.objects.get(pk=plan_id+1000)
@@ -180,6 +182,7 @@ def check_clients(clients,cursor):
                             issued_by = pass_who,
                             address = pass_addr)
             passport.save()
+        return created_list
 
 if __name__ == '__main__':
     clients = '50______'
