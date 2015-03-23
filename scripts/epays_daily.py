@@ -178,8 +178,7 @@ def check_clients(clients,cursor):
                             number = pass_num,
                             date = pass_when,
                             issued_by = pass_who,
-                            address = pass_addr
-                            )
+                            address = pass_addr)
             passport.save()
 
 if __name__ == '__main__':

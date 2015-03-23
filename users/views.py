@@ -217,7 +217,7 @@ def smart_search(request):
     return render_to_response('smart_search.html', 
                 { 'abonents' : abonents, 
                  'form': form, 
-                 'abonent_list_count' : len(abonent_list.distinct()) }, 
+                 'abonent_list_count' : len(abonent_list) }, 
                  context_instance = RequestContext(request))
 
 @login_required

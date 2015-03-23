@@ -139,7 +139,7 @@ class Device(models.Model):
     location = models.ForeignKey(Location, blank=True, null=True, 
                                 verbose_name=u'Местонахождение')
     router = models.BooleanField(u'Роутер?',default=False)
-    # mac = models.CharField(u'MAC адрес', blank=True, null= True, max_length=20) # Надо убрать
+    mac = models.CharField(u'MAC адрес', default = '', blank=True, null= True, max_length=17) # Надо убрать
     sn = models.CharField(u'Серийный номер', blank=True, 
                                  null=True, max_length=20)
     inv_number = models.CharField(u'Инвентарный номер', blank=True, 
