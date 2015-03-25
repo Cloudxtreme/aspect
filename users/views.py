@@ -515,6 +515,7 @@ def service_device_release(request, service_id):
         if device.service_set.all().count()==1:
             device.location = None
             device.save()
+            
         service.device = None
         service.save()
 
@@ -875,101 +876,20 @@ def sync_balance_from1C(abonent_id):
 def import_abonent_from1C(request):
     db = MySQLdb.connect(host="10.255.0.10", user="d.sitnikov", 
                              passwd="Aa12345", db="radius", charset='utf8')
-
     cursor = db.cursor()
 
     clients = '50______'
-    
-    created_list = check_clients(clients,cursor)# Проверяем нет ли новых абонентов
+    created_list = check_clients(clients,cursor)    # Проверяем нет ли новых абонентов
     for contract in created_list :
         clients = u'%s' % contract
-        period = (datetime.now() - timedelta(hours=24000)).date()
+        # period = (datetime.now() - timedelta(hours=24000)).date() # Задаем примерно 3 года
+        period = datetime.date(2012, 1, 1)          # Лучше с 01.01.2012
         importuntlcdb(cursor,clients,period)        # Проверяем платежи по Uniteller
         importosmp1cdb(cursor,clients,period)       # Проверяем платежи по OSMP
-    check_plan(cursor)                          # Проверяем не изменились ли тарифные планы
-    check_balance()                             # Синхронизируем балансы
+    check_plan(cursor)                              # Проверяем не изменились ли тарифные планы
+    check_balance()                                 # Синхронизируем балансы
     db.close()
-    # sql = """SELECT s.tarif, s.FIO, s.SubscriberID, s.State, s.AddressOfService, s.PasportS, s.PasportN, s.PasportWhon, s.PasportWhen, s.Address, s.Contacts, s.ContactPerson FROM Subscribers AS s, Tarifs as t WHERE s.tarif=t.tarifid AND s.SubscriberID LIKE '50______' AND s.tarif > 1 AND s.FIO!='<b>Фамилия Имя отчество</b>';"""
-    # cursor.execute(sql)
-    # data = cursor.fetchall()
-    # created_abon = None
-    
-    # for rec in data:
-    #     plan_id, title, contract, state, address, pass_ser, pass_num, pass_who, pass_when, pass_addr, cnt, prs = rec
-    #     abonent, created = Abonent.objects.get_or_create(contract=contract, defaults={
-    #                       'title' : title,
-    #                       'contract' :contract,
-    #                       'status': 'A' if state else 'N',
-    #                       'utype' :'F',
-    #                       'is_credit' : 'R',
-    #                     })
-        
-    #     if created:
-    #         # print u'Создан абонент #%s - %s' % (abonent.contract,abonent.title)
-    #         created_abon = abonent
-    #         # Получаем баланс изи 1С и синхронизируем
-    #         abonent.balance = sync_balance_from1C(abonent.pk)
-    #         abonent.save()
-    #         try:
-    #             plan = Plan.objects.get(pk=plan_id+1000)
-    #         except:
-    #             pass
 
-    #         tos = TypeOfService.objects.get(pk=4) # Интернет PPTP id=4
-    #         segment = Segment.objects.get(pk=1) # Основной сегмент
-    #         location = Location(bs_type='C',address=address)
-    #         location.save()
-    #         # Создаем услугу
-    #         service = Service(
-    #                 abon=abonent,
-    #                 tos=tos,
-    #                 segment=segment,
-    #                 location=location,
-    #                 plan=plan,
-    #                 status='A' if state else 'N',
-    #                 )
-    #         service.save()
-    #         # Создаем паспортные данные
-    #         passport = Passport(
-    #                         abonent=abonent,
-    #                         series = pass_ser,
-    #                         number = pass_num,
-    #                         date = pass_when,
-    #                         issued_by = pass_who,
-    #                         address = pass_addr
-    #                         )
-    #         passport.save()
-    #         # Создаем контакт
-    #         r_email = re.compile(r'(\b[\w.]+@+[\w.]+.+[\w.]\b)') # Ищем email в строке
-    #         emails = r_email.findall(cnt)
-
-    #         if emails:
-    #             email = emails[0]
-    #         else:
-    #             email = ''
-
-    #         if prs == '':
-    #             person = abonent.title # Если имени нет, то берем из тайтла абонента
-    #         else:
-    #             # person = prs.decode('cp1251') Тут какие-то проблемы возникают
-    #             person = prs
-
-    #         if pass_addr:
-    #             addr = pass_addr
-    #         else:
-    #             addr = ''
-
-    #         contact = Contact(
-    #                         abonent=abonent,
-    #                         surname=person,
-    #                         address=addr,
-    #                         phone=cnt.decode('cp1251'),
-    #                         email=email,
-    #               )
-    #         contact.save()
-
-    # db.close()
-    # url = reverse('abonent_info', args=[created_abon.pk]) if created_abon else settings.LOGIN_REDIRECT_URL
     url = settings.LOGIN_REDIRECT_URL
     return HttpResponseRedirect(url)
 

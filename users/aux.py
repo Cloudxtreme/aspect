@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
-from users.models import Abonent
-
 import os
 import sys
 import syslog
 import re
-import MySQLdb
+# import MySQLdb
 import requests
 from requests.auth import HTTPDigestAuth
-from django.db import IntegrityError
+# from django.db import IntegrityError
 from datetime import datetime, time
-from datetime import timedelta
+# from datetime import timedelta
 from users.models import Abonent, Plan, TypeOfService, Segment, Service, Passport
 from pays.models import Payment, PaymentSystem
 from vlans.models import Location
@@ -179,24 +177,8 @@ def check_clients(clients,cursor):
                             issued_by = pass_who,
                             address = pass_addr)
             passport.save()
-            
+
     return created_list
-
-# if __name__ == '__main__':
-#     clients = '50______'
-#     # clients = '50600007'
-#     period = (datetime.now() - timedelta(hours=24)).date()
-#     db = MySQLdb.connect(host="10.255.0.10", user="d.sitnikov", 
-#                          passwd="Aa12345", db="radius", charset='utf8')
-#     cursor = db.cursor()
-
-#     check_clients(clients,cursor)               # Проверяем нет ли новых абонентов
-#     importuntlcdb(cursor,clients,period)        # Проверяем платежи по Uniteller
-#     importosmp1cdb(cursor,clients,period)       # Проверяем платежи по OSMP
-#     check_plan(cursor)                          # Проверяем не изменились ли тарифные планы
-#     check_balance()                             # Синхронизируем балансы
-#     db.close()
-# Поиск по разным полям абонента
 
 def abonent_filter(data):
     abonent_list = Abonent.objects.filter(contract__icontains=data)|\

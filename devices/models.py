@@ -197,14 +197,24 @@ class Device(models.Model):
 
     # Получить МАС для UBNT
     def _get_macaddr(self):
-        if self.ip:
-            mac = get_ubnt_macaddr(self.ip.ip)
-            if mac:
-                iface = self.ip.interface
-                iface.mac = mac
-                iface.save()
-                device.mac = mac
-                device.save()
+        if not self.ip:
+            return False
+
+        if self.devtype.vendor == 'Ubiquiti':
+            if self.devtype.category == settings.DEVTYPE_RADIO:                 # Это радио
+                mac = get_ubnt_macaddr(self.ip.ip)
+            else:
+                mac = get_ubntsw_macaddr(self.ip.ip)                            # Это свитч
+        elif self.devtype.vendor == 'Cisco' or self.devtype.vendor == 'D-Link':   # D-Link и Cisco
+            mac = get_cisco_macaddr(self.ip.ip)
+
+        if mac:
+            iface = self.ip.interface
+            iface.mac = mac
+            iface.save()
+            # self.mac = mac
+            # self.save()
+            return mac
 
     # Привязать устройство к услуге (Только для физиков)
     def _attach2srv(self):

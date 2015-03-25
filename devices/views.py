@@ -285,6 +285,11 @@ def device_del(request, device_id):
     else:
         for iface in device.interfaces.all():
             iface.delete()
+            
+        for service in deice.service_set.all():
+            service.device = None
+            service.save()
+
         device.delete()
     return HttpResponseRedirect(reverse('devices_list', args=['0']))
 
@@ -324,7 +329,7 @@ def device_auto_attach(request, device_id):
     except:
         raise Http404
         
-    device.fill_namemac()
+    # device.fill_namemac()
     device._attach2srv()
 
     return HttpResponseRedirect(reverse('device_view', args=[device.pk]))

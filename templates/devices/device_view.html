@@ -106,6 +106,7 @@
         <div class='pull-right' id='supply'></div>
     </h2>
     <h6>{{ device.mgmt_vlan|default_if_none:"Vlan управления не задан" }}</h6>
+    <h6>{{ device.mac|default_if_none:"MAC адрес не задан" }}</h6>
     <h4>{% include "includes/device_location_mgmt.html" with device=device request=request only %}</h4>
     <h4>{{ device.comment|safe }}</h4>
     <h4>{% if device.router %}<span class="label label-danger">Router</span>{% endif %}</h4>

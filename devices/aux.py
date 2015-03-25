@@ -128,13 +128,30 @@ def get_cisco_iparp(ip,vlan,router):
     result = run_snmp(oid,router)
     return "".join(format(ord(c),"02x") for c in result) if result else ""
 
+# Опеределяем MAC D-Link и Cisco
+def get_cisco_macaddr(ip):
+    oid = 'iso.3.6.1.2.1.17.1.1.0'
+    result = run_snmp(oid,ip)
+    return "".join(format(ord(c),"02x") for c in result).upper() if result else ""
+
+# Опеределяем MAC UBNT свитча
+def get_ubntsw_macaddr(ip):
+    oid = 'iso.3.6.1.2.1.2.2.1.6.2'
+    result = run_snmp(oid,ip)
+    return "".join(format(ord(c),"02x") for c in result).upper() if result else ""
+
 # Опеределяем MAC устройства
 def get_ubnt_macaddr(ip):
-    line = """snmpwalk -v1 -c %s %s 1.2.840.10036.2.1.1.1""" % (settings.SNMP_COMMUNITY,ip)
-    mac_str = 'iso.2.840.10036.2.1.1.1.\d = STRING: "(.*)"'
-    result,err = run_command(line)
-    mac = re.findall(mac_str,result)
-    return mac[0].replace(':','') if mac else ''
+    oid = 'iso.2.840.10036.2.1.1.1.5'
+    return run_snmp(oid,ip).replace(':','')
+
+# Опеределяем MAC устройства
+# def get_ubnt_macaddr(ip):
+#     line = """snmpwalk -v1 -c %s %s 1.2.840.10036.2.1.1.1""" % (settings.SNMP_COMMUNITY,ip)
+#     mac_str = 'iso.2.840.10036.2.1.1.1.\d = STRING: "(.*)"'
+#     result,err = run_command(line)
+#     mac = re.findall(mac_str,result)
+#     return mac[0].replace(':','') if mac else ''
 
 # Определяем вольтаж на пинговалке
 def get_snr_voltage(ip):
