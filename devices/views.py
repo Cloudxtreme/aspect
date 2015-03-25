@@ -285,8 +285,8 @@ def device_del(request, device_id):
     else:
         for iface in device.interfaces.all():
             iface.delete()
-            
-        for service in deice.service_set.all():
+
+        for service in device.service_set.all():
             service.device = None
             service.save()
 
