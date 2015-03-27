@@ -36,7 +36,7 @@ def freq_list(value):
 
 @register.filter    
 def get_color(value):
-    dict = {'A': 'success', 'S' : 'warning', 'N' : 'danger', 'D' : 'info' }
+    dict = {'A': 'success', 'S' : 'warning', 'N' : 'danger', 'D' : 'info', 'W' : 'default' }
     return dict.get(value)
 
 @register.filter    

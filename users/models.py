@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from django.db.models import Sum
-from vlans.models import IPAddr, Vlan, Node, Location 
-# from devices.models import Device
-# from contacts.models import Contact
+from vlans.models import IPAddr, Vlan, Location 
 from journaling.models import AbonentStatusChanges, ServiceStatusChanges
 from django.core.validators import RegexValidator
-from users.fields import JSONField
 from django.contrib.auth.models import User
 import datetime
 import calendar
-# import pays.models
 from django.conf import settings
 
 class Segment(models.Model):
@@ -57,8 +53,6 @@ class Plan(models.Model):
     tos = models.ForeignKey(TypeOfService,verbose_name=u'Группа тарифа')
     segment = models.ManyToManyField(Segment,verbose_name=u'Сегмент')
     speed = models.ForeignKey(Pipe, verbose_name=u'Скорость')
-    # speed_in = models.PositiveIntegerField(blank=True, null=True)
-    # speed_out = models.PositiveIntegerField(blank=True, null=True)
     comment = models.CharField(max_length=200,blank=True, null=True)
     utype = models.CharField(u'Тип абонента', max_length=1, choices=settings.U_TYPE)
     price = models.FloatField(u'Абон. плата')
@@ -191,7 +185,11 @@ class Abonent(models.Model):
         else:
             super(Abonent, self).save(*args, **kwargs)
             self.set_changes('Создание нового', '')
-   
+    
+    def delete(self, *args, **kwargs):
+        self.status = settings.STATUS_ARCHIVED
+        self.save()
+
     class Meta:
         verbose_name = u'Абонент'
         verbose_name_plural = u'Абоненты'       
@@ -293,7 +291,6 @@ class Service(models.Model):
     datestart = models.DateField(auto_now=False, auto_now_add=False, default=datetime.datetime.now(), verbose_name=u'Дата начала')
     datefinish = models.DateField(auto_now=False, auto_now_add=False, blank=True, null= True, verbose_name=u'Дата окончания')
     device = models.ForeignKey('devices.Device', verbose_name=u'Абонентское устройство', blank=True, null= True)
-    # bs_device = models.ForeignKey(Device, related_name='bs_device', verbose_name=u'Абонентская БС', blank=True, null= True)
     objects = models.Manager()
     objects_active = ServiceActiveManager()
     objects_enabled = ServiceEnabledManager()
@@ -301,14 +298,17 @@ class Service(models.Model):
     def set_changestatus_in_plan(self, new_status, date=datetime.datetime.now()):
         ssc = ServiceStatusChanges(
                         service=self,
-                        # laststatus=self.status,
                         newstatus=new_status,
                         comment='Изменение статуса услуги',
-                        date=date,
-                        # done=True,
-                        # successfully=True,
-                        )
+                        date=date)
         ssc.save()
+
+    def recalculate(self):
+        # Удаляем все списание абонплаты по этой услуге
+        for wo in self.write_off_set.filte(wot=1):
+            wo.delete()
+        # Получаем список изменений тарифов
+        # Получаем список изменений статусов
 
     def set_status(self, new_status, date=datetime.datetime.now()):
         # Если статус не изменился - выходим
@@ -323,7 +323,7 @@ class Service(models.Model):
         if self.status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE] and new_status in [settings.STATUS_ARCHIVED, settings.STATUS_PAUSED, settings.STATUS_NEW]:
             self.stop(date, newstatus=new_status)
 
-        # Если статус услги был пассивным, а стал активным, то стартуем услугу
+        # Если статус услуги был пассивным, а стал активным, то стартуем услугу
         elif self.status in [settings.STATUS_ARCHIVED, settings.STATUS_PAUSED, settings.STATUS_NEW] and new_status in [settings.STATUS_ACTIVE, settings.STATUS_OUT_OF_BALANCE]:
             self.start(date, newstatus=new_status)
 
@@ -334,7 +334,6 @@ class Service(models.Model):
 
     def stop(self, date=datetime.datetime.now(), newstatus=settings.STATUS_ARCHIVED):
         self.status = newstatus
-        # today = datetime.datetime.today()
         today = date.date()
         qty_days = calendar.mdays[today.month]
         summ = self.plan.price * (qty_days - today.day)/qty_days
@@ -391,6 +390,10 @@ class Service(models.Model):
             comment = u'Абонентская плата за %s %s г.' % (calendar.month_name[m - post_month_shift],y)
             write_off = WriteOff(abonent=self.abon, service=self, wot=wot_abon,summ=summa, comment=comment, date=datetime.datetime(y,m,1))
             write_off.save()
+
+    def delete(self, *args, **kwargs):
+        self.status = settings.STATUS_ARCHIVED
+        self.save()
 
     class Meta:
         verbose_name = u'Услуга'

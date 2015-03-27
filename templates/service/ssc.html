@@ -1,0 +1,55 @@
+{% extends "abonent/main.html" %}
+
+{% block breadcrumb %}
+  <ol class="breadcrumb">
+      <li><a href="{% url 'abonent_info' abonent.id %}">Абонент</a></li>
+      <li><a href="{% url 'users.views.abonent_services' abonent.id %}">Услуги</a></li>
+      <li class="active">История статуса услуги</li>
+  </ol>
+{% endblock %}
+
+{% block pages %} 
+{% load dict_extras %}
+<div class="page-header">
+  <h2 class="sub-header">История статуса услуги</h2>
+  <h4>{{ service }}</h4>
+  <h5><a href="{% url 'users.views.service_status_change' abonent.id service.id %}">Сменить статус услуги
+  <span class="glyphicon glyphicon-calendar"></span></a></h5>
+</div>
+{% if sscs %}
+  <table class="table h6">
+    <thead>
+      <tr>
+        <th>Дата</th>
+        <th>Изменение</th>
+        <th>Состояние</th>
+        <th>Комментарий</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ssc in sscs %}
+      <tr>
+        <td>{{ ssc.date|date:'Y-m-d H:i:s' }}</td>
+        <td>
+          <span class="label label-{{ssc.laststatus|get_color}}">{{ ssc.get_laststatus_display }}</span> -> 
+          <span class="label label-{{ssc.newstatus|get_color}}">{{ ssc.get_newstatus_display }}</span>
+        </td>
+        <td>
+          {% if ssc.done %} 
+            Исполнен {{ ssc.successfully|yesno:"успешно,неудачно" }}
+          {% else %}
+            В очереди 
+            <a href="{% url 'ssc_delete' ssc.id %}"><span class="glyphicon glyphicon-remove"></span></a>
+          {% endif %}
+        </td>
+        <td>
+          {{ ssc.comment }}
+          {{ ssc.attach|default_if_none:"" }} 
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}        
+
+{% endblock %}

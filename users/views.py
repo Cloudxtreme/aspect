@@ -21,7 +21,7 @@ from journaling.forms import ServiceStatusChangesForm
 from notice.forms import AbonentFilterForm
 from users.models import Abonent, Service, TypeOfService, Plan, Passport, Detail, Interface, Segment,Tag
 from tt.models import TroubleTicket, TroubleTicketComment
-from journaling.models import ServiceStatusChanges, AbonentStatusChanges
+from journaling.models import ServiceStatusChanges, AbonentStatusChanges, ServicePlanChanges
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from vlans.models import Network, IPAddr, Vlan
 from vlans.forms import LocationForm
@@ -288,8 +288,9 @@ def abonent_search(request):
 @login_required
 def service_status_change(request, abonent_id, service_id):
     try:
-        abonent = Abonent.objects.get(pk=abonent_id)
+        # abonent = Abonent.objects.get(pk=abonent_id)
         service = Service.objects.get(pk=service_id)
+        abonent = service.abon
     except:
         raise Http404 
 
@@ -300,7 +301,7 @@ def service_status_change(request, abonent_id, service_id):
             ssc.service = Service.objects.get(pk=service_id)
             ssc.laststatus = Service.objects.get(pk=service_id).status
             ssc.save()
-            return HttpResponseRedirect(reverse('services_history', args=[abonent_id, service_id]))
+            return HttpResponseRedirect(reverse('service_status_changes', args=[service.id]))
         else:
             print form.errors
     else:
@@ -600,25 +601,54 @@ def service_location_edit(request, abonent_id, service_id):
                                 'menu_title': 'Изменение местоположения',  },
                                  context_instance = RequestContext(request))
 
-@login_required
 # Смена тарифного плана на услуге
-def service_plan_edit(request, abonent_id, service_id):
+@login_required
+def service_plan_edit(request, service_id):
     try:
-        # abonent = Abonent.objects.get(pk = abonent_id)
         service = Service.objects.get(pk=service_id)
         abonent = service.abon
     except:
         raise Http404
 
     if request.method == 'POST':
-        form = ServicePlanForm(request.POST)
-        if form.is_valid():
-            service = form.save(commit=False)
-            service.save()
-            return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
+        # Выбираем разные формы для юриков и физиков
+        if abonent.utype == settings.U_TYPE_FIZ:
+            form = ServiceForm(request.POST, instance=service)
+            if form.is_valid():
+                pass
+        else:
+            form = OrgServiceForm(request.POST, instance=service)
+            if form.is_valid():
+                speed = form.cleaned_data['speed']
+                price = form.cleaned_data['price']
+                install_price = form.cleaned_data['install_price']
+                datechange = form.cleaned_data['datechange'] or datetime.now()
+                title = u'%s' % (speed)
+                # Создаем новый тарифный план
+                plan = Plan(title = title,
+                            tos = service.tos,
+                            speed = speed,
+                            comment = 'Автоматически созданный тарифный план',
+                            utype = abonent.utype,
+                            price = price,
+                            install_price = install_price,
+                            visible = False)
+                plan.save()
+                plan.segment.add(service.segment)
+                # Создаем запись об назначении тарифного плана
+                spc = ServicePlanChanges(
+                                service=service,
+                                plan=plan,
+                                newstatus='A',
+                                comment='Изменение тарифного плана',
+                                date=datechange)
+                spc.save()
+                return HttpResponseRedirect(reverse('abonent_services', args=[abonent.id]))
     else:
-        form = ServicePlanForm(initial={'plan': service.plan})
-        form.fields['plan'].queryset=Plan.objects.filter(tos__pk=service.plan.tos.pk, utype=abonent.utype)
+        if abonent.utype == settings.U_TYPE_FIZ:
+            form = ServiceForm(instance=service)
+        else:
+            form = OrgServiceForm(instance=service)
 
     return render_to_response('service/service_plan_changes.html', {
                                 'form': form,
@@ -652,8 +682,9 @@ def service_add(request, abonent_id, service_id):
                 speed = form.cleaned_data['speed']
                 price = form.cleaned_data['price']
                 install_price = form.cleaned_data['install_price']
-                datechange = form.cleaned_data['datechange']
+                datechange = form.cleaned_data['datechange'] or datetime.now()
                 title = u'%s' % (speed)
+
                 plan = Plan(title = title,
                             tos = service.tos,
                             speed = speed,
@@ -665,28 +696,36 @@ def service_add(request, abonent_id, service_id):
                 plan.save()
                 plan.segment.add(service.segment)
                 service.plan = plan
+
             service.save()
+            # Создаем запись об назначении тарифного плана
+            spc = ServicePlanChanges(
+                            service=service,
+                            plan=plan,
+                            newstatus='A',
+                            comment='Изменение тарифного плана',
+                            date=datechange)
+            spc.save()
             # Создаем запись об активации услуги
-            if datechange:
-                ssc = ServiceStatusChanges(
-                                service=service,
-                                newstatus=settings.STATUS_ACTIVE,
-                                comment='Изменение тарифного плана',
-                                date=datechange,
-                                # done=True,
-                                # successfully=True,
-                        )
-                ssc.save()
+            ssc = ServiceStatusChanges(
+                            service=service,
+                            newstatus=settings.STATUS_ACTIVE,
+                            comment='Изменение тарифного плана',
+                            date=datechange)
+            ssc.save()
+
             # Создаем уведомление о новой услуге для всех инженеров
             for user in Group.objects.get(name='Инженеры').user_set.all():
                 url_abonent = reverse('abonent_info', args=[abonent.pk])
                 url_service = reverse('abonent_services', args=[abonent.pk])
                 new_note = Note(
                     title = u'Добавлена новая услуга',
-                    descr = u'У абонента <a href=%s>%s</a> добавлена новая услуга <a href=%s>[%s]</a>. Заполните технические параметры' % (url_abonent,abonent.title,url_service,service.pk)  ,
+                    descr = u"""У абонента <a href=%s>%s</a> добавлена 
+                                новая услуга <a href=%s>[%s]</a>. Заполните 
+                                технические параметры"""
+                                % (url_abonent,abonent.title,url_service,service.pk),
                     marks = 'panel-warning',
-                    author = user,
-                    )
+                    author = user)
                 new_note.save()
 
             return HttpResponseRedirect(reverse('abonent_services', args=[abonent_id]))
@@ -702,12 +741,6 @@ def service_add(request, abonent_id, service_id):
                                 'menu_title': message, },
                                  context_instance = RequestContext(request))
 
-    # return render_to_response('service/service_add.html', {
-    #                             'form': form,
-    #                             'abonent' : abonent, },
-    #                             context_instance = RequestContext(request)
-    #                             ) 
-
 @login_required	
 def abonent_services(request, abonent_id):
     try:
@@ -721,21 +754,63 @@ def abonent_services(request, abonent_id):
                                 's_types' : TypeOfService.objects.all(), }, 
                                 context_instance = RequestContext(request))
 
+# Удалить изменение статуса услуги
 @login_required   
-def ssc_delete(request, abonent_id, service_id, ssc_id):
-    ServiceStatusChanges.objects.get(pk=ssc_id).delete()
-    return HttpResponseRedirect(reverse('services_history', args=[abonent_id, service_id]))
+def ssc_delete(request, ssc_id):
+    try:
+        ssc = ServiceStatusChanges.objects.get(pk=ssc_id)
+        service_id = ssc.service.id
+    except:
+        raise Http404
+    else:
+        ssc.delete()
 
+    return HttpResponseRedirect(reverse('service_status_changes', args=[service_id]))
+
+# Удалить изменение тарифного плана
+@login_required   
+def spc_delete(request, spc_id):
+    try:
+        spc = ServicePlanChanges.objects.get(pk=spc_id)
+        service_id = spc.service.id
+    except:
+        raise Http404 
+    else:
+        spc.delete()
+
+    return HttpResponseRedirect(reverse('service_plan_changes', args=[service_id]))
+
+# Изменения статуса услуги
 @login_required    
-def service_history(request, abonent_id, service_id):
+def service_status_changes(request, service_id):
     try:
         service = Service.objects.get(pk=service_id)
-        abonent = Abonent.objects.get(pk=abonent_id)
+        abonent = service.abon
     except:
         raise Http404
 
-    sscs = ServiceStatusChanges.objects.filter(service__pk=service_id).order_by('-pk')
-    return render_to_response('service/history.html', { 'abonent' : abonent, 'service' : service,  'sscs' : sscs, }, context_instance = RequestContext(request))
+    sscs = ServiceStatusChanges.objects.filter(service__pk=service_id).order_by('-date')
+    return render_to_response('service/ssc.html', 
+                            { 'abonent' : abonent, 
+                              'service' : service,  
+                                  'sscs' : sscs, }, 
+                                  context_instance = RequestContext(request))
+
+# Изменения тарифа услуги
+@login_required    
+def service_plan_changes(request, service_id):
+    try:
+        service = Service.objects.get(pk=service_id)
+        abonent = service.abon
+    except:
+        raise Http404
+
+    spcs = ServicePlanChanges.objects.filter(service__pk=service_id).order_by('-date')
+    return render_to_response('service/spc.html', 
+                            { 'abonent' : abonent, 
+                              'service' : service,  
+                                  'spcs' : spcs, }, 
+                                  context_instance = RequestContext(request))
 
 @login_required    
 def abonent_history(request, abonent_id):
@@ -745,7 +820,7 @@ def abonent_history(request, abonent_id):
         raise Http404
 
     ascs = AbonentStatusChanges.objects.filter(abonent__pk=abonent_id).order_by('-pk')
-    return render_to_response('abonent/history.html', { 'abonent' : abonent,  'ascs' : ascs, }, context_instance = RequestContext(request))
+    return render_to_response('abonent/ssc.html', { 'abonent' : abonent,  'ascs' : ascs, }, context_instance = RequestContext(request))
 
 @login_required
 def abonent_manage(request, abonent_id):

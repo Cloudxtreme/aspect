@@ -1,0 +1,48 @@
+{% extends "abonent/main.html" %}
+
+{% block breadcrumb %}
+        <ol class="breadcrumb">
+            <li><a href="{% url 'abonent_info' abonent.id %}">Абонент</a></li>
+            <li><a href="{% url 'users.views.abonent_services' abonent.id %}">Услуги</a></li>
+            <li class="active">История тарифа услуги</li>
+        </ol>
+{% endblock %}
+
+{% block pages %} 
+<div class="page-header">
+  <h2 class="sub-header">История тарифа услуги</h2>
+  <h4>{{ service }}</h4>
+  <h5><a href="{% url 'users.views.service_plan_edit' service.id %}">Изменить тариф
+  <span class="glyphicon glyphicon-calendar"></span></a></h5>
+</div>
+{% if spcs %}   
+  <table class="table h6">
+    <thead>
+      <tr>
+        <th>Дата</th>
+        <th>Тариф</th>
+        <th>Состояние</th>
+        <th>Комментарий</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for spc in spcs %}
+      <tr>
+        <td>{{ spc.date }}</td>
+        <td>{{ spc.plan }}</td>
+        <td>
+          {% if spc.done %} 
+            Исполнен {{ spc.successfully|yesno:"успешно,неудачно" }}
+          {% else %}
+            В очереди 
+            <a href="{% url 'spc_delete' spc.id %}"><span class="glyphicon glyphicon-remove"></span></a>
+          {% endif %}
+        </td>
+        <td>{{ spc.comment }} {{ spc.attach|default_if_none:"" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}        
+
+{% endblock %}

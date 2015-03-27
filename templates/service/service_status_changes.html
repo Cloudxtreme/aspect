@@ -7,7 +7,7 @@
         <ol class="breadcrumb">
             <li><a href="{% url 'abonent_info' abonent.id %}">Абонент</a></li>
             <li><a href="{% url 'users.views.abonent_services' abonent.id %}">Услуги</a></li>
-            <li><a href="{% url 'services_history' abonent.id service.id %}">История</a></li>
+            <li><a href="{% url 'service_status_changes' service.id %}">История</a></li>
             <li class="active">Изменение статуса</li>
         </ol>
 {% endblock %}
@@ -54,11 +54,12 @@
         </div>
     </div> 
 </form>
-        <script type="text/javascript">
-        $("#setDate").click(function () {
-            var d = new Date();
-            d.setDate( d.getDate() + 3 );
-            $('#id_datefinish_picker').data("DateTimePicker").setDate(d);
-        });
-        </script>
+
+<script type="text/javascript">
+$("#setDate").click(function () {
+    var d = new Date();
+    d.setDate( d.getDate() + 3 );
+    $('#id_datefinish_picker').data("DateTimePicker").setDate(d);
+});
+</script>
 {% endblock %}

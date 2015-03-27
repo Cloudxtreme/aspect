@@ -80,9 +80,7 @@ class PromisedPays(models.Model):
 
 class WriteOff(models.Model):
     def getnumber():
-        # pass
-        # no = WriteOff.objects.filter(valid=True).count()
-        no = WriteOff.objects.all().order_by("-id")[0].id or 1
+        no = WriteOff.objects.all().order_by("-id").first().id or 1
         return WRITEOFF_PREFIX + u'%06d' % (no + 1)
 
     abonent = models.ForeignKey(Abonent, verbose_name=u'Абонент')
@@ -121,11 +119,11 @@ class WriteOff(models.Model):
             #     email = EmailMessage(abonent=abonent, destination = abonent.notice_email, subject = 'Списание средств', content = u'С вашего счета списано: %s руб. Теперь на вашем счету %s руб.' % (self.summ, abonent.balance) )
             #     email.save()      
             
-            
     def delete(self, *args, **kwargs):
-        Abonent.objects.filter(pk=self.abonent.pk).update(balance=F('balance') + self.summ)
-        self.valid = False
-        self.save()
+        if self.valid:
+            Abonent.objects.filter(pk=self.abonent.pk).update(balance=F('balance') + self.summ)
+            self.valid = False
+            self.save()
     
     class Meta:
         verbose_name = u'Списание'
@@ -149,15 +147,11 @@ class PaymentFilterManager(models.Manager):
         
 class Payment(models.Model):
     def getnumber():
-        # pass
-        # no = Payment.objects.filter(valid=True).count()
-        no = Payment.objects.all().order_by("-id")[0].id or 1
+        no = Payment.objects.all().order_by("-id").first().id or 1
         return PAYS_PREFIX + u'%06d' % (no + 1)
     
-    # abon = models.ForeignKey(Abonent, verbose_name=u'Абонент',related_name='old_abonent')
     abonent = models.ForeignKey(Abonent, verbose_name=u'Абонент')
     top = models.ForeignKey(PaymentSystem, verbose_name=u'Платежная система')
-    # sum = models.FloatField(u'Сумма')
     summ = models.FloatField(u'Сумма',default=0)
     date = models.DateTimeField(default=datetime.now, verbose_name=u'Дата')
     user = models.ForeignKey(User, verbose_name=u'Пользователь', blank=True, null= True)
@@ -197,13 +191,10 @@ class Payment(models.Model):
                 abonentevent.generate_messages([self.abonent],extra_keys)
             
     def delete(self, *args, **kwargs):
-        # self.abonent.balance = F('balance') - self.summ
-        Abonent.objects.filter(pk=self.abonent.pk).update(balance=F('balance') - self.summ)
-        # self.abonent.balance -= self.summ
-        # self.abonent.save()
-        self.valid = False
-        self.save()
-        # super(Payment, self).delete(*args, **kwargs)
+        if self.valid:
+            Abonent.objects.filter(pk=self.abonent.pk).update(balance=F('balance') - self.summ)
+            self.valid = False
+            self.save()
 
     class Meta:
         verbose_name = u'Платеж'
