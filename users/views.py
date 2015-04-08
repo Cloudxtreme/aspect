@@ -35,7 +35,7 @@ from devices.aux import dec2ip,ip2dec
 from devices.models import Device
 from users.aux import abonent_filter
 import MySQLdb, requests, re
-from datetime import datetime, time, timedelta
+from datetime import datetime, time, timedelta, date
 from users.aux import *
 
 
@@ -958,7 +958,7 @@ def import_abonent_from1C(request):
     for contract in created_list :
         clients = u'%s' % contract
         # period = (datetime.now() - timedelta(hours=24000)).date() # Задаем примерно 3 года
-        period = datetime.date(2012, 1, 1)          # Лучше с 01.01.2012
+        period = date(2012, 1, 1)          # Лучше с 01.01.2012
         importuntlcdb(cursor,clients,period)        # Проверяем платежи по Uniteller
         importosmp1cdb(cursor,clients,period)       # Проверяем платежи по OSMP
     check_plan(cursor)                              # Проверяем не изменились ли тарифные планы
