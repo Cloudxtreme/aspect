@@ -291,7 +291,7 @@ class Device(models.Model):
         verbose_name_plural = u'Устройства'
 
     def __unicode__(self):
-        return u"%s - %s" % (self.devtype, self.ip)
+        return u"%s - %s - %s" % (self.devtype, self.mac, self.ip)
 
 class DeviceStatusEntry(models.Model):
     device = models.ForeignKey(Device, verbose_name=u'Устройство')

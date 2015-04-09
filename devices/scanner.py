@@ -25,12 +25,24 @@ def device_explore(ip,nonexisting_only=True):
         try:
             ipaddr = IPAddr.objects.get(ip=ip)              # Пробуем получить объект IP-адреса
         except: 
-            return 'Network is not exist'                   # Упс! Объект IP не создан, надо решать вопрос
+            return 'Network is not exist'                   # Упс! Объект IP не создан, надо решать вопрос отдельно
         else:
             iface, created = Interface.objects.get_or_create(ip__ip=ip, defaults={'ip': ipaddr,'for_device':True})
-            if devtype.category == 'R':                     # Для радио заполним мак адрес   
-                iface.mac = get_ubnt_macaddr(ip)            
-                iface.save()
+
+            if devtype.vendor == 'Ubiquiti':               # Заполним мак адрес   
+                mac = get_ubnt_macaddr(ip) if devtype.category == 'R' else get_ubntsw_macaddr(ip)
+            else:
+                mac = get_cisco_macaddr(ip)
+
+            # try:
+            #     d = Device.objects.get(mac=mac)
+            # except:
+            #     return 'Device with same IP already exist'
+            # else:
+            #     device_explore(d.ip.ip)
+                
+            iface.mac = mac
+            iface.save()
 
             ip_list = get_ip_list(ip)
             msg = ''

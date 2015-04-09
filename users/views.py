@@ -559,7 +559,9 @@ def service_device_choice(request, service_id):
             return HttpResponseRedirect(reverse('abonent_services', args=[abonent.id]))
     else:
         form = ServiceDeviceForm(instance=service)
-        form.fields['device'].queryset=Device.objects.filter(devtype__category='R',location=None)|Device.objects.filter(devtype__category='S',location__bs_type='CP')
+        form.fields['device'].queryset=Device.objects.filter(devtype__category='R',location=None)|\
+                                       Device.objects.filter(devtype__category='S')|\
+                                       Device.objects.filter(location__bs_type='CP')
         if service.device:
             form.fields['device'].queryset = form.fields['device'].queryset|Device.objects.filter(pk=service.device.pk)
         # else:

@@ -144,13 +144,13 @@ def get_clients(request):
         for mac,signal in get_ubnt_clients(ip):
             text = {}
             try:
-                dev = Device.objects.get(interfaces__mac=mac)
-            except:
+                dev = Device.objects.get(mac=mac)
+            except: # Устройство не найдено в базе
                 text['ip'] = ''
                 text['url'] = '#'
-                text['devname'] = ''
+                text['devname'] = 'Отсутствует в базе'
                 text['class'] = 'warning'
-            else:
+            else: # Устройство найдено в базе
                 peer_list = peer_list.exclude(pk=dev.pk) if peer_list else []
                 ip = dev.ip.ip
                 text['devname'] = get_dev_name(ip)
@@ -168,7 +168,7 @@ def get_clients(request):
             text['ip'] = ip
             text['devname'] = get_dev_name(ip)
             text['mac'] = peer.ip.interface.mac
-            text['signal'] = '?'
+            text['signal'] = 'offline'
             text['class'] = 'info'
             text['url'] = reverse('device_view', args=[peer.pk])
             data.append(text)
@@ -203,6 +203,24 @@ def get_supply_info(request):
         data = {}
         data['voltage'] = voltage
         data['supply'] = supply
+    return HttpResponse(simplejson.dumps(data))
+
+@login_required
+def check_mac(request):
+    try:
+        device = Device.objects.get(pk=request.GET['id'])
+        ip = device.ip.ip
+    except:
+        data = {}
+    else:
+        if device.devtype.vendor == 'Ubiquiti':                  
+            mac = get_ubnt_macaddr(ip) if device.devtype.category == 'R' else get_ubntsw_macaddr(ip)
+        elif device.devtype.category == 'S':
+            mac = get_cisco_macaddr(ip)
+        else:
+            mac = ''
+        data = {}
+        data['mac'] = mac
     return HttpResponse(simplejson.dumps(data))
 
 @login_required

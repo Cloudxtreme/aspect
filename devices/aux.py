@@ -143,7 +143,8 @@ def get_ubntsw_macaddr(ip):
 # Опеределяем MAC устройства
 def get_ubnt_macaddr(ip):
     oid = 'iso.2.840.10036.2.1.1.1.5'
-    return run_snmp(oid,ip).replace(':','')
+    oid_2 = 'iso.2.840.10036.2.1.1.1.6'
+    return run_snmp(oid,ip).replace(':','') or run_snmp(oid_2,ip).replace(':','')
 
 # Опеределяем MAC устройства
 # def get_ubnt_macaddr(ip):
