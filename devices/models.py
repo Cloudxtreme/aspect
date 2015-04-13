@@ -269,6 +269,8 @@ class Device(models.Model):
     # Только для UBNT получение, анализ и сохранение конфига
     def _get_config(self):    
         result = False
+        if not self.ip:
+            return False
         if self.devtype.vendor == 'Ubiquiti':
             config, success = get_ubnt_cfg(self.ip.ip)
             if success:

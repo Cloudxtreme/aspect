@@ -1,0 +1,51 @@
+{% extends "abonent/main.html" %}
+
+{% block breadcrumb %}
+  <ol class="breadcrumb">
+      <li><a href="{% url 'abonent_info' abonent.id %}">Абонент</a></li>
+      <li class="active">История статусов абонента</li>
+  </ol>
+{% endblock %}
+
+{% block pages %} 
+{% load dict_extras %}
+<div class="page-header">
+  <h2 class="sub-header">История статусов абонента</h2>
+</div>
+{% if ascs %}
+  <table class="table h6">
+    <thead>
+      <tr>
+        <th>Дата</th>
+        <th>Изменение</th>
+        <th>Состояние</th>
+        <th>Комментарий</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for asc in ascs %}
+      <tr>
+        <td>{{ asc.date|date:'Y-m-d H:i:s' }}</td>
+        <td>
+          <span class="label label-{{asc.laststatus|get_color}}">{{ asc.get_laststatus_display }}</span> -> 
+          <span class="label label-{{asc.newstatus|get_color}}">{{ asc.get_newstatus_display }}</span>
+        </td>
+        <td>
+          {% if asc.done %} 
+            Исполнен {{ asc.successfully|yesno:"успешно,неудачно" }}
+          {% else %}
+            В очереди 
+            {# <a href="{% url 'asc_delete' asc.id %}"><span class="glyphicon glyphicon-remove"></span></a> #}
+          {% endif %}
+        </td>
+        <td>
+          {{ asc.comment }}
+          {{ asc.attach|default_if_none:"" }} 
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}        
+
+{% endblock %}

@@ -822,7 +822,11 @@ def abonent_history(request, abonent_id):
         raise Http404
 
     ascs = AbonentStatusChanges.objects.filter(abonent__pk=abonent_id).order_by('-pk')
-    return render_to_response('abonent/ssc.html', { 'abonent' : abonent,  'ascs' : ascs, }, context_instance = RequestContext(request))
+
+    return render_to_response('abonent/ssc.html', 
+                                { 'abonent' : abonent,
+                                     'ascs' : ascs, }, 
+                                context_instance = RequestContext(request))
 
 @login_required
 def abonent_manage(request, abonent_id):
