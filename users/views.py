@@ -809,10 +809,10 @@ def service_plan_changes(request, service_id):
 
     spcs = ServicePlanChanges.objects.filter(service__pk=service_id).order_by('-date')
     return render_to_response('service/spc.html', 
-                            { 'abonent' : abonent, 
-                              'service' : service,  
-                                  'spcs' : spcs, }, 
-                                  context_instance = RequestContext(request))
+                                { 'abonent' : abonent, 
+                                  'service' : service,  
+                                     'spcs' : spcs, }, 
+                                context_instance = RequestContext(request))
 
 @login_required    
 def abonent_history(request, abonent_id):
@@ -984,7 +984,11 @@ def abonent_settings(request, abonent_id):
         for service in abonent.service_set.all():
             for iface in service.ifaces.all():
                 mask = dec2ip(4294967295 - pow(2,32-iface.ip.net.mask) + 1)
-                gw = Interface.objects.get(device__router=True,ip__net__pk=iface.ip.net.pk)
+                try:
+                    gw = Interface.objects.get(device__router=True,ip__net__pk=iface.ip.net.pk)
+                except:
+                    gw = 'Шлюз не указан'
+                    
                 entry = {'location':service.location,'ip': iface.ip.ip, 'mask': mask, 'gw' : gw }
                 setting_list.append(entry)
 
