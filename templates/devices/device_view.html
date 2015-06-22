@@ -62,6 +62,19 @@
                         $('#config-group').html(options);
                         $('#spinner').hide();
                         get_details('None');
+                    }); 0
+        };
+
+        function do_measuring()
+        {
+            $('#spinner-mesuring').show();
+            $.getJSON("/ajax/do_measuring/",{id:dev_id}, function(j) {
+                var options = '';
+                for (var i = 0; i < j.length; i++) {
+                        options += '<li class="list-group-item small">' + j[i]['date'] + ' ' + j[i]['mac'] + ' ' + j[i]['signal'] + 'dBm' + '</li>';
+                    }
+                        $('#measuring-group').html(options);
+                        $('#spinner-mesuring').hide();
                     }); 
         };
 
@@ -102,6 +115,10 @@
             $('#save_config').click(function(){  
                 save_confg();
             });  
+
+            $('#do_measuring').click(function(){  
+                do_measuring();
+            }); 
 
         }); 
     </script>
@@ -224,6 +241,22 @@
             {% endfor %}
             </ul>
         </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">Результаты измерений</div>
+            <div class="panel-body">
+                <a href="#" id="do_measuring">Сохранить измерения <span class="glyphicon glyphicon-save"></span>&nbsp;
+                <img id="spinner-mesuring" style="display:none;" src="/media/images/spinner2.gif" alt="Loading"/></a>
+            </div>
+            <ul class="list-group" id="measuring-group">
+            {% for measuring in device.measuring_set.all|slice:":3" %}
+                <li class="list-group-item small">
+                    {{ measuring.date|date:"d-m-Y H:i:s" }} {{ measuring.mac }} {{ measuring.signal }} dBm
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
+
     </div>
 </div>
 

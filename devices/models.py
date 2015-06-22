@@ -266,6 +266,21 @@ class Device(models.Model):
         config.save()
         return config.pk
 
+    def _do_measuring(self):
+        result = False
+        if not self.ip:
+            return False        
+        if self.devtype.vendor == 'Ubiquiti' and self.devtype.category == settings.DEVTYPE_RADIO:
+            measuringList =[]
+            for mac,signal in get_ubnt_clients(self.ip.ip):
+                measuringList += [Measuring(
+                        device=self,
+                        mac = mac,
+                        signal = signal)]
+            Measuring.objects.bulk_create(measuringList)
+            result = True
+        return result
+
     # Только для UBNT получение, анализ и сохранение конфига
     def _get_config(self):    
         result = False
@@ -321,3 +336,18 @@ class Config(models.Model):
 
     def __unicode__(self):
         return u"[%s] - %s" % (self.date, self.device)
+
+class Measuring(models.Model):
+    device = models.ForeignKey(Device,verbose_name=u'Устройство')
+    mac = mac = models.CharField(u'MAC адрес', default = '', 
+        blank=True, null= True, max_length=17)
+    signal = models.IntegerField(u'Signal')
+    date = models.DateTimeField(auto_now=True, auto_now_add=True)
+
+    class Meta:
+        verbose_name = u'Измерение'
+        verbose_name_plural = u'Измерения'
+        ordering = ['-date']
+
+    def __unicode__(self):
+        return u"[%s] - %s %s dBm" % (self.date, self.device, self.signal)
