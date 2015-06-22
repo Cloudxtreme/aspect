@@ -176,6 +176,23 @@ def get_clients(request):
     return HttpResponse(simplejson.dumps(data), mimetype='application/javascript')
 
 @login_required
+def measuring_list(request):
+    data = []
+    try:
+        device = Device.objects.get(pk=request.GET['id'])
+    except:
+        pass
+    else:
+        for measure in device.measuring_set.all():
+            text = {}
+            text['date'] = "%s" % measure.date
+            text['mac'] = measure.mac
+            text['signal'] = measure.signal
+            data.append(text)  
+
+    return HttpResponse(simplejson.dumps(data), mimetype='application/javascript')  
+
+@login_required
 def do_measuring(request):
     data = []
     try:

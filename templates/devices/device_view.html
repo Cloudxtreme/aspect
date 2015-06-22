@@ -65,13 +65,26 @@
                     }); 0
         };
 
+        function measuring_list()
+        {
+            $('#spinner-mesuringlist').show();
+            $.getJSON("/ajax/measuring_list/",{id:dev_id}, function(j) {
+                var options = '';
+                for (var i = 0; i < j.length; i++) {
+                        options += '<li class="list-group-item small">' + j[i]['date'] + ' ' + j[i]['mac'] + ' ' + j[i]['signal'] + ' dBm' + '</li>';
+                    }
+                        $('#measuring-group').html(options);
+                        $('#spinner-mesuringlist').hide();
+                    }); 
+        };
+
         function do_measuring()
         {
             $('#spinner-mesuring').show();
             $.getJSON("/ajax/do_measuring/",{id:dev_id}, function(j) {
                 var options = '';
                 for (var i = 0; i < j.length; i++) {
-                        options += '<li class="list-group-item small">' + j[i]['date'] + ' ' + j[i]['mac'] + ' ' + j[i]['signal'] + 'dBm' + '</li>';
+                        options += '<li class="list-group-item small">' + j[i]['date'] + ' ' + j[i]['mac'] + ' ' + j[i]['signal'] + ' dBm' + '</li>';
                     }
                         $('#measuring-group').html(options);
                         $('#spinner-mesuring').hide();
@@ -120,6 +133,9 @@
                 do_measuring();
             }); 
 
+            $('#measuring_list').click(function(){  
+                measuring_list();
+            });
         }); 
     </script>
 {% endblock %}
@@ -245,8 +261,10 @@
         <div class="panel panel-default">
             <div class="panel-heading">Результаты измерений</div>
             <div class="panel-body">
-                <a href="#" id="do_measuring">Сохранить измерения <span class="glyphicon glyphicon-save"></span>&nbsp;
+                <a href="#" id="do_measuring">Провести измерение <span class="glyphicon glyphicon-save"></span>&nbsp;
                 <img id="spinner-mesuring" style="display:none;" src="/media/images/spinner2.gif" alt="Loading"/></a>
+                <a href="#" id="measuring_list">Показать все измерения <span class="glyphicon glyphicon-list"></span>&nbsp;
+                <img id="spinner-mesuringlist" style="display:none;" src="/media/images/spinner2.gif" alt="Loading"/></a>
             </div>
             <ul class="list-group" id="measuring-group">
             {% for measuring in device.measuring_set.all|slice:":3" %}
