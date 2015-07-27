@@ -45,6 +45,8 @@ class DeviceEditForm(forms.ModelForm):
         model = Device
         exclude = ['interfaces','last_available','location']
 
+class IPForm(forms.Form):
+    ip = forms.CharField(label=u'IP-адрес', widget=forms.TextInput(attrs={'class':'form-control', 'placeholder' : "10.64.х.х" } ))
 
 class SyslogFilterForm(forms.Form):
     datestart = forms.DateField(

@@ -6,7 +6,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
 from devices.models import Device, DevType, DeviceStatusEntry, Application
-from devices.forms import DeviceEditForm, SyslogFilterForm, AppEditForm, DeviceChoiceLocationForm, DeviceChoiceServiceForm
+from devices.forms import DeviceEditForm, SyslogFilterForm, AppEditForm, DeviceChoiceLocationForm,\
+                          DeviceChoiceServiceForm, IPForm
 from users.forms import ServiceInterfaceForm
 from users.models import Interface
 from vlans.models import IPAddr, Network
@@ -398,6 +399,35 @@ def device_save_config(request, device_id):
     device._get_config()
     return HttpResponseRedirect(reverse('device_view', args=[device.pk]))
                                            
+# Редактирование устройства
+@login_required
+def device_add_byip(request):
+
+    if request.method == 'POST':
+        form = IPForm(request.POST)
+        if form.is_valid():
+            # newdevice = form.save()
+            # newdevice.save()
+            # if device.interfaces.all().count():
+            #    net_id = device.interfaces.all()[0].ip.net_id
+            # else:
+            #     net_id = 1
+            # anchortag = '#%s' % device.pk
+            return HttpResponseRedirect(reverse('devices_list', args=[0]))
+    else:
+        form = IPForm()
+    header = 'Добавить новое устройство'
+
+    breadcrumbs = [({'url':reverse('devices_list', args=[0]),'title':'Список подсетей'}),
+                    ({'url':reverse('devtype_list', args=[0]),'title':'Список устройств'})]
+
+    return render_to_response('generic/generic_edit.html', {
+                                'header' : header,
+                                'breadcrumbs' :breadcrumbs,
+                                'form': form,
+                                'extend': 'index.html',},
+                                context_instance = RequestContext(request)
+                                )     
 
 # Редактирование устройства
 @login_required

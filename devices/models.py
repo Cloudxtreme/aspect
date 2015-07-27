@@ -342,6 +342,8 @@ class Measuring(models.Model):
     mac = mac = models.CharField(u'MAC адрес', default = '', 
         blank=True, null= True, max_length=17)
     signal = models.IntegerField(u'Signal')
+    quality = models.IntegerField(u'Quality',default=0)
+    capacity = models.IntegerField(u'Capacity',default=0)
     date = models.DateTimeField(auto_now=True, auto_now_add=True)
 
     class Meta:

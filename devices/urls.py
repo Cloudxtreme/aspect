@@ -3,6 +3,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 urlpatterns = patterns('',
+    url(r'^add_byip/$','devices.views.device_add_byip', name='device_add_byip'),
     url(r'^(?P<device_id>\d+)/edit/$','devices.views.device_edit', name='device_edit'),
     url(r'^(?P<device_id>\d+)/view/$','devices.views.device_view', name='device_view'),
     url(r'^(?P<device_id>\d+)/del/$','devices.views.device_del', name='device_del'),

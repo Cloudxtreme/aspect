@@ -27,6 +27,10 @@
 {% block main %} 
 <div class="page-header">
     <h2 class="sub-header">Оборудование по типам устройств</h2>
+    <a href="{% url 'device_edit' 0 %}">Добавить новое устройство
+    <span class="glyphicon glyphicon-plus-sign"></span></a>
+    <a href="{% url 'device_add_byip' %}">Добавить новое устройство по IP
+    <span class="glyphicon glyphicon-plus-sign"></span></a>
 </div>
 <div class="row">
     <div class="col-md-3">
