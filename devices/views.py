@@ -420,7 +420,7 @@ def device_add_byip(request):
                 device._attach2srv()
                 device.fill_namemac()
                 device._do_measuring()
-                device._save_config()
+                # device._save_config()
 
             return HttpResponseRedirect(reverse('device_view', args=[device.pk]))
     else:
