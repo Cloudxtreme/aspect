@@ -3,6 +3,10 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from vlans.fields import LocationField
 from devices.aux import ip2dec,dec2ip
+# from users.models import Service
+# from vlans.aux import get_profit_by_bs
+# import vlans.aux
+from django.db.models import Sum
 
 TYPE_OF_OBJECTS = (
     ('C', 'Клиент'),
@@ -62,13 +66,25 @@ class Location(models.Model):
         if self.geolocation:
             return self.geolocation.split(',')
 
+    # @property
+    def get_profit(self):
+        if self.bs_type in ['B','CP']:
+            from users.models import Service
+            srv_list = Service.objects.filter(device__peer__location__pk=self.pk)|\
+                       Service.objects.filter(device__location__pk=self.pk)
+            # active_srv_list = srv_list.filter(status=settings.STATUS_ACTIVE)
+
+            profit = srv_list.aggregate(Sum('plan__price'))['plan__price__sum']
+            # active_profit = active_srv_list.aggregate(Sum('plan__price'))['plan__price__sum']
+            return profit
+
     class Meta:
         verbose_name = u'Местонахождение'
         verbose_name_plural = u'Местонахождения'
         ordering = ['title']
 
     def __unicode__(self):
-        return "[%s] %s" % (self.pk, self.title)
+        return "[%s] %s" % (self.pk, self.address)
 
 class Node(models.Model):
     title  = models.CharField(max_length=100)

@@ -128,7 +128,7 @@ def unfilled_params(request,param):
 
     def srv_wo_device():
         result = []
-        for service in Service.objects_enabled.filter(device=None):
+        for service in Service.objects_enabled.filter(device=None,tos__id__in=[1,4]):
             result.append({'url':reverse('abonent_services', args=[service.abon.pk]),'title': service.__unicode__() }) 
         return result   
 

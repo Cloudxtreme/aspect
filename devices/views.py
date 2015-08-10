@@ -5,7 +5,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
-from devices.models import Device, DevType, DeviceStatusEntry, Application
+from devices.models import Device, DevType, DeviceStatusEntry, Application, get_devtype
 from devices.forms import DeviceEditForm, SyslogFilterForm, AppEditForm, DeviceChoiceLocationForm,\
                           DeviceChoiceServiceForm, IPForm
 from users.forms import ServiceInterfaceForm
@@ -406,16 +406,23 @@ def device_add_byip(request):
     if request.method == 'POST':
         form = IPForm(request.POST)
         if form.is_valid():
-            # newdevice = form.save()
-            # newdevice.save()
-            # if device.interfaces.all().count():
-            #    net_id = device.interfaces.all()[0].ip.net_id
-            # else:
-            #     net_id = 1
-            # anchortag = '#%s' % device.pk
-            return HttpResponseRedirect(reverse('devices_list', args=[0]))
+            ip = form.cleaned_data['ip']
+            try:
+                ipaddr = IPAddr.objects.get(ip=ip)
+                iface = Interface(ip=ipaddr)
+                iface.save()
+            except:
+                return HttpResponseRedirect(reverse('devtype_list', args=[0]))
+            else:
+                device = Device(devtype = get_devtype(ip))
+                device.save()
+                device.interfaces.add(iface)
+                device._get_macaddr()
+
+            return HttpResponseRedirect(reverse('device_view', args=[device.pk]))
     else:
         form = IPForm()
+
     header = 'Добавить новое устройство'
 
     breadcrumbs = [({'url':reverse('devices_list', args=[0]),'title':'Список подсетей'}),
@@ -569,6 +576,7 @@ def device_location_choice(request, device_id, bs):
         header = 'Выбор узла связи' if bs=='0' else 'Выбор услуги'
         anchortag = '#%s' % device.pk
         breadcrumbs = []
+        message = ''
     except:
         raise Http404
 
@@ -592,7 +600,7 @@ def device_location_choice(request, device_id, bs):
             message = 'Устройство успешно привязано к БС' # if bs=='0' else 'Устройство успешно привязано к услуге'
     else:
         form = DeviceChoiceLocationForm(instance=device) if bs=='0' else DeviceChoiceServiceForm(instance=device)
-        message = ''
+        
 
     breadcrumbs.append({'url':reverse('devtype_list', args=[device.devtype.id]),'title':device.devtype})
     breadcrumbs.append({'url':reverse('devices_list', args=[device.ip.net.id]) + anchortag,'title':device.ip.net})

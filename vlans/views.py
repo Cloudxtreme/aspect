@@ -219,6 +219,18 @@ def bs_list(request):
     return render_to_response('bs_list.html', { 'bs_list': bs_list }, context_instance = RequestContext(request))
 
 # Просмотр БС
+# @login_required
+# def bs_profitability(request):
+#     for bs in Location.objects.filter(bs_type__in=['B','CP']):
+#         srv_list = Service.objects.filter(device__peer__location__pk=bs.id)|\
+#                    Service.objects.filter(device__location__pk=bs.id)
+#         active_srv_list = srv_list.filter(status=settings.STATUS_ACTIVE)
+
+#         profit = srv_list.aggregate(Sum('plan__price'))['plan__price__sum']
+#         active_profit = active_srv_list.aggregate(Sum('plan__price'))['plan__price__sum']
+
+
+# Просмотр БС
 @login_required
 def bs_view(request,bs_id):
     try:

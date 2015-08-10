@@ -212,8 +212,8 @@ class Device(models.Model):
             iface = self.ip.interface
             iface.mac = mac
             iface.save()
-            # self.mac = mac
-            # self.save()
+            self.mac = mac
+            self.save()
             return mac
 
     # Привязать устройство к услуге (Только для физиков)
