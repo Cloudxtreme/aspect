@@ -402,7 +402,6 @@ def device_save_config(request, device_id):
 # Редактирование устройства
 @login_required
 def device_add_byip(request):
-
     if request.method == 'POST':
         form = IPForm(request.POST)
         if form.is_valid():
@@ -418,6 +417,10 @@ def device_add_byip(request):
                 device.save()
                 device.interfaces.add(iface)
                 device._get_macaddr()
+                device._attach2srv()
+                device.fill_namemac()
+                device.do_measuring()
+                device._save_config()
 
             return HttpResponseRedirect(reverse('device_view', args=[device.pk]))
     else:

@@ -36,7 +36,7 @@
     <th>Кол-во устройств</th>
     <th>Доход, руб.</th>
     <th>Расход, руб.</th>
-    <th>Комментарий</th>    
+    <th>Комментарий</th>
     <th></th>
   </tr>
 </thead>
@@ -48,7 +48,7 @@
     <td><a href="{% url 'bs_view' bs.pk %}">{% if bs.bs_type == 'CP' %}<span class="glyphicon glyphicon-flash"></span>{% endif %} {{ bs.title }}</a><small></small>
     <small>{{ bs.address }}</small></td>
     <td><small>{{ bs.device_set.count }}</small></td>
-    <td>{{ bs.get_profit|default_if_none:"" }}</td>
+    <td>{{ bs.get_profit }}</td>
     <td>{{ bs.rent.cost|default_if_none:"" }} </td>
     <td>{{ bs.comment }} </td>
     <td>

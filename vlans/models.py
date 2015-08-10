@@ -66,7 +66,6 @@ class Location(models.Model):
         if self.geolocation:
             return self.geolocation.split(',')
 
-    # @property
     def get_profit(self):
         if self.bs_type in ['B','CP']:
             from users.models import Service
@@ -74,9 +73,31 @@ class Location(models.Model):
                        Service.objects.filter(device__location__pk=self.pk)
             # active_srv_list = srv_list.filter(status=settings.STATUS_ACTIVE)
 
-            profit = srv_list.aggregate(Sum('plan__price'))['plan__price__sum']
+            profit = srv_list.aggregate(Sum('plan__price'))['plan__price__sum'] or 0
             # active_profit = active_srv_list.aggregate(Sum('plan__price'))['plan__price__sum']
-            return profit
+
+            # satellite_list =[]
+            satellite_profit = 0
+
+            if self.bs_type == 'B':
+                for d in self.device_set.all():
+                    for p in d.peers:
+                        if p.location:
+                            if p.location.bs_type == 'CP':
+                                satellite_profit += p.location.get_profit()
+
+                                # satellite_profit += satellite.get_profit()
+                                # satellite_list.append(sat_id)
+                        # else:
+                    #     print p # Выводим устройства не привязанные к БС
+            # print 'БС: [%s] - список пересков: %s' % (self.pk, satellite_list)
+            # for sat_id in satellite_list:
+            #     satellite = Location.objects.get(sat_id)
+            #     satellite_profit += satellite.get_profit()
+
+            # print satellite_list
+
+            return profit + satellite_profit 
 
     class Meta:
         verbose_name = u'Местонахождение'
