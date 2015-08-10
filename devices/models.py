@@ -268,6 +268,7 @@ class Device(models.Model):
 
     def _do_measuring(self):
         result = False
+        self.fill_namemac()
         if not self.ip:
             return False        
         if self.devtype.vendor == 'Ubiquiti' and self.devtype.category == settings.DEVTYPE_RADIO:
