@@ -419,7 +419,7 @@ def device_add_byip(request):
                 device._get_macaddr()
                 device._attach2srv()
                 device.fill_namemac()
-                device.do_measuring()
+                device._do_measuring()
                 device._save_config()
 
             return HttpResponseRedirect(reverse('device_view', args=[device.pk]))
