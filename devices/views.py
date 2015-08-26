@@ -310,7 +310,7 @@ def devtype_list(request, dt_id):
         dev_list = Device.objects.filter(devtype=dt_id) # Тут проблемы с сортировкой, поэтому её убрали
 
     return render_to_response('devices/devtype_list.html', { 
-                                'dev_list' : dev_list, 
+                                'dev_list' : dev_list.order_by('interfaces'), 
                                 'devtype_list' : devtype_list }, 
                                 context_instance = RequestContext(request))
 
@@ -326,7 +326,7 @@ def devices_list(request, net_id):
         dev_list = Device.objects.filter(interfaces__ip__net__pk=net_id)
 
     return render_to_response('devices/devices_list.html', { 
-                                'dev_list' : dev_list, 
+                                'dev_list' : dev_list.order_by('interfaces'), 
                                 'parent_nets' : parent_nets }, 
                                 context_instance = RequestContext(request))
 # Удаление устройства

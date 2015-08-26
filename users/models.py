@@ -308,6 +308,15 @@ class Service(models.Model):
         for wo in self.write_off_set.filte(wot=1):
             wo.delete()
         # Получаем список изменений тарифов
+        chlist = self.serviceplanchanges_set.all().order_by('-date')
+        idx = 0
+        for spc in chlist:
+            datestart = chlist[idx].date
+            idx += 1
+            datefinish = chlist[idx].date if len(chlist)>=idx+1 else datetime.today()
+            period = [datestart,datefinish]
+            print period
+            
         # Получаем список изменений статусов
 
     def set_status(self, new_status, date=datetime.datetime.now()):

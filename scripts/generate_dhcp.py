@@ -3,6 +3,7 @@
 # Скрипт генерирует файл конфигурации DHCP сервера
 import os
 import sys
+import re
 
 sys.path.append("/home/diamond/venv/billing/aspekt")
 os.environ['DJANGO_SETTINGS_MODULE'] = 'aspekt.settings'
@@ -16,6 +17,10 @@ def dec2ip(ip):
         
 def ip2dec(ip):
     return sum([int(q) << i * 8 for i, q in enumerate(reversed(ip.split(".")))])
+
+def format_mac(s):
+    regex = re.compile('[^a-fA-F0-9]')
+    return reduce(lambda x,y: x+':'+y, map(''.join, zip(*[iter(regex.sub('', s)[:12])]*2)))
 
 config = ''
 config += 'authoritative;\n'
@@ -57,7 +62,7 @@ for net in Network.objects.filter(net_type='UN',in_dhcpd=True):
             if number:
                 config += '\n'
                 config += 'host %s {\n' % (number)
-                config += '  hardware ethernet %s;\n' % (mac)
+                config += '  hardware ethernet %s;\n' % (format_mac(mac))
                 config += '  ifixed-address %s;\n'  % (ip)
                 config += '}\n'
 
