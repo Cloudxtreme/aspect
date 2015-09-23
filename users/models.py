@@ -5,7 +5,8 @@ from vlans.models import IPAddr, Vlan, Location
 from journaling.models import AbonentStatusChanges, ServiceStatusChanges
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import User
-import datetime
+from datetime import date, datetime, time, timedelta
+from calendar import monthrange,month_name
 import calendar
 from django.conf import settings
 
@@ -150,7 +151,7 @@ class Abonent(models.Model):
                     laststatus=old_status,
                     newstatus=self.status,
                     comment=comment,
-                    date=datetime.datetime.now()
+                    date=datetime.now()
                 )
                 asc.save()
 
@@ -167,7 +168,7 @@ class Abonent(models.Model):
                     self.status = (settings.STATUS_ACTIVE if self.balance >= settings.TURNOFFBALANCE else settings.STATUS_OUT_OF_BALANCE)
                 else: # Постоплатников c минусовым балансом выключаем 25 числа или в любой другой день, как только сумма на счете станет меньше чем сумма всех услуг
                     service_sum = self.service_set.filter(status__in=['A','N']).aggregate(Sum('plan__price'))['plan__price__sum'] or 0
-                    self.status = (settings.STATUS_OUT_OF_BALANCE if (self.balance - settings.TURNOFFBALANCE < -service_sum) or (self.balance < settings.TURNOFFBALANCE and datetime.datetime.today().day > 24) else settings.STATUS_ACTIVE)
+                    self.status = (settings.STATUS_OUT_OF_BALANCE if (self.balance - settings.TURNOFFBALANCE < -service_sum) or (self.balance < settings.TURNOFFBALANCE and datetime.today().day > 24) else settings.STATUS_ACTIVE)
                 super(Abonent, self).save()
                 self.set_changes(reason, old_status)
 
@@ -267,7 +268,7 @@ def get_1stdaynextmonth(sourcedate,months):
     year = sourcedate.year + month / 12
     month = month % 12 + 1
     day = min(sourcedate.day,calendar.monthrange(year,month)[1])
-    return datetime.date(year,month,1)
+    return date(year,month,1)
 
 class ServiceEnabledManager(models.Manager):
     def get_queryset(self):
@@ -276,6 +277,21 @@ class ServiceEnabledManager(models.Manager):
 class ServiceActiveManager(models.Manager):
     def get_queryset(self):
         return super(ServiceActiveManager, self).get_queryset().filter(status=settings.STATUS_ACTIVE)
+
+def add_months(sourcedate,months):
+    month = sourcedate.month - 1 + months
+    year = int(sourcedate.year + month / 12 )
+    month = month % 12 + 1
+    day = min(sourcedate.day,calendar.monthrange(year,month)[1])
+    return date(year,month,day)
+
+def month_year_iter( start_month, start_year, end_month, end_year ):
+    ym_start= 12*start_year + start_month - 1
+    ym_end= 12*end_year + end_month
+    # ym_end= 12*end_year + end_month - 1
+    for ym in range( ym_start, ym_end ):
+        y, m = divmod( ym, 12 )
+        yield y, m+1
 
 class Service(models.Model):
     abon = models.ForeignKey(Abonent,verbose_name=u'Абонент')
@@ -288,14 +304,14 @@ class Service(models.Model):
     status = models.CharField(u'Статус', max_length=1, choices=settings.STATUSES, default=settings.STATUS_NEW)
     speed = models.ForeignKey(Pipe, blank=True, null=True, verbose_name=u'Скорость')
     location = models.ForeignKey(Location, blank=True, null=True, verbose_name=u'Местонахождение')
-    datestart = models.DateField(auto_now=False, auto_now_add=False, default=datetime.datetime.now(), verbose_name=u'Дата начала')
+    datestart = models.DateField(auto_now=False, auto_now_add=False, default=datetime.now(), verbose_name=u'Дата начала')
     datefinish = models.DateField(auto_now=False, auto_now_add=False, blank=True, null= True, verbose_name=u'Дата окончания')
     device = models.ForeignKey('devices.Device', verbose_name=u'Абонентское устройство', blank=True, null= True)
     objects = models.Manager()
     objects_active = ServiceActiveManager()
     objects_enabled = ServiceEnabledManager()
 
-    def set_changestatus_in_plan(self, new_status, date=datetime.datetime.now()):
+    def set_changestatus_in_plan(self, new_status, date=datetime.now()):
         ssc = ServiceStatusChanges(
                         service=self,
                         newstatus=new_status,
@@ -303,23 +319,63 @@ class Service(models.Model):
                         date=date)
         ssc.save()
 
-    def recalculate(self):
-        # Удаляем все списание абонплаты по этой услуге
-        for wo in self.write_off_set.filte(wot=1):
-            wo.delete()
+    def recalculate(self,demo=True):
         # Получаем список изменений тарифов
-        chlist = self.serviceplanchanges_set.all().order_by('-date')
+        chlist = self.serviceplanchanges_set.all().order_by('date')
+        period = {'start':datetime(2014,10,1),'end':datetime(2015,8,31)}
+        is_credit = True if self.abon.is_credit == 'O' else False # Проверяем на постоплату
         idx = 0
+        
+        # Делаем заготовку для пачки спсианий аб. платы
+        from pays.models import WriteOff, WriteOffType
+        wot = WriteOffType.objects.get(title='Абонентская плата')
+        # Удаляем все списание абонплаты по этой услуге за указанный период
+        date_range = [period['start'],period['end']] if not is_credit else [add_months(period['start'],1),add_months(period['end'],1)]
+        for wo in self.writeoff_set.filter(date__range=date_range,wot=wot):
+            wo.delete()
+
         for spc in chlist:
             datestart = chlist[idx].date
             idx += 1
-            datefinish = chlist[idx].date if len(chlist)>=idx+1 else datetime.today()
-            period = [datestart,datefinish]
-            print period
-            
-        # Получаем список изменений статусов
+            datefinish = chlist[idx].date - timedelta(days=1) if len(chlist) >= idx+1 else datetime.today()
+            plan = chlist[idx-1].plan
 
-    def set_status(self, new_status, date=datetime.datetime.now()):
+            if period['start'] > datefinish or period['end'] < datestart:
+                continue
+            datestart = datestart if datestart > period['start'] else period['start']
+            datefinish = datefinish if datefinish < period['end'] else period['end']
+
+            for year,month in month_year_iter(datestart.month,datestart.year,datefinish.month,datefinish.year):
+                qty_days = monthrange(year,month)[1] # Кол-во дней в месяце
+                payday = 1 # День списания аб.платы
+                # Это на случай если весь период - один месяц
+                if (datefinish.year,datefinish.month) == (year,month):
+                    last_day = datefinish.day
+                else:
+                    last_day = qty_days
+
+                if (datestart.year,datestart.month) == (year,month):
+                    # Если это первый месяц
+                    payday = datestart.day
+                    total_days =  last_day - datestart.day + 1
+                elif (datefinish.year,datefinish.month) == (year,month):
+                    # Если это последний месяц
+                    total_days = datefinish.day
+                else:
+                    # Подсчет для обычного месяца
+                    total_days = qty_days
+
+                comment = 'Абонентская плата за %s, всего дней: %s' % (date(year,month,1).strftime('%B %Y'),total_days)
+                date_of_debit = add_months(date(year,month,1),1) if is_credit else date(year,month,payday)
+                summ = plan.price * (total_days)/qty_days
+                # Делаем новые списания аб.платы
+                write_off = WriteOff(abonent=self.abon, service=self, wot=wot,summ=round(summ,2), date=date_of_debit, comment=comment)
+                write_off.save()
+                # print "%s %0.2f руб, %s %s" % (date_of_debit,summ, month,comment)
+        # WriteOff.objects.bulk_create(write_off_list)
+        # print write_off_list    
+
+    def set_status(self, new_status, date=datetime.now()):
         # Если статус не изменился - выходим
         if self.status == new_status:
             return False
@@ -341,10 +397,11 @@ class Service(models.Model):
         self.save()
         return True
 
-    def stop(self, date=datetime.datetime.now(), newstatus=settings.STATUS_ARCHIVED):
+    def stop(self, date=datetime.now(), newstatus=settings.STATUS_ARCHIVED):
         self.status = newstatus
         today = date.date()
-        qty_days = calendar.mdays[today.month]
+        # qty_days = calendar.mdays[today.month]
+        qty_days = monthrange(today.year,today.month)[1]
         summ = self.plan.price * (qty_days - today.day)/qty_days
         if summ > 0 and self.abon.is_credit == settings.PAY_BEFORE:
             from pays.models import PaymentSystem,Payment
@@ -354,18 +411,19 @@ class Service(models.Model):
         self.datefinish = date
         self.save()
 
-    def start(self, date=datetime.datetime.now(), newstatus=settings.STATUS_ACTIVE):
+    def start(self, date=datetime.now(), newstatus=settings.STATUS_ACTIVE):
         self.status = newstatus
         self.datestart = date
         targetday = date.date() # Дата начала услуги
-        now = datetime.datetime.now() # Текущая дата
+        now = datetime.now() # Текущая дата
         self.save()
 
         from pays.models import WriteOff, WriteOffType
         wot_install = WriteOffType.objects.get(title=u'Инсталляция')
         wot_abon = WriteOffType.objects.get(title=u'Абонентская плата')
 
-        qty_days = calendar.mdays[targetday.month] # Считаем число дней в месяце
+        # qty_days = calendar.mdays[targetday.month] # Считаем число дней в месяце
+        qty_days = monthrange(targetday.year,targetday.month)[1]
         summ = self.plan.price * (qty_days - targetday.day + 1)/qty_days # Считаем абоненскую плату за остаток месяца
         comment = u'Абонентская плата за %s дней %s' % (qty_days - targetday.day + 1,targetday.strftime('%B %Y'))
 
@@ -397,7 +455,7 @@ class Service(models.Model):
                 m = month%12
 
             comment = u'Абонентская плата за %s %s г.' % (calendar.month_name[m - post_month_shift],y)
-            write_off = WriteOff(abonent=self.abon, service=self, wot=wot_abon,summ=summa, comment=comment, date=datetime.datetime(y,m,1))
+            write_off = WriteOff(abonent=self.abon, service=self, wot=wot_abon,summ=summa, comment=comment, date=datetime(y,m,1))
             write_off.save()
 
     def delete(self, *args, **kwargs):
@@ -415,7 +473,7 @@ class Service(models.Model):
 class ServiceSuspension(models.Model):
     service = models.ForeignKey(Service, verbose_name=u'Услуга')
     user = models.ForeignKey(User, verbose_name=u'Пользователь', blank=True, null= True)
-    datestart = models.DateTimeField(default=datetime.datetime.now, verbose_name=u'Дата начала')
+    datestart = models.DateTimeField(default=datetime.now, verbose_name=u'Дата начала')
     datefinish = models.DateTimeField(verbose_name=u'Дата завершения', blank=True, null= True)
     comment = models.CharField(u'Комментарии', blank=True, null= True, max_length=200)
 
