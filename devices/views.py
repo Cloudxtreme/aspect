@@ -337,18 +337,25 @@ def device_del(request, device_id):
     except:
         raise Http404
     else:
+        print 'Мы тут'
         for service in device.service_set.all():
+            print service
             service.device = None
             service.save()
 
         for iface in device.interfaces.all():
+            print iface
             iface.delete()
 
-        for peer_dev in device.peers:
+        for peer_dev in device.peer_set.all():
             peer_dev.peer = None
             peer_dev.save()
 
+        device.peer = None
+        device.location = None
+        device.save()
         device.delete()
+
     return HttpResponseRedirect(reverse('devices_list', args=['0']))
 
 # Обследовать устройство заново
