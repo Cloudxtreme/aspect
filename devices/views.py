@@ -337,12 +337,16 @@ def device_del(request, device_id):
     except:
         raise Http404
     else:
-        for iface in device.interfaces.all():
-            iface.delete()
-
         for service in device.service_set.all():
             service.device = None
             service.save()
+
+        for iface in device.interfaces.all():
+            iface.delete()
+
+        for peer_dev in device.peers:
+            peer_dev.peer = None
+            peer_dev.save()
 
         device.delete()
     return HttpResponseRedirect(reverse('devices_list', args=['0']))

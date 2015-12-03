@@ -189,4 +189,5 @@ def abonent_filter(data):
         Abonent.objects.filter(contact__first_name__icontains=data)|\
         Abonent.objects.filter(contact__surname__icontains=data)|\
         Abonent.objects.filter(contact__mobile__icontains=data)
+    # Добавлен фильтр архивных абонентов
     return abonent_list.exclude(status='D').distinct()

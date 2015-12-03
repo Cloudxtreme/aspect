@@ -829,6 +829,27 @@ def abonent_history(request, abonent_id):
                                 context_instance = RequestContext(request))
 
 @login_required
+def recalculate_payments(request, srv_id):
+    try:
+        srv = Service.objects.get(pk=srv_id)
+    except:
+        raise Http404
+
+    if request.method == 'POST':
+        form = ManageForm(request.POST,instance=abonent)
+        if form.is_valid():
+            pass
+    else:
+        form = ManageForm(instance=abonent,initial={'extratag': tag_list})
+
+    return render_to_response('generic/generic_edit.html', { 
+                                'header' : 'Настройки абонента',
+                                'form': form,
+                                'abonent': abonent,
+                                'extend': 'abonent/main.html', },
+                                 context_instance = RequestContext(request))
+
+@login_required
 def abonent_manage(request, abonent_id):
     try:
         abonent = Abonent.objects.get(pk=abonent_id)
@@ -930,6 +951,7 @@ def abonent_tts(request, abonent_id):
                                                         'tts' : tts, }, 
                               context_instance = RequestContext(request))
 
+@login_required 
 def sync_balance_from1C(abonent_id):
     try:
         abonent = Abonent.objects.get(pk=abonent_id)
@@ -954,6 +976,7 @@ def sync_balance_from1C(abonent_id):
 
         return balance
 
+@login_required 
 def import_abonent_from1C(request):
     db = MySQLdb.connect(host="10.255.0.10", user="d.sitnikov", 
                              passwd="Aa12345", db="radius", charset='utf8')
@@ -974,6 +997,7 @@ def import_abonent_from1C(request):
     url = settings.LOGIN_REDIRECT_URL
     return HttpResponseRedirect(url)
 
+@login_required 
 def abonent_settings(request, abonent_id):
     try:
         abonent = Abonent.objects.get(pk=abonent_id)
@@ -997,6 +1021,7 @@ def abonent_settings(request, abonent_id):
                                 'settings':setting_list,},
                                  context_instance = RequestContext(request))
 
+@login_required 
 def abonent_map(request, abonent_id):
     points = []
     if abonent_id != '0':

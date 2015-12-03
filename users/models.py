@@ -262,14 +262,6 @@ class Interface(models.Model):
     def __unicode__(self):
         return u"%s" % (self.ip)
 
-# Функция возвращает первый день следующего месяца
-def get_1stdaynextmonth(sourcedate,months):
-    month = sourcedate.month - 1 + months
-    year = sourcedate.year + month / 12
-    month = month % 12 + 1
-    day = min(sourcedate.day,calendar.monthrange(year,month)[1])
-    return date(year,month,1)
-
 class ServiceEnabledManager(models.Manager):
     def get_queryset(self):
         return super(ServiceEnabledManager, self).get_queryset().filter(status__in=[settings.STATUS_ACTIVE,settings.STATUS_OUT_OF_BALANCE])
@@ -284,6 +276,14 @@ def add_months(sourcedate,months):
     month = month % 12 + 1
     day = min(sourcedate.day,calendar.monthrange(year,month)[1])
     return date(year,month,day)
+
+# Функция возвращает первый день следующего месяца
+def get_1stdaynextmonth(sourcedate,months):
+    month = sourcedate.month - 1 + months
+    year = sourcedate.year + month / 12
+    month = month % 12 + 1
+    day = min(sourcedate.day,calendar.monthrange(year,month)[1])
+    return date(year,month,1)
 
 def month_year_iter( start_month, start_year, end_month, end_year ):
     ym_start= 12*start_year + start_month - 1
@@ -319,10 +319,11 @@ class Service(models.Model):
                         date=date)
         ssc.save()
 
-    def recalculate(self,demo=True):
+    def recalculate(self,start,end,demo=True):
         # Получаем список изменений тарифов
         chlist = self.serviceplanchanges_set.all().order_by('date')
-        period = {'start':datetime(2014,10,1),'end':datetime(2015,8,31)}
+        # period = {'start':datetime(2014,10,1),'end':datetime(2015,8,31)}
+        period = {'start':start,'end':end}
         is_credit = True if self.abon.is_credit == 'O' else False # Проверяем на постоплату
         idx = 0
         
