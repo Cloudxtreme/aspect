@@ -49,7 +49,7 @@
         <tbody>
         {% if smss %}
         {% for sms in smss %}
-        <tr {% if not notice.sent %}class="active"{% endif %}>
+        <tr {% if not sms.sent %}class="active"{% endif %}>
             <td>{{ sms.date }}</td>
             <td>
                 {{ sms.sent|yesno:"Отправлен,В очереди" }}
