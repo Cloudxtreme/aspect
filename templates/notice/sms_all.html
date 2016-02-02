@@ -14,6 +14,25 @@
     {% endif %}
 </p>
 </br>
+<nav>
+  <ul class="pagination">
+    {% if smss.has_previous %}
+    <li>
+      <a href="?page={{ smss.previous_page_number }}" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+      </a>
+    </li>
+    {% endif %}
+    <li class="active"><a href="#">{{ smss.number }} of {{ smss.paginator.num_pages }}</a></li>
+    {% if smss.has_next %}
+    <li>
+      <a href="?page={{ smss.next_page_number }}" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+      </a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
 {% load dict_extras %}
     <div class="table-responsive">
         <table class="table h6">
@@ -28,30 +47,30 @@
           </tr>
         </thead>
         <tbody>
-        {% if notice_list %}
-        {% for notice in notice_list %}
+        {% if smss %}
+        {% for sms in smss %}
         <tr {% if not notice.sent %}class="active"{% endif %}>
-            <td>{{ notice.date }}</td>
+            <td>{{ sms.date }}</td>
             <td>
-                {{ notice.sent|yesno:"Отправлен,В очереди" }}
+                {{ sms.sent|yesno:"Отправлен,В очереди" }}
             </td>
             <td>
-                {{ notice.status|sms_status }}
+                {{ sms.status|sms_status }}
             </td>
-            <td>{% if notice.abonent %}
-                    <a href="{% url 'abonent_info' notice.abonent.id %}">{{ notice.abonent }}</a>
+            <td>{% if sms.abonent %}
+                    <a href="{% url 'abonent_info' sms.abonent.id %}">{{ sms.abonent }}</a>
                 {% endif %}
             </td>
             <td>
-                {{ notice.text }}
+                {{ sms.text }}
             </td>
             <td>
-                {% if not notice.sent %}
-                    <p class='pull-right'><a href="{% url 'sms_send' notice.id %}">Отправить&nbsp
+                {% if not sms.sent %}
+                    <p class='pull-right'><a href="{% url 'sms_send' sms.id %}">Отправить&nbsp
                     <span class="glyphicon glyphicon-share-alt"></span></a></p>
-                    <p class='pull-right'><a href="{% url 'sms_edit' notice.id %}">Изменить&nbsp
+                    <p class='pull-right'><a href="{% url 'sms_edit' sms.id %}">Изменить&nbsp
                     <span class="glyphicon glyphicon-edit"></span></a></p>
-                    <p class='pull-right'><a href="{% url 'sms_del' notice.id %}">Удалить&nbsp
+                    <p class='pull-right'><a href="{% url 'sms_del' sms.id %}">Удалить&nbsp
                     <span class="glyphicon glyphicon-remove"></span></a></p>
                 {% endif %}
             </td>

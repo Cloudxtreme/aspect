@@ -19,12 +19,14 @@ NETWORK_USERS = 'UN'
 NETWORK_EQUIP = 'EN'
 NETWORK_DISTRIB = 'DN'
 NETWORK_LIMITER = 'LN'
+NETWORK_PTP = 'PN'
 
 TYPE_OF_NETS = (
     (NETWORK_USERS,'Сеть пользователей'),
     (NETWORK_EQUIP,'Сеть оборудование'),
     (NETWORK_DISTRIB,'Сеть для распределения'),
     (NETWORK_LIMITER,'Сеть разделитель'),
+    (NETWORK_PTP,'Сеть /32'),
 )
 
 class Vlan(models.Model):
