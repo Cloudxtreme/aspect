@@ -23,8 +23,8 @@ def revise(request, abonent_id):
     except:
         raise Http404
 
-    pay_list = Payment.objects.filter(abonent=abonent)
-    writeoff_list = WriteOff.objects.filter(abonent=abonent,valid=True)
+    pay_list = Payment.objects.filter(abonent=abonent, valid=True)
+    writeoff_list = WriteOff.objects.filter(abonent=abonent, valid=True)
 
     result_list = sorted(
             chain(pay_list, writeoff_list),
@@ -224,8 +224,8 @@ def reserve_check_balance(request, abonent_id):
 
     balance = abonent.balance
 
-    pay_list = Payment.objects.filter(abonent=abonent)
-    writeoff_list = WriteOff.objects.filter(abonent=abonent)
+    pay_list = Payment.objects.filter(abonent=abonent, valid=True)
+    writeoff_list = WriteOff.objects.filter(abonent=abonent, valid=True)
 
     result_list = sorted(
                 chain(pay_list, writeoff_list),
