@@ -24,7 +24,7 @@ def revise(request, abonent_id):
         raise Http404
 
     pay_list = Payment.objects.filter(abonent=abonent)
-    writeoff_list = WriteOff.objects.filter(abonent=abonent)
+    writeoff_list = WriteOff.objects.filter(abonent=abonent,valid=True)
 
     result_list = sorted(
             chain(pay_list, writeoff_list),
