@@ -193,7 +193,8 @@ class Abonent(models.Model):
 
     class Meta:
         verbose_name = u'Абонент'
-        verbose_name_plural = u'Абоненты'       
+        verbose_name_plural = u'Абоненты'     
+        ordering = ['-utype','title'] 
         
     def __unicode__(self):
         if self.utype == settings.U_TYPE_UR:
