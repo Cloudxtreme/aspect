@@ -17,8 +17,8 @@ def traffic_analize(w_dir,inbound):
     trList =[]
     onlyfiles = [f for f in listdir(w_dir) if isfile(join(w_dir, f))]
     
-    for ffile in onlyfiles:
-        m = re.match(r"ft-v05.(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+).(?P<hour>\d{2})(?P<min>\d{2})(?P<sec>\d{2})*", ffile)
+    for filename in onlyfiles:
+        m = re.match(r"ft-v05.(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+).(?P<hour>\d{2})(?P<min>\d{2})(?P<sec>\d{2})*", filename)
         year = int(m.group('year'))
         month = int(m.group('month'))
         day = int(m.group('day'))
@@ -27,7 +27,7 @@ def traffic_analize(w_dir,inbound):
         sec = int(m.group('sec'))
         timestamp = datetime(year,month,day,hour,minutes,sec)
 
-        f = open(ffile)
+        f = open(os.path.join(w_dir, filename))
         for line in f:
             ip, octets = line.split(' ')
             try:
