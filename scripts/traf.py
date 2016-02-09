@@ -10,8 +10,8 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'aspekt.settings'
 
 from vlans.models import TrafRecord,IPAddr
 
-in_dir = '/var/flow/bras/saved/processed/in/'
-out_dir = '/var/flow/bras/saved/processed/out/'
+in_dir = '/var/flow/bras/saved/in/'
+out_dir = '/var/flow/bras/saved/out/'
 
 def traffic_analize(w_dir,inbound):
     trList =[]
@@ -33,7 +33,7 @@ def traffic_analize(w_dir,inbound):
             try:
                 ipaddr = IPAddr.objects.get(ip=ip)
             except:
-                print ip                
+                print ip, '<< inbound' if inbound  else '>> outbound', octets
             else:
                 trList += [TrafRecord(
                     ip=ipaddr,
@@ -42,9 +42,9 @@ def traffic_analize(w_dir,inbound):
                     time=timestamp
                     )]
         f.close()
-
+        os.rename(os.path.join(w_dir, filename), os.path.join(w_dir, 'processed' ,filename))
     TrafRecord.objects.bulk_create(trList)
 
 if __name__ == '__main__':
-    traffic_analize(in_dir,True)
     traffic_analize(out_dir,False)
+    traffic_analize(in_dir,True)
