@@ -32,6 +32,8 @@ def traffic_analize(w_dir,inbound):
             ip, octets = line.split(' ')
             try:
                 ipaddr = IPAddr.objects.get(ip=ip)
+            except:
+                print ip                
             else:
                 trList += [TrafRecord(
                     ip=ipaddr,
@@ -39,8 +41,6 @@ def traffic_analize(w_dir,inbound):
                     inbound=inbound,
                     time=timestamp
                     )]
-            except:
-                print ip
         f.close()
 
     TrafRecord.objects.bulk_create(trList)
