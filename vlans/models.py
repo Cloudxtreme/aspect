@@ -192,3 +192,18 @@ class IPAddr(models.Model):
 
     def __unicode__(self):
         return "%s/%s" % (self.ip, self.net.mask)
+
+class TrafRecord(models.Model):
+    ip = models.ForeignKey(IPAddr)
+    octets = models.BigIntegerField(u'Bytes')
+    interval = models.PositiveIntegerField(u'Интервал в сек',default=300)
+    inbound = models.BooleanField(u'Входящий',default=True)
+    time = models.DateTimeField(auto_now=True, auto_now_add=True)
+
+    class Meta:
+        verbose_name = u'Трафик'
+        verbose_name_plural = u'Трафик'
+        ordering = ['time']
+
+    def __unicode__(self):
+        return "%s - %s - %s" % (self.time, self.ip, self.octets)
