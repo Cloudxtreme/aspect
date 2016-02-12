@@ -198,7 +198,7 @@ class TrafRecord(models.Model):
     octets = models.BigIntegerField(u'Bytes')
     interval = models.PositiveIntegerField(u'Интервал в сек',default=300)
     inbound = models.BooleanField(u'Входящий',default=True)
-    time = models.DateTimeField(auto_now=True, auto_now_add=True)
+    time = models.DateTimeField(auto_now=False, auto_now_add=False)
 
     class Meta:
         verbose_name = u'Трафик'
