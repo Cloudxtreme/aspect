@@ -240,8 +240,11 @@ class Device(models.Model):
 
     # Выдаем первый IP-адрес
     def _get_main_ip(self):
-        if self.interfaces.count():
-            return self.interfaces.all().first().ip
+        if self.interfaces:
+            if self.interfaces.count():
+                return self.interfaces.all().first().ip
+            else:
+                return None
         else:
             return None
 
