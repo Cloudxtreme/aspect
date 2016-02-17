@@ -294,3 +294,25 @@ def bs_edit(request, bs_id):
                                 'extend': 'index.html',},
                                 context_instance = RequestContext(request)
                                 ) 
+
+
+# Просмотр трафика по IP
+@login_required
+def traf_view(request,ip):
+    try:
+        ipaddr = IPAddr.objects.get(ip=ip)
+    except:
+        raise Http404
+
+    from django.db import connection
+    from django.db.models import Sum, Count
+    truncate_date = connection.ops.date_trunc_sql('day', 'time')
+    qs = TrafRecord.objects.extra({'day':truncate_date}).filter(ip=ip)
+    report = qs.values('day','inbound').annotate(Sum('octets')).order_by('day')
+
+    return render_to_response('generic/generic_edit.html', {
+                                'form': form,
+                                'breadcrumbs':breadcrumbs,
+                                'extend': 'index.html',},
+                                context_instance = RequestContext(request)
+                                ) 
