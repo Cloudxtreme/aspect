@@ -14,3 +14,5 @@ urlpatterns = patterns('',
     url(r'^network/(?P<net_id>\d+)/edit/$', 'vlans.views.edit_network', name='edit_network'),
     url(r'^network/(?P<net_id>\d+)/del/$', 'vlans.views.network_del', name='network_del'),
 )
+
+

@@ -19,6 +19,7 @@ def main_cycle():
         idx += 1
         print "%s from %s" % (idx, amount)
         device._get_config()
+        device._do_measuring()
 
 if __name__ == '__main__':
     main_cycle()

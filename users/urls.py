@@ -73,4 +73,7 @@ urlpatterns = patterns('',
     url(r'^ajax/planbytos/$', 'users.views.feeds_plans_by_tos'),
     url(r'^ajax/ipbyseg/$', 'users.views.feeds_ip_by_seg'),
     url(r'^balance/$', 'users.views.balance', name='balance'),
+    url(r'^traf_top30/$', 'users.views.traf_top30', name='traf_top30'),
+    url(r'^traf/(?P<abonent_id>\d+)/cur_month/$', 'users.views.traf_month', name='traf_month'),
+    url(r'^traf/(?P<abonent_id>\d+)/by_days/(?P<ip_id>\d+)/$', 'users.views.traf_by_days', name='traf_by_days'),
 )

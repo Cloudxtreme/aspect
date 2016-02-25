@@ -23,9 +23,9 @@ from users.models import Abonent, Service, TypeOfService, Plan, Passport, Detail
 from tt.models import TroubleTicket, TroubleTicketComment
 from journaling.models import ServiceStatusChanges, AbonentStatusChanges, ServicePlanChanges
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from vlans.models import Network, IPAddr, Vlan
+from vlans.models import Network, IPAddr, Vlan, TrafRecord
 from vlans.forms import LocationForm
-from django.db.models import Avg, Max, Min, Sum, Q
+from django.db.models import Avg, Max, Min, Sum, Q, Count
 from django.conf import settings
 from pays.models import Payment
 from notes.models import Note
@@ -37,7 +37,9 @@ from users.aux import abonent_filter
 import MySQLdb, requests, re
 from datetime import datetime, time, timedelta, date
 from users.aux import *
-
+from django.db import connection
+from operator import itemgetter
+from itertools import groupby
 
 def zapret(request):
     return render_to_response('zapret.html')
@@ -1065,6 +1067,93 @@ def abonent_map(request, abonent_id):
                                 'points':points,},
                                  context_instance = RequestContext(request))
 
+# Топ 30 по трафику
+@login_required 
+def traf_top30(request, sortby='inbound'):
+    traf_list = []
+    this_month = datetime.now().month
+    
+    for service in Service.objects.all():
+        for iface in service.ifaces.all():
+            trs = TrafRecord.objects.filter(time__month=this_month,ip=iface.ip)
+            inbound = trs.filter(inbound=True).aggregate(Sum('octets'))['octets__sum'] or 0
+            outbound = trs.filter(inbound=False).aggregate(Sum('octets'))['octets__sum'] or 0
+            entry = {'abonent':service.abon, 
+                     'abonent_id':service.abon.id, 
+                     'location':service.location,
+                     'ip': iface.ip.ip, 
+                     'inbound': inbound, 
+                     'outbound' : outbound , 
+                     'id': iface.ip.id }
+            traf_list.append(entry)
+
+    newlist = sorted(traf_list, key=itemgetter(sortby), reverse=True)[0:30]
+
+    return render_to_response('stat/traf_top30.html', { 
+                                'traf':newlist,},
+                                 context_instance = RequestContext(request))
+
+# Просмотр трафика за текущий месяц
+@login_required 
+def traf_month(request, abonent_id, sortby='inbound'):
+    try:
+        abonent = Abonent.objects.get(pk=abonent_id)
+    except:
+        raise Http404
+    else:   
+        traf_list = []
+        this_month = datetime.now().month
+        
+        for service in abonent.service_set.all():
+            for iface in service.ifaces.all():
+                trs = TrafRecord.objects.filter(time__month=this_month,ip=iface.ip)
+                inbound = trs.filter(inbound=True).aggregate(Sum('octets'))['octets__sum'] or 0
+                outbound = trs.filter(inbound=False).aggregate(Sum('octets'))['octets__sum'] or 0
+                entry = {'location':service.location,'ip': iface.ip.ip, 'inbound': inbound, 'outbound' : outbound , 'id': iface.ip.id }
+                traf_list.append(entry)
+
+        newlist = sorted(traf_list, key=itemgetter(sortby), reverse=True)
+
+    return render_to_response('abonent/traf.html', { 
+                                'abonent': abonent,
+                                'traf':newlist,},
+                                 context_instance = RequestContext(request))
+
+# Просмотр трафика по IP по дням
+@login_required
+def traf_by_days(request,abonent_id,ip_id):
+    try:
+        ipaddr = IPAddr.objects.get(id=ip_id)
+        abonent = Abonent.objects.get(pk=abonent_id)
+    except:
+        raise Http404
+
+    report = []
+
+    truncate_date = connection.ops.date_trunc_sql('day', 'time')
+    qs = TrafRecord.objects.extra({'day':truncate_date}).filter(ip=ipaddr)
+    tr_report = qs.values('day','inbound').annotate(Sum('octets')).order_by('day')
+
+    sorted_report = sorted(tr_report, key=itemgetter('day'))
+    for key, group in itertools.groupby(sorted_report, key=lambda x:x['day']):
+        day_record = {}
+        day_record['day'] = key
+        # print list(group)
+        for item in list(group):
+            if item['inbound'] == True:
+                day_record['inbound'] = item['octets__sum']
+            else:
+                day_record['outbound'] = item['octets__sum']
+        print day_record
+        report.append(day_record)
+
+    return render_to_response('abonent/traf.html', {
+                                'abonent': abonent,
+                                'report': report,},
+                                context_instance = RequestContext(request)
+                                ) 
+
+
 def log_in(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -1086,3 +1175,4 @@ def log_in(request):
 def log_out(request):
     logout(request)
     return HttpResponseRedirect(settings.LOGIN_URL)
+

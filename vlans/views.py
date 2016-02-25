@@ -13,7 +13,7 @@ from django.core import serializers
 from django.utils import simplejson
 from devices.aux import dec2ip,ip2dec
 from devices.models import Device
-
+    
 NETWORK_USERS = 'UN'
 NETWORK_EQUIP = 'EN'
 NETWORK_DISTRIB = 'DN'
@@ -219,18 +219,6 @@ def bs_list(request):
     return render_to_response('bs_list.html', { 'bs_list': bs_list }, context_instance = RequestContext(request))
 
 # Просмотр БС
-# @login_required
-# def bs_profitability(request):
-#     for bs in Location.objects.filter(bs_type__in=['B','CP']):
-#         srv_list = Service.objects.filter(device__peer__location__pk=bs.id)|\
-#                    Service.objects.filter(device__location__pk=bs.id)
-#         active_srv_list = srv_list.filter(status=settings.STATUS_ACTIVE)
-
-#         profit = srv_list.aggregate(Sum('plan__price'))['plan__price__sum']
-#         active_profit = active_srv_list.aggregate(Sum('plan__price'))['plan__price__sum']
-
-
-# Просмотр БС
 @login_required
 def bs_view(request,bs_id):
     try:
@@ -295,24 +283,3 @@ def bs_edit(request, bs_id):
                                 context_instance = RequestContext(request)
                                 ) 
 
-
-# Просмотр трафика по IP
-@login_required
-def traf_view(request,ip):
-    try:
-        ipaddr = IPAddr.objects.get(ip=ip)
-    except:
-        raise Http404
-
-    from django.db import connection
-    from django.db.models import Sum, Count
-    truncate_date = connection.ops.date_trunc_sql('day', 'time')
-    qs = TrafRecord.objects.extra({'day':truncate_date}).filter(ip=ip)
-    report = qs.values('day','inbound').annotate(Sum('octets')).order_by('day')
-
-    return render_to_response('generic/generic_edit.html', {
-                                'form': form,
-                                'breadcrumbs':breadcrumbs,
-                                'extend': 'index.html',},
-                                context_instance = RequestContext(request)
-                                ) 
