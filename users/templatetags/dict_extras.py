@@ -13,7 +13,9 @@ def sizify(value):
     
     {{ product.file.size|sizify }}
     """
-    #value = ing(value)
+    if not isinstance( value, ( int, long ) ):
+        value = 0
+    # value = float(value)
     if value < 512000:
         value = value / 1024.0
         ext = 'Кб'

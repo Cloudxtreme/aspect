@@ -1,0 +1,29 @@
+{% extends "abonent/main.html" %}
+
+{% block pages %}
+<div class="page-header">
+    <h4 class="sub-header">Трафик {{ ipaddr }} по дням</h4>
+</div>
+{% if report %}   
+{% load dict_extras %}
+<table class="table table-striped h6">
+<thead>
+  <tr>
+    <th>Дата</th>
+    <th>Входящий</th>
+    <th>Исходящий</th>
+  </tr>
+</thead>
+<tbody>
+{% for item in report %}
+<tr>
+    <td>{{ item.day|date:'d-M-Y' }}</td>
+    <td>{{ item.inbound|sizify }}</td>
+    <td>{{ item.outbound|sizify }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %} 
+
+{% endblock %}

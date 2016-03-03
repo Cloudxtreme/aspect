@@ -40,6 +40,7 @@ from users.aux import *
 from django.db import connection
 from operator import itemgetter
 from itertools import groupby
+# import itertools
 
 def zapret(request):
     return render_to_response('zapret.html')
@@ -1135,7 +1136,7 @@ def traf_by_days(request,abonent_id,ip_id):
     tr_report = qs.values('day','inbound').annotate(Sum('octets')).order_by('day')
 
     sorted_report = sorted(tr_report, key=itemgetter('day'))
-    for key, group in itertools.groupby(sorted_report, key=lambda x:x['day']):
+    for key, group in groupby(sorted_report, key=lambda x:x['day']):
         day_record = {}
         day_record['day'] = key
         # print list(group)
@@ -1144,11 +1145,11 @@ def traf_by_days(request,abonent_id,ip_id):
                 day_record['inbound'] = item['octets__sum']
             else:
                 day_record['outbound'] = item['octets__sum']
-        print day_record
         report.append(day_record)
 
-    return render_to_response('abonent/traf.html', {
+    return render_to_response('abonent/traf_by_days.html', {
                                 'abonent': abonent,
+                                'ipaddr':ipaddr,
                                 'report': report,},
                                 context_instance = RequestContext(request)
                                 ) 

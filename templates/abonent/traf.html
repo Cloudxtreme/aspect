@@ -13,15 +13,17 @@
     <th>IP</th>
     <th>Входящий</th>
     <th>Исходящий</th>
+    <th>По дням</th>
   </tr>
 </thead>
 <tbody>
 {% for item in traf %}
 <tr>
     <td>{{ item.location }}</td>
-    <td>{{ item.ip }}</td>
+    <td>{{ item.ip }}</td> 
     <td>{{ item.inbound|sizify }}</td>
     <td>{{ item.outbound|sizify }}</td>
+    <td> <a href="{% url 'traf_by_days' abonent.id item.id %}"><span class="glyphicon glyphicon-list" aria-hidden="true"></span></a></td>
 </tr>
 {% endfor %}
 </tbody>
