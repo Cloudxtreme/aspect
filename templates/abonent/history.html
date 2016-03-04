@@ -3,30 +3,31 @@
 {% block pages %} 
        
 {% if ascs %}	
-		<table class="table h6">
-		<thead>
-          <tr>
-            <th>Дата</th>
-            <th>Старый статус</th>
-            <th>Новый статус</th>
-            <th>Основание</th>
-          </tr>
-        </thead>
-        <tbody>
-		{% for asc in ascs %}
-		<tr>
+    <table class="table h6">
+    <thead>
+      <tr>
+        <th>Дата</th>
+        <th>Старый статус</th>
+        <th>Новый статус</th>
+        <th>Основание</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for asc in ascs %}
+        <tr>
             <td>{{ asc.date|date:'Y-m-d H:i:s' }}</td>
             <td>{{ asc.get_laststatus_display }}</td>
             <td>{{ asc.get_newstatus_display }}</td>
-            <td>{{ asc.comment }}
-            {% if asc.attach %} 
-              {{  asc.attach.url }}
-            {% endif %}
+            <td>
+                {{ asc.comment }}
+                {% if asc.attach %} 
+                  {{  asc.attach.url }}
+                {% endif %}
             </td>
         </tr>
-		{% endfor %}
-		</tbody>
-		</table>
+    {% endfor %}
+    </tbody>
+    </table>
 {% endif %}        
 
 {% endblock %}

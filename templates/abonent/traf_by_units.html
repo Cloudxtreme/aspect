@@ -1,8 +1,15 @@
 {% extends "abonent/main.html" %}
 
+{% block breadcrumb %}
+        <ol class="breadcrumb">
+            <li><a href="{% url 'traf_month' abonent.id %}">Трафик за текущий месяц</a></li>
+            <li class="active">Трафик по {{ unit }}</li>
+        </ol>
+{% endblock %}
+
 {% block pages %}
 <div class="page-header">
-    <h4 class="sub-header">Трафик {{ ipaddr }} по дням</h4>
+    <h4 class="sub-header">Трафик {{ ipaddr.ip }} по {{ unit }}</h4>
 </div>
 {% if report %}   
 {% load dict_extras %}
@@ -17,7 +24,7 @@
 <tbody>
 {% for item in report %}
 <tr>
-    <td>{{ item.day|date:'d-M-Y' }}</td>
+    <td>{{ item.unit|date:'d-F-Y' }}</td>
     <td>{{ item.inbound|sizify }}</td>
     <td>{{ item.outbound|sizify }}</td>
 </tr>

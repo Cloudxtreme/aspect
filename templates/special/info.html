@@ -8,7 +8,7 @@
     <meta name="author" content="">
     <link rel="icon" href="/media/images/favicon.ico">
 
-    <title>Доступ заблокирован</title>
+    <title>{{ title }}</title>
 
     <!-- Bootstrap core CSS -->
     <link href="/media/css/bootstrap.min.css" rel="stylesheet">
@@ -32,15 +32,17 @@
     <div class="container">
       <div class="page-header">
         <img src='/media/images/logo.png'/>   
-        <h1>Доступ к ресурсу заблокирован</h1>
+        <h1>{{ title }}</h1>
       </div>
-      <p class="lead">Доступ к запрашиваемому Вами ресурсу заблокирован в соответствии с Постановления Правительства РФ от 26 октября 2012 года № 1101, вступившего в силу с 01 ноября 2012 года.</p>
-      <p>Более подробную информацию вы можете получить на официальном сайте Роскомнадзора <a href="http://eais.rkn.gov.ru/">здесь</a></p>
+      <p class="lead">
+        {% block message %}
+        {% endblock %}
+      </p>
     </div>
 
     <footer class="footer">
       <div class="container">
-        <p class="text-muted">ООО "АСПЕКТ", 188300, Ленинградская обл., г. Гатчина, Проспект 25 Октября 28А, пом. VIII, +7(812)670-1817</p>
+        <p class="text-muted">ООО "АСПЕКТ",188300, Ленинградская обл., г. Гатчина, Проспект 25 Октября 28А, пом. VIII, +7(812)670-1817</p>
       </div>
     </footer>
 

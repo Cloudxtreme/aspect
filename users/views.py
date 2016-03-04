@@ -42,17 +42,16 @@ from operator import itemgetter
 from itertools import groupby
 # import itertools
 
-def zapret(request):
-    return render_to_response('zapret.html')
+def block(request):
+    return render_to_response('special/block.html', { 'title': 'Доступ к ресурсу заблокирован' })
 
 def balance(request):
     ip = request.META.get('REMOTE_ADDR', '') or request.META.get('HTTP_X_FORWARDED_FOR', '')
     try:
-        balance = '%s руб.' % round(Abonent.objects.get(service__ifaces__ip__ip=ip).balance,2)
+        balance = '%s' % round(Abonent.objects.get(service__ifaces__ip__ip=ip).balance,2)
     except:
-        balance = 'неизвестен'
-    return render_to_response('balance.html', { 'balance': balance })
-
+        balance = None
+    return render_to_response('special/balance.html', { 'balance': balance,'title': 'Недостаточно средств на счете' })
 
 @login_required 
 def aquicksearch(request):
@@ -1120,9 +1119,9 @@ def traf_month(request, abonent_id, sortby='inbound'):
                                 'traf':newlist,},
                                  context_instance = RequestContext(request))
 
-# Просмотр трафика по IP по дням
+# Просмотр трафика по IP по дням и месяцам
 @login_required
-def traf_by_days(request,abonent_id,ip_id):
+def traf_by_units(request,abonent_id,unit,ip_id):
     try:
         ipaddr = IPAddr.objects.get(id=ip_id)
         abonent = Abonent.objects.get(pk=abonent_id)
@@ -1130,15 +1129,16 @@ def traf_by_days(request,abonent_id,ip_id):
         raise Http404
 
     report = []
+    unit_dict = {'month':'месяцам','day' : 'дням'}
 
-    truncate_date = connection.ops.date_trunc_sql('day', 'time')
-    qs = TrafRecord.objects.extra({'day':truncate_date}).filter(ip=ipaddr)
-    tr_report = qs.values('day','inbound').annotate(Sum('octets')).order_by('day')
+    truncate_date = connection.ops.date_trunc_sql(unit, 'time')
+    qs = TrafRecord.objects.extra({unit:truncate_date}).filter(ip=ipaddr)
+    tr_report = qs.values(unit,'inbound').annotate(Sum('octets')).order_by(unit)
 
-    sorted_report = sorted(tr_report, key=itemgetter('day'))
-    for key, group in groupby(sorted_report, key=lambda x:x['day']):
+    sorted_report = sorted(tr_report, key=itemgetter(unit))
+    for key, group in groupby(sorted_report, key=lambda x:x[unit]):
         day_record = {}
-        day_record['day'] = key
+        day_record['unit'] = key
         # print list(group)
         for item in list(group):
             if item['inbound'] == True:
@@ -1147,9 +1147,10 @@ def traf_by_days(request,abonent_id,ip_id):
                 day_record['outbound'] = item['octets__sum']
         report.append(day_record)
 
-    return render_to_response('abonent/traf_by_days.html', {
+    return render_to_response('abonent/traf_by_units.html', {
                                 'abonent': abonent,
                                 'ipaddr':ipaddr,
+                                'unit' : unit_dict[unit],
                                 'report': report,},
                                 context_instance = RequestContext(request)
                                 ) 
@@ -1171,7 +1172,7 @@ def log_in(request):
                 return HttpResponseRedirect(url)
     else:
         form = LoginForm()
-    return render(request, 'auth.html', {'form': form})
+    return render(request, 'auth.html', {'form': form })
 
 def log_out(request):
     logout(request)
