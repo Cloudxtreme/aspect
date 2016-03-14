@@ -1,7 +1,7 @@
 {% extends "index.html" %}
 {% block script %}
   <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    <script type="text/javascript">
+  <script type="text/javascript">
       google.load("visualization", "1", {packages:["corechart"]});
       google.setOnLoadCallback(drawChart);
       function drawChart() {
@@ -18,7 +18,7 @@
 
         var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
         chart.draw(data, options);
-      }
+        }
     </script>
 {% endblock %}
 

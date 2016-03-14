@@ -16,7 +16,7 @@ from users.forms import  ServiceForm, OrgServiceForm, SearchForm, LoginForm, \
                          ServicePlanForm, ServiceEditForm, ServiceInterfaceForm, \
                          ServiceSpeedForm, ServiceStateForm, ServiceVlanForm, \
                          SmartSearchForm, ServiceLocationForm, \
-                         ServiceDeviceForm
+                         ServiceDeviceForm, DateFilterForm
 from journaling.forms import ServiceStatusChangesForm
 from notice.forms import AbonentFilterForm
 from users.models import Abonent, Service, TypeOfService, Plan, Passport, Detail, Interface, Segment,Tag
@@ -1109,7 +1109,11 @@ def traf_month(request, abonent_id, sortby='inbound'):
                 trs = TrafRecord.objects.filter(time__month=this_month,ip=iface.ip)
                 inbound = trs.filter(inbound=True).aggregate(Sum('octets'))['octets__sum'] or 0
                 outbound = trs.filter(inbound=False).aggregate(Sum('octets'))['octets__sum'] or 0
-                entry = {'location':service.location,'ip': iface.ip.ip, 'inbound': inbound, 'outbound' : outbound , 'id': iface.ip.id }
+                entry = {'location':service.location,
+                         'ip': iface.ip.ip, 
+                         'inbound': inbound, 
+                         'outbound' : outbound , 
+                         'id': iface.ip.id }
                 traf_list.append(entry)
 
         newlist = sorted(traf_list, key=itemgetter(sortby), reverse=True)
@@ -1133,6 +1137,19 @@ def traf_by_units(request,abonent_id,unit,ip_id):
 
     truncate_date = connection.ops.date_trunc_sql(unit, 'time')
     qs = TrafRecord.objects.extra({unit:truncate_date}).filter(ip=ipaddr)
+    
+    if request.method == 'POST':
+        form = DateFilterForm(request.POST)
+        if form.is_valid():
+            date_start = form.cleaned_data['datestart']
+            date_finish = form.cleaned_data['datefinish']
+            qs = qs.filter(time__range=[date_start,date_finish])
+          
+    else:
+        form = DateFilterForm()
+        
+    inbound_sum = qs.filter(inbound=True).aggregate(Sum('octets'))['octets__sum'] or 0
+    outbound_sum = qs.filter(inbound=False).aggregate(Sum('octets'))['octets__sum'] or 0 
     tr_report = qs.values(unit,'inbound').annotate(Sum('octets')).order_by(unit)
 
     sorted_report = sorted(tr_report, key=itemgetter(unit))
@@ -1151,7 +1168,10 @@ def traf_by_units(request,abonent_id,unit,ip_id):
                                 'abonent': abonent,
                                 'ipaddr':ipaddr,
                                 'unit' : unit_dict[unit],
-                                'report': report,},
+                                'form' : form,
+                                'report': report,
+                                'inbound_sum': inbound_sum, 
+                                'outbound_sum': outbound_sum},
                                 context_instance = RequestContext(request)
                                 ) 
 
