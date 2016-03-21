@@ -194,7 +194,7 @@ class IPAddr(models.Model):
         ordering = ['decip']
 
     def __unicode__(self):
-        return "%s/%s" % (self.ip, self.net.mask)
+        return "%s/%s" % (self.ip, self.net.mask if self.net.net_type !=NETWORK_32 else '32')
 
 class TrafRecord(models.Model):
     ip = models.ForeignKey(IPAddr)
