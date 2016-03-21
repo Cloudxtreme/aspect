@@ -1134,6 +1134,7 @@ def traf_by_units(request,abonent_id,unit,ip_id):
 
     report = []
     unit_dict = {'month':'месяцам','day' : 'дням'}
+    unit_form = {1:'month',2:'day'}
 
     truncate_date = connection.ops.date_trunc_sql(unit, 'time')
     qs = TrafRecord.objects.extra({unit:truncate_date}).filter(ip=ipaddr)
@@ -1143,11 +1144,12 @@ def traf_by_units(request,abonent_id,unit,ip_id):
         if form.is_valid():
             date_start = form.cleaned_data['datestart']
             date_finish = form.cleaned_data['datefinish']
+            # f_unit = form.cleaned_data['unit']
             qs = qs.filter(time__range=[date_start,date_finish])
           
     else:
         form = DateFilterForm()
-        
+
     inbound_sum = qs.filter(inbound=True).aggregate(Sum('octets'))['octets__sum'] or 0
     outbound_sum = qs.filter(inbound=False).aggregate(Sum('octets'))['octets__sum'] or 0 
     tr_report = qs.values(unit,'inbound').annotate(Sum('octets')).order_by(unit)

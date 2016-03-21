@@ -19,14 +19,14 @@ NETWORK_USERS = 'UN'
 NETWORK_EQUIP = 'EN'
 NETWORK_DISTRIB = 'DN'
 NETWORK_LIMITER = 'LN'
-NETWORK_PTP = 'PN'
+NETWORK_32 = 'PN'
 
 TYPE_OF_NETS = (
     (NETWORK_USERS,'Сеть пользователей'),
     (NETWORK_EQUIP,'Сеть оборудование'),
     (NETWORK_DISTRIB,'Сеть для распределения'),
     (NETWORK_LIMITER,'Сеть разделитель'),
-    (NETWORK_PTP,'Сеть /32'),
+    (NETWORK_32,'Сеть /32'),
 )
 
 class Vlan(models.Model):
@@ -152,8 +152,11 @@ class Network(models.Model):
         self.decip = sum([int(q) << i * 8 for i, q in enumerate(reversed(self.ip.split(".")))])
         isNew = not self.pk
         super(Network, self).save(force_insert, force_update)
-        if isNew and (self.net_type == NETWORK_EQUIP or self.net_type == NETWORK_USERS):
-            aList = [ IPAddr(ip = dec2ip(item), net = self, decip = item) for item in range ( self.decip + 1, self.decip + pow(2,32-self.mask) - 1 )]
+        if isNew:
+            if self.net_type in [NETWORK_EQUIP,NETWORK_USERS]:
+                aList = [ IPAddr(ip = dec2ip(item), net = self, decip = item) for item in range ( self.decip + 1, self.decip + pow(2,32-self.mask) - 1 )]
+            elif self.net_type == NETWORK_32:
+                aList = [ IPAddr(ip = dec2ip(item), net = self, decip = item) for item in range ( self.decip, self.decip + pow(2,32-self.mask))]
             IPAddr.objects.bulk_create(aList)
 
     class Meta:
