@@ -513,7 +513,7 @@ def device_iface_add(request, device_id):
         form = ServiceInterfaceForm()
     
     if device.router: 
-        net_type = ['UN','EN']
+        net_type = ['UN','EN','PN']
         form.fields['ip'].queryset=IPAddr.objects.filter(interface=None).filter(net__net_type__in=net_type)
     else:
         net_type = ['EN']
