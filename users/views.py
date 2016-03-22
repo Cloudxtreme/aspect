@@ -43,7 +43,7 @@ from itertools import groupby
 # import itertools
 
 def block(request):
-    return render_to_response('special/block.html', { 'title': 'Доступ к ресурсу заблокирован','request':request })
+    return render_to_response('special/block.html', { 'title': 'Доступ к ресурсу заблокирован',})
 
 def balance(request):
     ip = request.META.get('REMOTE_ADDR', '') or request.META.get('HTTP_X_FORWARDED_FOR', '')
