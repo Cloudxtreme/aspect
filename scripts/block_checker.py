@@ -9,7 +9,7 @@ from xml.dom.minidom import *
 from Queue import Queue
 from threading import Thread
 
-DUMP_FILE = 'dump.xml'
+DUMP_FILE = ' ~timoxa/scripts/block_site/dump.xml'
 RESULT_FILE = 'report.txt'
 BLOCK_SITE = 'http://194.190.13.158/block/'
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -118,7 +118,7 @@ header += print_and_return(u"Доступно %s сайтов\n" % (len(result_l
 header += print_and_return(u"Заблокировано %s сайтов\n" % (len(blocked)))
 header += print_and_return(u"Недоступно %s сайтов\n" % (len(unreachable)))
 
-syslog.syslog(syslog.LOG_INFO, header)
+
 
 print u"Запись результатов в %s" % RESULT_FILE
 
@@ -126,6 +126,7 @@ alert_file = codecs.open(RESULT_FILE, encoding='utf-8', mode='w')
 
 for line in header:
     alert_file.write(line)
+    syslog.syslog(syslog.LOG_INFO, line)
 
 alert_file.write('===========================================\n')
 
