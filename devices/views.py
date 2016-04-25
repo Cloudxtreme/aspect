@@ -681,7 +681,10 @@ def get_application_entries(request):
 
 @login_required
 def syslog(request,app):
-    switch = {'1':('zapret_checker.',u'Журнал получения списка запрещенных сайтов'),'2':('epays_daily.py',u'Журнал сообщения системы')}
+    switch = {'1':('zapret_checker.',u'Журнал получения списка запрещенных сайтов'),
+              '2':('epays_daily.py',u'Журнал сообщения системы')
+              '3':('block_checker.py',u'Проверка блокировки запрещенных сайтов')
+              }
     log_list = []
     db = MySQLdb.connect(host="192.168.64.6", user="syslog", \
                          passwd="yfpfgbcm", db="syslog", charset='utf8')
