@@ -137,7 +137,7 @@ def vlans_all(request):
 
 def gen_nets(parent_id):
     net_ip = Network.objects.get(pk=parent_id).ip
-    mask = Network.objects.get(pk=parent_id).mask
+    mask = Network.objects.get(pk=parent_id).mask - 1
 
     net_list = []
     for net in Network.objects.all().filter(parent__pk=parent_id):

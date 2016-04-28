@@ -144,8 +144,9 @@ class Network(models.Model):
             # ip2dec(item.ip) in range(ip2dec(self.ip),ip2dec(self.ip)+pow(2,32-self.mask)-1):
                 self.parent = item
             elif item.net_type != NETWORK_DISTRIB and \
-            (ip2dec(self.ip) in range(item.decip,item.decip+pow(2,32-item.mask)-1) or \
-                ip2dec(self.ip)+pow(2,32-self.mask)-1 in range(item.decip,item.decip+pow(2,32-item.mask)-1)):
+                (ip2dec(self.ip) in range(item.decip,item.decip+pow(2,32-item.mask)-1) or \
+                ip2dec(self.ip)+
+                pow(2,32-self.mask)-1 in range(item.decip,item.decip+pow(2,32-item.mask)-1)):
                 raise ValidationError('Существует подсеть с большей маской')
 
     def save(self, force_insert=False, force_update=False):
@@ -155,9 +156,10 @@ class Network(models.Model):
         if isNew:
             if self.net_type in [NETWORK_EQUIP,NETWORK_USERS]:
                 aList = [ IPAddr(ip = dec2ip(item), net = self, decip = item) for item in range ( self.decip + 1, self.decip + pow(2,32-self.mask) - 1 )]
+                IPAddr.objects.bulk_create(aList)
             elif self.net_type == NETWORK_32:
                 aList = [ IPAddr(ip = dec2ip(item), net = self, decip = item) for item in range ( self.decip, self.decip + pow(2,32-self.mask))]
-            IPAddr.objects.bulk_create(aList)
+                IPAddr.objects.bulk_create(aList)
 
     class Meta:
         verbose_name = u'Сеть'
