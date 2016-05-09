@@ -13,17 +13,19 @@ from django.core import serializers
 from django.utils import simplejson
 from devices.aux import dec2ip,ip2dec
 from devices.models import Device
-
+    
 NETWORK_USERS = 'UN'
 NETWORK_EQUIP = 'EN'
 NETWORK_DISTRIB = 'DN'
 NETWORK_LIMITER = 'LN'
+NETWORK_32 = 'PN'
 
 TYPE_OF_NETS = (
     (NETWORK_USERS,'Сеть пользователей'),
     (NETWORK_EQUIP,'Сеть оборудование'),
     (NETWORK_DISTRIB,'Сеть для распределения'),
     (NETWORK_LIMITER,'Сеть разделитель'),
+    (NETWORK_32,'Сеть /32'),
 )
 
 @login_required
@@ -135,7 +137,7 @@ def vlans_all(request):
 
 def gen_nets(parent_id):
     net_ip = Network.objects.get(pk=parent_id).ip
-    mask = Network.objects.get(pk=parent_id).mask
+    mask = Network.objects.get(pk=parent_id).mask - 1
 
     net_list = []
     for net in Network.objects.all().filter(parent__pk=parent_id):
@@ -219,18 +221,6 @@ def bs_list(request):
     return render_to_response('bs_list.html', { 'bs_list': bs_list }, context_instance = RequestContext(request))
 
 # Просмотр БС
-# @login_required
-# def bs_profitability(request):
-#     for bs in Location.objects.filter(bs_type__in=['B','CP']):
-#         srv_list = Service.objects.filter(device__peer__location__pk=bs.id)|\
-#                    Service.objects.filter(device__location__pk=bs.id)
-#         active_srv_list = srv_list.filter(status=settings.STATUS_ACTIVE)
-
-#         profit = srv_list.aggregate(Sum('plan__price'))['plan__price__sum']
-#         active_profit = active_srv_list.aggregate(Sum('plan__price'))['plan__price__sum']
-
-
-# Просмотр БС
 @login_required
 def bs_view(request,bs_id):
     try:
@@ -294,3 +284,4 @@ def bs_edit(request, bs_id):
                                 'extend': 'index.html',},
                                 context_instance = RequestContext(request)
                                 ) 
+

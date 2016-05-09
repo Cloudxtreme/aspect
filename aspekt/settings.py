@@ -206,6 +206,7 @@ U_TYPE_UR = 'U'
 DEVTYPE_RADIO = 'R'
 DEVTYPE_SWITCH = 'S'
 DEVTYPE_SNR = 'P'
+DEVTYPE_SERVER = 'E'
 # Пороговая сумма выключения
 TURNOFFBALANCE = -10
 
@@ -235,6 +236,7 @@ TYPE_OF_DEVICE = (
     (DEVTYPE_RADIO, 'Ubiquiti Radio'),
     (DEVTYPE_SNR, 'SNR Pinger'),
     (DEVTYPE_SWITCH, 'Switch'),
+    (DEVTYPE_SERVER, 'Server'),
 )
 
 TYPE_LOG = (

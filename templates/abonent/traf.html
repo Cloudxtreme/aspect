@@ -1,0 +1,43 @@
+{% extends "abonent/main.html" %}
+
+{% block pages %}
+<div class="page-header">
+    <h4 class="sub-header">Трафик клиента за текущий месяц</h4>
+</div>
+{% if traf %}   
+{% load dict_extras %}
+<table class="table table-striped h6">
+<thead>
+  <tr>
+    <th>Местоположение</th>
+    <th>IP</th>
+    <th>Входящий</th>
+    <th>Исходящий</th>
+    <th>По дням</th>
+    <th>По месяцам</th>
+  </tr>
+</thead>
+<tbody>
+{% for item in traf %}
+<tr>
+    <td>{{ item.location }}</td>
+    <td>{{ item.ip }}</td> 
+    <td>{{ item.inbound|sizify }}</td>
+    <td>{{ item.outbound|sizify }}</td>
+    <td>
+        <a href="{% url 'traf_by_units' abonent.id 'day' item.id  %}">
+            <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+        </a>
+    </td>
+    <td>
+        <a href="{% url 'traf_by_units' abonent.id 'month' item.id  %}">
+            <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+        </a>
+    </td>    
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %} 
+
+{% endblock %}

@@ -19,6 +19,39 @@ from users.models import Abonent, Plan, TypeOfService, Segment, Service, Passpor
 from pays.models import Payment, PaymentSystem
 from vlans.models import Location
 
+# Получаем платежи CyberPlat
+def importcyberplan1cdb(cursor,clients,period):
+    sql = """SELECT c.txn_id, c.sum, c.date, c.time, s.SubscriberID FROM Subscribers AS s, CYBERPLAT_reestr as c WHERE c.Cansel = '0' AND s.SubscriberID=c.SubscriberID AND s.SubscriberID LIKE '%s' AND s.tarif > 1  AND c.date >= '%s'""" % (clients,period)
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    p_ps = PaymentSystem.objects.get(pk=6) # CyberPlat id=6
+    
+    payList = []
+    for rec in data:
+        p_id, p_sum, p_date, p_time, a_contract = rec
+        full_time = datetime.combine(p_date,time(0,0)) + p_time
+        try:
+            p_ab = Abonent.objects.get(contract=a_contract)
+        except:
+            pass
+        else:
+            payment = Payment(abonent=p_ab,
+                        top = p_ps,
+                        summ = p_sum,
+                        date = full_time,
+                        num = p_id,
+                        valid = True,
+                        )
+            try:
+                payment.save()
+            # except IntegrityError as e:
+            except:
+                msg =  '%s Дублированный платеж' % payment
+                syslog.syslog(syslog.LOG_ERR, msg)
+            else:
+                msg = '%s Платеж зачислен' % payment
+                syslog.syslog(syslog.LOG_INFO, msg)
+
 # Получаем платежи OSMP
 def importosmp1cdb(cursor,clients,period):
     sql = """SELECT o.txn_id, o.sum, o.date, o.time, s.SubscriberID FROM Subscribers AS s, OSMP_reestr as o WHERE s.SubscriberID=o.SubscriberID AND s.SubscriberID LIKE '%s' AND s.tarif > 1  AND o.date >= '%s'""" % (clients,period)
@@ -52,7 +85,7 @@ def importosmp1cdb(cursor,clients,period):
                 msg = '%s Платеж зачислен' % payment
                 syslog.syslog(syslog.LOG_INFO, msg)
 
-# Получаем платежи Unitellera
+# Получаем платежи Uniteller
 def importuntlcdb(cursor,clients,period):
     sql = """SELECT u.Order_IDP, u.summ, u.time_create, s.SubscriberID, u.canceled FROM Subscribers AS s, Uniteller_reestr as u WHERE s.SubscriberID=u.SubscriberID AND s.SubscriberID LIKE '%s' AND u.paid = 1 AND u.canceled = 0 AND u.time_create >= '%s'""" % (clients,period)
     cursor.execute(sql)
@@ -195,6 +228,7 @@ if __name__ == '__main__':
     check_clients(clients,cursor)               # Проверяем нет ли новых абонентов
     importuntlcdb(cursor,clients,period)        # Проверяем платежи по Uniteller
     importosmp1cdb(cursor,clients,period)       # Проверяем платежи по OSMP
+    importcyberplan1cdb(cursor,clients,period)  # Проверяем платежи по CyberPlat
     check_plan(cursor)                          # Проверяем не изменились ли тарифные планы
     check_balance()                             # Синхронизируем балансы
     db.close()

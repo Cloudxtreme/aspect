@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*- 
 from django.shortcuts import render, render_to_response, HttpResponseRedirect
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.contrib.auth.decorators import login_required
@@ -287,24 +288,48 @@ def sms_all_send(request):
 
 @login_required
 def sms_all(request):
-    notice_list = SMSMessage.objects.all()
+    sms_list = SMSMessage.objects.all()
     count = SMSMessage.objects.filter(sent=False).count()
     cli = smsru.Client()
     balance = cli.balance()
 
-    return render_to_response('notice/sms_all.html', { 
-                                'notice_list': notice_list, 
+    paginator = Paginator(sms_list, 25) # Show 25 contacts per page
+
+    page = request.GET.get('page')
+    try:
+        smss = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        smss = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        smss = paginator.page(paginator.num_pages)
+
+    return render(request,'notice/sms_all.html', { 
+                                'smss': smss, 
                                 'count' : count,
                                 'balance' : balance,
                                 }, context_instance = RequestContext(request))
 
 @login_required
 def email_all(request):
-    notice_list = EmailMessage.objects.all()
+    email_list = EmailMessage.objects.all()
     count = EmailMessage.objects.filter(sent=False).count()
 
-    return render_to_response('notice/email_all.html', { 
-                                'notice_list': notice_list, 
+    paginator = Paginator(email_list, 25) # Show 25 contacts per page
+
+    page = request.GET.get('page')
+    try:
+        emails = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        emails = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        emails = paginator.page(paginator.num_pages)
+    
+    return render(request, 'notice/email_all.html', { 
+                                'emails': emails, 
                                 'count' : count,
                                 }, context_instance = RequestContext(request))
 

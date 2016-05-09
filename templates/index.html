@@ -73,6 +73,7 @@
                     <li><a href={% url "promisedpays_all" %}>Обещанные платежи</a></li>
                     <li><a href={% url "unfilled_params" 0 %}>Незаполненые тех параметры</a></li>
                     <li><a href={% url "defaulters" %}>Неплатильщики > 180 дней</a></li>
+                    <li><a href={% url "traf_top30" %}>ТОП-30 Трафик</a></li>
                 </ul>
             </li>
 
@@ -109,6 +110,7 @@
                     <li><a href={% url "bs_list" %}>Базовые станции</a></li>
                     <li><a href={% url "apps_all" %}>Журнал работы с оборудованием</a></li>
                     <li><a href={% url "syslog" 2 %}>Журнал сообщений системы</a></li>
+                    <li><a href={% url "syslog" 3 %}>Проверка запрещенных сайтов</a></li>
                     <li><a href={% url "syslog" 1 %}>Выгрузка запрещенных сайтов</a></li>
                 </ul>
             </li>
@@ -144,7 +146,7 @@
             {% endblock %}
         {% endblock %}
         <div class="footer pull-right">
-        <p>User Control System ver.{{ version }} &copy; ASPEKT Ltd. 2014-2015</p>
+        <p>User Control System ver.{{ version }} &copy; ASPEKT Ltd. 2014-2016</p>
         <a href={% url 'show_changelog' %}>История изменений</a>
     </div>
     </div>

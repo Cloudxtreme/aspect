@@ -38,13 +38,12 @@
 
         <div class="row">
             <div class="col-md-9">
-
-                    <a href={% url 'abonent_settings' abonent.pk %}>
-                        Настройки клиента <span class="glyphicon glyphicon-list-alt"></span>
-                    </a>
-                    &nbsp;
                     <a href={% url 'abonent_map' abonent.pk %}>
                         Карта <span class="glyphicon glyphicon-map-marker"></span>
+                    </a>
+                    &nbsp;
+                    <a href={% url 'abonent_settings' abonent.pk %}>
+                        Настройки клиента <span class="glyphicon glyphicon-list-alt"></span>
                     </a>
                     &nbsp;
                     {% if abonent.vip %}
@@ -67,6 +66,7 @@
                 {% include "includes/menu_item.html" with item_url='contacts' item_title='Контакты' abonent=abonent request=request only %}
                 {% include "includes/menu_item.html" with item_url='for_abonent' item_title='Уведомления' abonent=abonent request=request only %}
                 {% include "includes/menu_item.html" with item_url='revise' item_title='Финансы' abonent=abonent request=request only %}
+                {% include "includes/menu_item.html" with item_url='traf_month' item_title='Трафик' abonent=abonent request=request only %}
     		</ul>
     		<br>
             {% block breadcrumb %}
@@ -79,7 +79,7 @@
 </div>
 
 {% else %}
-<h2 class="sub-header">Абонент не найден</h2>
+    <h2 class="sub-header">Абонент не найден</h2>
 {% endif %}
 
 {% endblock %}

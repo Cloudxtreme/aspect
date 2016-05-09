@@ -1,0 +1,48 @@
+{% extends "abonent/main.html" %}
+
+{% block script %}
+    {{ form.media }}
+{% endblock %}
+
+{% block breadcrumb %}
+        <ol class="breadcrumb">
+            <li><a href="{% url 'traf_month' abonent.id %}">Трафик за текущий месяц</a></li>
+            <li class="active">Трафик по {{ unit }}</li>
+        </ol>
+{% endblock %}
+
+{% block pages %}
+<div class="page-header">
+    <h4 class="sub-header">Трафик {{ ipaddr.ip }} по {{ unit }}</h4>
+</div>
+
+{% include "generic/generic_form.html" with form=form csrf_token=csrf_token request=request only %}
+
+{% if report %}   
+{% load dict_extras %}
+<table class="table table-striped h6">
+<thead>
+  <tr>
+    <th>Дата</th>
+    <th>Входящий</th>
+    <th>Исходящий</th>
+  </tr>
+</thead>
+<tbody>
+{% for item in report %}
+<tr>
+    <td>{{ item.unit|date:'d-F-Y' }}</td>
+    <td>{{ item.inbound|sizify }}</td>
+    <td>{{ item.outbound|sizify }}</td>
+</tr>
+{% endfor %}
+<tr>
+    <td><b>Итого за период:</b></td>
+    <td><b>{{ inbound_sum|sizify }}</b></td>
+    <td><b>{{ outbound_sum|sizify }}</b></td>
+</tr>
+</tbody>
+</table>
+{% endif %} 
+
+{% endblock %}

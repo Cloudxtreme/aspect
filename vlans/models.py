@@ -19,12 +19,14 @@ NETWORK_USERS = 'UN'
 NETWORK_EQUIP = 'EN'
 NETWORK_DISTRIB = 'DN'
 NETWORK_LIMITER = 'LN'
+NETWORK_32 = 'PN'
 
 TYPE_OF_NETS = (
     (NETWORK_USERS,'Сеть пользователей'),
     (NETWORK_EQUIP,'Сеть оборудование'),
     (NETWORK_DISTRIB,'Сеть для распределения'),
     (NETWORK_LIMITER,'Сеть разделитель'),
+    (NETWORK_32,'Сеть /32'),
 )
 
 class Vlan(models.Model):
@@ -142,17 +144,22 @@ class Network(models.Model):
             # ip2dec(item.ip) in range(ip2dec(self.ip),ip2dec(self.ip)+pow(2,32-self.mask)-1):
                 self.parent = item
             elif item.net_type != NETWORK_DISTRIB and \
-            (ip2dec(self.ip) in range(item.decip,item.decip+pow(2,32-item.mask)-1) or \
-                ip2dec(self.ip)+pow(2,32-self.mask)-1 in range(item.decip,item.decip+pow(2,32-item.mask)-1)):
+                (ip2dec(self.ip) in range(item.decip,item.decip+pow(2,32-item.mask)-1) or \
+                ip2dec(self.ip)+
+                pow(2,32-self.mask)-1 in range(item.decip,item.decip+pow(2,32-item.mask)-1)):
                 raise ValidationError('Существует подсеть с большей маской')
 
     def save(self, force_insert=False, force_update=False):
         self.decip = sum([int(q) << i * 8 for i, q in enumerate(reversed(self.ip.split(".")))])
         isNew = not self.pk
         super(Network, self).save(force_insert, force_update)
-        if isNew and (self.net_type == NETWORK_EQUIP or self.net_type == NETWORK_USERS):
-            aList = [ IPAddr(ip = dec2ip(item), net = self, decip = item) for item in range ( self.decip + 1, self.decip + pow(2,32-self.mask) - 1 )]
-            IPAddr.objects.bulk_create(aList)
+        if isNew:
+            if self.net_type in [NETWORK_EQUIP,NETWORK_USERS]:
+                aList = [ IPAddr(ip = dec2ip(item), net = self, decip = item) for item in range ( self.decip + 1, self.decip + pow(2,32-self.mask) - 1 )]
+                IPAddr.objects.bulk_create(aList)
+            elif self.net_type == NETWORK_32:
+                aList = [ IPAddr(ip = dec2ip(item), net = self, decip = item) for item in range ( self.decip, self.decip + pow(2,32-self.mask))]
+                IPAddr.objects.bulk_create(aList)
 
     class Meta:
         verbose_name = u'Сеть'
@@ -189,4 +196,19 @@ class IPAddr(models.Model):
         ordering = ['decip']
 
     def __unicode__(self):
-        return "%s/%s" % (self.ip, self.net.mask)
+        return "%s/%s" % (self.ip, self.net.mask if self.net.net_type !=NETWORK_32 else '32')
+
+class TrafRecord(models.Model):
+    ip = models.ForeignKey(IPAddr)
+    octets = models.BigIntegerField(u'Bytes')
+    interval = models.PositiveIntegerField(u'Интервал в сек',default=300)
+    inbound = models.BooleanField(u'Входящий',default=True)
+    time = models.DateTimeField(auto_now=False, auto_now_add=False)
+
+    class Meta:
+        verbose_name = u'Трафик'
+        verbose_name_plural = u'Трафик'
+        ordering = ['time']
+
+    def __unicode__(self):
+        return "%s - %s - %s" % (self.time, self.ip, self.octets)

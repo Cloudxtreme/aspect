@@ -16,16 +16,16 @@ from users.forms import  ServiceForm, OrgServiceForm, SearchForm, LoginForm, \
                          ServicePlanForm, ServiceEditForm, ServiceInterfaceForm, \
                          ServiceSpeedForm, ServiceStateForm, ServiceVlanForm, \
                          SmartSearchForm, ServiceLocationForm, \
-                         ServiceDeviceForm
+                         ServiceDeviceForm, DateFilterForm
 from journaling.forms import ServiceStatusChangesForm
 from notice.forms import AbonentFilterForm
 from users.models import Abonent, Service, TypeOfService, Plan, Passport, Detail, Interface, Segment,Tag
 from tt.models import TroubleTicket, TroubleTicketComment
 from journaling.models import ServiceStatusChanges, AbonentStatusChanges, ServicePlanChanges
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from vlans.models import Network, IPAddr, Vlan
+from vlans.models import Network, IPAddr, Vlan, TrafRecord
 from vlans.forms import LocationForm
-from django.db.models import Avg, Max, Min, Sum, Q
+from django.db.models import Avg, Max, Min, Sum, Q, Count
 from django.conf import settings
 from pays.models import Payment
 from notes.models import Note
@@ -37,19 +37,21 @@ from users.aux import abonent_filter
 import MySQLdb, requests, re
 from datetime import datetime, time, timedelta, date
 from users.aux import *
+from django.db import connection
+from operator import itemgetter
+from itertools import groupby
+# import itertools
 
-
-def zapret(request):
-    return render_to_response('zapret.html')
+def block(request):
+    return render_to_response('special/block.html', { 'title': 'Доступ к ресурсу заблокирован',})
 
 def balance(request):
     ip = request.META.get('REMOTE_ADDR', '') or request.META.get('HTTP_X_FORWARDED_FOR', '')
     try:
-        balance = '%s руб.' % round(Abonent.objects.get(service__ifaces__ip__ip=ip).balance,2)
+        balance = '%s' % round(Abonent.objects.get(service__ifaces__ip__ip=ip).balance,2)
     except:
-        balance = 'неизвестен'
-    return render_to_response('balance.html', { 'balance': balance })
-
+        balance = None
+    return render_to_response('special/balance.html', { 'balance': balance,'title': 'Недостаточно средств на счете' })
 
 @login_required 
 def aquicksearch(request):
@@ -1065,6 +1067,117 @@ def abonent_map(request, abonent_id):
                                 'points':points,},
                                  context_instance = RequestContext(request))
 
+# Топ 30 по трафику
+@login_required 
+def traf_top30(request, sortby='inbound'):
+    traf_list = []
+    this_month = datetime.now().month
+    
+    for service in Service.objects.all():
+        for iface in service.ifaces.all():
+            trs = TrafRecord.objects.filter(time__month=this_month,ip=iface.ip)
+            inbound = trs.filter(inbound=True).aggregate(Sum('octets'))['octets__sum'] or 0
+            outbound = trs.filter(inbound=False).aggregate(Sum('octets'))['octets__sum'] or 0
+            entry = {'abonent':service.abon, 
+                     'abonent_id':service.abon.id, 
+                     'location':service.location,
+                     'ip': iface.ip.ip, 
+                     'inbound': inbound, 
+                     'outbound' : outbound , 
+                     'id': iface.ip.id }
+            traf_list.append(entry)
+
+    newlist = sorted(traf_list, key=itemgetter(sortby), reverse=True)[0:30]
+
+    return render_to_response('stat/traf_top30.html', { 
+                                'traf':newlist,},
+                                 context_instance = RequestContext(request))
+
+# Просмотр трафика за текущий месяц
+@login_required 
+def traf_month(request, abonent_id, sortby='inbound'):
+    try:
+        abonent = Abonent.objects.get(pk=abonent_id)
+    except:
+        raise Http404
+    else:   
+        traf_list = []
+        this_month = datetime.now().month
+        
+        for service in abonent.service_set.all():
+            for iface in service.ifaces.all():
+                trs = TrafRecord.objects.filter(time__month=this_month,ip=iface.ip)
+                inbound = trs.filter(inbound=True).aggregate(Sum('octets'))['octets__sum'] or 0
+                outbound = trs.filter(inbound=False).aggregate(Sum('octets'))['octets__sum'] or 0
+                entry = {'location':service.location,
+                         'ip': iface.ip.ip, 
+                         'inbound': inbound, 
+                         'outbound' : outbound , 
+                         'id': iface.ip.id }
+                traf_list.append(entry)
+
+        newlist = sorted(traf_list, key=itemgetter(sortby), reverse=True)
+
+    return render_to_response('abonent/traf.html', { 
+                                'abonent': abonent,
+                                'traf':newlist,},
+                                 context_instance = RequestContext(request))
+
+# Просмотр трафика по IP по дням и месяцам
+@login_required
+def traf_by_units(request,abonent_id,unit,ip_id):
+    try:
+        ipaddr = IPAddr.objects.get(id=ip_id)
+        abonent = Abonent.objects.get(pk=abonent_id)
+    except:
+        raise Http404
+
+    report = []
+    unit_dict = {'month':'месяцам','day' : 'дням'}
+    unit_form = {1:'month',2:'day'}
+
+    truncate_date = connection.ops.date_trunc_sql(unit, 'time')
+    qs = TrafRecord.objects.extra({unit:truncate_date}).filter(ip=ipaddr)
+    
+    if request.method == 'POST':
+        form = DateFilterForm(request.POST)
+        if form.is_valid():
+            date_start = form.cleaned_data['datestart']
+            date_finish = form.cleaned_data['datefinish']
+            # f_unit = form.cleaned_data['unit']
+            qs = qs.filter(time__range=[date_start,date_finish])
+          
+    else:
+        form = DateFilterForm()
+
+    inbound_sum = qs.filter(inbound=True).aggregate(Sum('octets'))['octets__sum'] or 0
+    outbound_sum = qs.filter(inbound=False).aggregate(Sum('octets'))['octets__sum'] or 0 
+    tr_report = qs.values(unit,'inbound').annotate(Sum('octets')).order_by(unit)
+
+    sorted_report = sorted(tr_report, key=itemgetter(unit))
+    for key, group in groupby(sorted_report, key=lambda x:x[unit]):
+        day_record = {}
+        day_record['unit'] = key
+        # print list(group)
+        for item in list(group):
+            if item['inbound'] == True:
+                day_record['inbound'] = item['octets__sum']
+            else:
+                day_record['outbound'] = item['octets__sum']
+        report.append(day_record)
+
+    return render_to_response('abonent/traf_by_units.html', {
+                                'abonent': abonent,
+                                'ipaddr':ipaddr,
+                                'unit' : unit_dict[unit],
+                                'form' : form,
+                                'report': report,
+                                'inbound_sum': inbound_sum, 
+                                'outbound_sum': outbound_sum},
+                                context_instance = RequestContext(request)
+                                ) 
+
+
 def log_in(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -1081,8 +1194,9 @@ def log_in(request):
                 return HttpResponseRedirect(url)
     else:
         form = LoginForm()
-    return render(request, 'auth.html', {'form': form})
+    return render(request, 'auth.html', {'form': form })
 
 def log_out(request):
     logout(request)
     return HttpResponseRedirect(settings.LOGIN_URL)
+

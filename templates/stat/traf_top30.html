@@ -1,0 +1,33 @@
+{% extends "index.html" %}
+
+{% block main %} 
+    <div class="page-header">
+        <h4 class="sub-header">ТОП-30 Клиентов по входящему трафику за текущий месяц</h4>
+    </div>
+    {% if traf %}   
+        {% load dict_extras %}
+        <table class="table table-striped h6">
+        <thead>
+          <tr>
+            <th>Абонент</th>
+            <th>Местоположение</th>
+            <th>IP</th>
+            <th>Входящий</th>
+            <th>Исходящий</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for item in traf %}
+        <tr>
+            <td><a href="{% url 'abonent_info' item.abonent_id %}">{{ item.abonent }}</a></td>
+            <td>{{ item.location }}</td>
+            <td>{{ item.ip }}</td>
+            <td>{{ item.inbound|sizify }}</td>
+            <td>{{ item.outbound|sizify }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    {% endif %} 
+
+{% endblock %}

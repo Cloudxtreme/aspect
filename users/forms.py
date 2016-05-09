@@ -246,3 +246,28 @@ class LoginForm(forms.Form):
 
     def get_user(self):
         return self.user or None
+
+class DateFilterForm(forms.Form):
+    UNIT_CHOICES = (
+        (1, u"По месяцам"),
+        (2, u"По дням")
+    )
+    datestart = forms.DateField(
+        label=u'Дата начала', 
+        widget=DateTimePicker(options={"format": "YYYY-MM-DD",
+                                       "pickTime": False, 'showToday': True }),
+        required=False,
+        )
+
+    datefinish = forms.DateField(
+        label=u'Дата окончания', 
+        widget=DateTimePicker(options={"format": "YYYY-MM-DD",
+                                       "pickTime": False, "showToday": True, }),
+        required=False,
+        )
+
+    # unit = forms.ChoiceField(
+    #     choices = UNIT_CHOICES, 
+    #     label=u"Группировка", initial='', 
+    #     widget=forms.Select(attrs={'class' : 'form-control'},), 
+    #     required=True)

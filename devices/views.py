@@ -513,7 +513,7 @@ def device_iface_add(request, device_id):
         form = ServiceInterfaceForm()
     
     if device.router: 
-        net_type = ['UN','EN']
+        net_type = ['UN','EN','PN']
         form.fields['ip'].queryset=IPAddr.objects.filter(interface=None).filter(net__net_type__in=net_type)
     else:
         net_type = ['EN']
@@ -681,7 +681,9 @@ def get_application_entries(request):
 
 @login_required
 def syslog(request,app):
-    switch = {'1':('zapret_checker.',u'Журнал получения списка запрещенных сайтов'),'2':('epays_daily.py',u'Журнал сообщения системы')}
+    switch = {'1':('zapret_checker.',u'Журнал получения списка запрещенных сайтов'),
+              '2':('epays_daily.py',u'Журнал сообщения системы'),
+              '3':('checker.py',u'Проверка блокировки запрещенных сайтов')}
     log_list = []
     db = MySQLdb.connect(host="192.168.64.6", user="syslog", \
                          passwd="yfpfgbcm", db="syslog", charset='utf8')

@@ -193,7 +193,8 @@ class Abonent(models.Model):
 
     class Meta:
         verbose_name = u'Абонент'
-        verbose_name_plural = u'Абоненты'       
+        verbose_name_plural = u'Абоненты'     
+        ordering = ['-utype','title'] 
         
     def __unicode__(self):
         if self.utype == settings.U_TYPE_UR:
@@ -372,7 +373,7 @@ class Service(models.Model):
                 # Делаем новые списания аб.платы
                 write_off = WriteOff(abonent=self.abon, service=self, wot=wot,summ=round(summ,2), date=date_of_debit, comment=comment)
                 write_off.save()
-                # print "%s %0.2f руб, %s %s" % (date_of_debit,summ, month,comment)
+                print "%s %0.2f руб, %s %s" % (date_of_debit,summ, month,comment)
         # WriteOff.objects.bulk_create(write_off_list)
         # print write_off_list    
 
